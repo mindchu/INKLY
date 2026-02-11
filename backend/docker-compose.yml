@@ -1,3 +1,4 @@
+name: SoftDev
 services:
   mongodb:
     image: mongo:latest
