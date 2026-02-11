@@ -79,7 +79,8 @@ FRONTEND_PORT=5173
 Using Docker Compose:
 
 ```bash
-docker-compose up -d
+#in backend folder
+docker compose docker-compose.yml up -d
 ```
 
 Or use your local MongoDB installation.
