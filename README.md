@@ -49,7 +49,6 @@ cd INKLY
 cd backend
 python -m venv venv
 venv\Scripts\activate  # On Windows
-# source venv/bin/activate  # On macOS/Linux
 pip install -r requirements.txt
 ```
 
@@ -77,10 +76,10 @@ FRONTEND_PORT=5173
 #### Start MongoDB
 
 Using Docker Compose:
+#in backend folder
 
 ```bash
-#in backend folder
-docker compose docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 Or use your local MongoDB installation.
