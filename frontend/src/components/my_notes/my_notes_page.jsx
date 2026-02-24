@@ -129,7 +129,7 @@ const My_notes_page = () => {
     <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative'>
       {/* Blur overlay - only shows when modal is open */}
       {(selectedNote || editingNote) && (
-        <div className="absolute inset-0 backdrop-blur-sm bg-white/30 z-10 pointer-events-none" />
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-10" />
       )}
 
       <div className='px-8 py-6'>

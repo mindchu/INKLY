@@ -71,12 +71,12 @@ const Home_page = () => {
     // Sort notes based on sortBy state
     const sortedNotes = useMemo(() => {
         const notesCopy = [...otherNotes];
-        
+
         switch (sortBy) {
             case 'hot':
                 // Sort by views (highest to lowest)
                 return notesCopy.sort((a, b) => b.views - a.views);
-            
+
             case 'top':
                 // Sort by likes (highest to lowest), using current like counts
                 return notesCopy.sort((a, b) => {
@@ -84,12 +84,12 @@ const Home_page = () => {
                     const bLikes = noteLikes[b.id]?.count || b.likes;
                     return bLikes - aLikes;
                 });
-            
+
             case 'new':
                 // Sort by date (newest first) - assuming notes have a date field
                 // If you don't have a date field, you can sort by ID (higher ID = newer)
                 return notesCopy.sort((a, b) => b.id - a.id);
-            
+
             default:
                 return notesCopy;
         }
@@ -99,19 +99,22 @@ const Home_page = () => {
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative'>
             {/* Blur overlay - only shows when modal is open */}
             {selectedNote && (
-                <div className="absolute inset-0 backdrop-blur-sm bg-white/30 z-10 pointer-events-none" />
+                <div
+                    className="fixed inset-0 backdrop-blur-sm bg-white/30 z-10"
+                    onClick={handleCloseModal}
+                />
             )}
-            
+
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8 ${selectedNote ? 'relative z-0' : ''}`}>
                 {sortedNotes.map((note) => (
-                    <div 
-                        key={note.id} 
+                    <div
+                        key={note.id}
                         className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
                         onClick={() => handleCardClick(note)}
                     >
                         {/* Title */}
                         <h3 className='text-lg font-semibold text-gray-800 mb-3'>{note.title}</h3>
-                        
+
                         {/* Author */}
                         <div className='flex items-center gap-2 mb-3'>
                             <div className='w-6 h-6 bg-green-600 rounded-full'></div>
@@ -119,7 +122,7 @@ const Home_page = () => {
                         </div>
 
                         {/* Description */}
-                        <p className='text-sm text-gray-600 mb-4 flex-grow line-clamp-3'>
+                        <p className='text-sm text-gray-600 mb-4 grow line-clamp-3'>
                             {note.description}
                         </p>
 
@@ -150,7 +153,7 @@ const Home_page = () => {
                         {/* Stats and Actions */}
                         <div className='flex items-center justify-between text-sm text-gray-600'>
                             <div className='flex items-center gap-4'>
-                                <button 
+                                <button
                                     onClick={(e) => handleLike(note.id, e)}
                                     className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
                                 >
@@ -176,7 +179,7 @@ const Home_page = () => {
                                 <button className='hover:text-gray-800 transition'>
                                     <MdOutlineFileDownload size={16} />
                                 </button>
-                                <button 
+                                <button
                                     onClick={(e) => handleBookmark(note, e)}
                                     className='hover:text-yellow-500 transition cursor-pointer'
                                 >

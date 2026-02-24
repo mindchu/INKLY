@@ -63,6 +63,71 @@ export const myNotes = [
     views: 1056,
     createdAt: "2024-02-08",
     isOwn: true
+  },
+  {
+    id: 6,
+    title: "Physics : Quantum Mechanics Fundamentals",
+    author: "Student 2",
+    description: "Introduction to wave-particle duality, uncertainty principle, and Schrödinger equation with solved examples. This comprehensive guide includes detailed explanations, comparative analysis, and visual aids to help you understand the concepts thoroughly. Contains mathematical derivations and physical interpretations of quantum phenomena.",
+    attachments: 1,
+    tags: ["Physics", "Quantum", "Science"],
+    likes: 201,
+    comments: 31,
+    views: 1056,
+    createdAt: "2024-02-08",
+    isOwn: true
+  },
+  {
+    id: 7,
+    title: "Physics : Quantum Mechanics Fundamentals",
+    author: "Student 2",
+    description: "Introduction to wave-particle duality, uncertainty principle, and Schrödinger equation with solved examples. This comprehensive guide includes detailed explanations, comparative analysis, and visual aids to help you understand the concepts thoroughly. Contains mathematical derivations and physical interpretations of quantum phenomena.",
+    attachments: 1,
+    tags: ["Physics", "Quantum", "Science"],
+    likes: 201,
+    comments: 31,
+    views: 1056,
+    createdAt: "2024-02-08",
+    isOwn: true
+  },
+  {
+    id: 8,
+    title: "Physics : Quantum Mechanics Fundamentals",
+    author: "Student 2",
+    description: "Introduction to wave-particle duality, uncertainty principle, and Schrödinger equation with solved examples. This comprehensive guide includes detailed explanations, comparative analysis, and visual aids to help you understand the concepts thoroughly. Contains mathematical derivations and physical interpretations of quantum phenomena.",
+    attachments: 1,
+    tags: ["Physics", "Quantum", "Science"],
+    likes: 201,
+    comments: 31,
+    views: 1056,
+    createdAt: "2024-02-08",
+    isOwn: true
+  },
+  {
+    id: 9,
+    title: "Physics : Quantum Mechanics Fundamentals",
+    author: "Student 2",
+    description: "Introduction to wave-particle duality, uncertainty principle, and Schrödinger equation with solved examples. This comprehensive guide includes detailed explanations, comparative analysis, and visual aids to help you understand the concepts thoroughly. Contains mathematical derivations and physical interpretations of quantum phenomena.",
+    attachments: 1,
+    tags: ["Physics", "Quantum", "Science"],
+    likes: 201,
+    comments: 31,
+    views: 1056,
+    createdAt: "2024-02-08",
+    isOwn: true
+  },
+  {
+    id: 10,
+    title: "Physics : Quantum Mechanics Fundamentals",
+    author: "Student 2",
+    description: "Introduction to wave-particle duality, uncertainty principle, and Schrödinger equation with solved examples. This comprehensive guide includes detailed explanations, comparative analysis, and visual aids to help you understand the concepts thoroughly. Contains mathematical derivations and physical interpretations of quantum phenomena.",
+    attachments: 1,
+    tags: ["Physics", "Quantum", "Science"],
+    likes: 201,
+    comments: 31,
+    views: 1056,
+    createdAt: "2024-02-08",
+    isOwn: true
   }
 ];
 
