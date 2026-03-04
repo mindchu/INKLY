@@ -3,14 +3,11 @@ from pydantic import BaseModel
 from typing import Dict, Any, List
 
 # Import your database and models
-from backend.model.user import User, users_col
-from backend.model.file_manager import FileManager
+from model.user import User, users_col
+from model.file_manager import FileManager
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
-# ==========================================
-# 1. SECURITY DEPENDENCY
-# ==========================================
 def get_current_user(request: Request) -> User:
     """
     Checks the session cookie from your auth.py. 
@@ -36,21 +33,14 @@ def get_current_user(request: Request) -> User:
     user.interest_tags = user_doc.get("interest_tags", [])
     return user
 
-# ==========================================
-# 2. PYDANTIC MODELS (For Frontend JSON)
-# ==========================================
 class ProfileUpdateData(BaseModel):
     bio: str = ""
     github: str = ""
     location: str = ""
-    # Add anything else your frontend UI collects here!
+    # Add anything else your frontend UI collects here
 
 class InterestTagsUpdate(BaseModel):
     tags: List[str]
-
-# ==========================================
-# 3. THE API ROUTES
-# ==========================================
 
 @router.get("/me")
 async def get_my_profile(user: User = Depends(get_current_user)):

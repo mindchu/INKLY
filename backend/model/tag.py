@@ -1,7 +1,7 @@
 import pymongo
 from datetime import datetime
 from typing import List, Dict, Any
-from backend.util.dbconn import db
+from util.dbconn import db
 
 
 tags_col = db.tags

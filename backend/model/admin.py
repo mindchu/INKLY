@@ -5,7 +5,7 @@
 from datetime import datetime
 from typing import List
 
-from backend.util.dbconn import db
+from util.dbconn import db
 
 users_col = db.users
 posts_col = db.posts

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from pydantic import BaseModel
 from typing import List, Optional
 
-from backend.model.post import Post, posts_col, ForumType, SortBy
-from backend.model.user import User
-from backend.routes.user_routes import get_current_user # Reusing our security check!
+from model.post import Post, posts_col, ForumType, SortBy
+from model.user import User
+from routes.user_routes import get_current_user # Reusing our security check!
 
 router = APIRouter(prefix="/api/posts", tags=["Posts"])
 

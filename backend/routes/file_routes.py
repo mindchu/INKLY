@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from backend.model.user import User
-from backend.routes.user_routes import get_current_user
-from backend.model.file_manager import FileManager
+from model.user import User
+from routes.user_routes import get_current_user
+from model.file_manager import FileManager
 
 router = APIRouter(prefix="/api/files", tags=["Files"])
 

@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
 from typing import Dict, Any, List
-from backend.util.dbconn import db
-from backend.model.tag import TagManager
+from util.dbconn import db
+from model.tag import TagManager
 
 users_col = db.users
 follows_col = db.follows

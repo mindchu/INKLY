@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
-from backend.util.auth import oauth, config
-from backend.model.user import User
-from backend.util.dbconn import db
+from util.auth import oauth, config
+from model.user import User
+from util.dbconn import db
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

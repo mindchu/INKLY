@@ -3,7 +3,7 @@ import pymongo
 from datetime import datetime
 from typing import List, Optional
 
-from backend.util.dbconn import db
+from util.dbconn import db
 
 comments_col = db.comments
 comment_likes_col = db.comment_likes

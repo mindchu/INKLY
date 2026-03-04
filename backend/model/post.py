@@ -4,8 +4,8 @@ from enum import Enum
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from backend.util.dbconn import db
-from backend.model.tag import TagManager
+from util.dbconn import db
+from model.tag import TagManager
 
 posts_col = db.posts
 likes_col = db.post_likes

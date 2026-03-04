@@ -6,12 +6,12 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.config import Config
 
 # Import all routers
-from backend.routes.auth_routes import router as auth_router
-from backend.routes.user_routes import router as user_router
-from backend.routes.post_routes import router as post_router
-from backend.routes.comment_routes import router as comment_router
-from backend.routes.admin_routes import router as admin_router
-from backend.routes.file_routes import router as file_router
+from routes.auth_routes import router as auth_router
+from routes.user_routes import router as user_router
+from routes.post_routes import router as post_router
+from routes.comment_routes import router as comment_router
+from routes.admin_routes import router as admin_router
+from routes.file_routes import router as file_router
 
 # Load config
 config = Config('.env')

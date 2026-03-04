@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from backend.model.comment import Comment, comments_col
-from backend.model.user import User
-from backend.routes.user_routes import get_current_user
+from model.comment import Comment, comments_col
+from model.user import User
+from routes.user_routes import get_current_user
 
 router = APIRouter(tags=["Comments"])
 
