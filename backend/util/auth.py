@@ -1,9 +1,11 @@
+# backend/util/auth.py
+
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
 from .dbconn import load_dotenv, db
 import os
 from fastapi import Request, HTTPException
-from obj.user import User
+from model.user import User
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +46,7 @@ async def authenticate(request: Request):
          user_info = await oauth.google.userinfo(token=token)
     
     # Check if user exists
-    user_data = db.users.find_one({"email": user_info['email']})
+    user_data = db.users.find_one({"google_id": user_info.get('sub')})
     if not user_data:
         # Create new user
         new_user = User.from_google_info(user_info)
