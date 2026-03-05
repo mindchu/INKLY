@@ -1,5 +1,4 @@
 import os
-import uuid
 from datetime import datetime
 from fastapi import UploadFile, HTTPException
 from util.dbconn import fs

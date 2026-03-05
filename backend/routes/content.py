@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form, Query
 from typing import List, Optional
-from pydantic import BaseModel
-import os
 import uuid
 from middleware.auth import require_auth
 from middleware.validate import validate

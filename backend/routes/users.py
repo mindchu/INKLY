@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
-from typing import List
 from middleware.auth import require_auth
 from middleware.validate import validate
 from validation_schema.user_schema import BioUpdate, ProfileUpdate

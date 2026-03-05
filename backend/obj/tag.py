@@ -6,14 +6,12 @@ class Tag:
     def __init__(
         self,
         name: str,
-        description: Optional[str] = "",
         color: Optional[str] = None,
         created_at: Optional[str] = None,
         created_by: Optional[str] = None,
         use_count: int = 0
     ):
         self.name = name
-        self.description = description
         self.color = color or self._generate_random_color()
         self.created_at = created_at or datetime.utcnow().isoformat()
         self.created_by = created_by
@@ -31,7 +29,6 @@ class Tag:
     def to_dict(self) -> dict:
         return {
             "name": self.name,
-            "description": self.description,
             "color": self.color,
             "created_at": self.created_at,
             "created_by": self.created_by,
@@ -42,7 +39,6 @@ class Tag:
     def from_dict(cls, data: dict):
         return cls(
             name=data.get("name"),
-            description=data.get("description", ""),
             color=data.get("color"),
             created_at=data.get("created_at"),
             created_by=data.get("created_by"),
