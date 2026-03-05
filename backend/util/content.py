@@ -1,7 +1,7 @@
 from typing import Dict, Any, Optional, List
 from obj.post_discussion_comment import Post, Discussion, Comment
 from util.dbconn import db
-from util import karma, embeddings
+from util import embeddings
 
 def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
@@ -50,9 +50,6 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         # Update dynamic tags
         from util import tags
         tags.ensure_tags_exist(content_data.get('tags', []), created_by=user_id)
-        
-        # Update user karma
-        karma.update_karma_on_create(user_id, content_type)
         
         # Track content ID in user profile
         if content_type == 'post':
@@ -352,10 +349,7 @@ def create_comment(parent_id: str, author_id: str, text: str) -> Optional[Dict[s
         res = db.comments.update_one({"_id": parent_id}, {"$push": {"reply_ids": data['_id']}})
         if res.modified_count > 0:
             updated = True
-            
-    # Update user karma for comment creation
-    karma.update_karma_on_create(author_id, "comment")
-    
+
     # Fetch author username for the new comment
     author = db.users.find_one({"google_id": author_id}, {"username": 1, "profile_picture_url": 1})
     data['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
@@ -474,7 +468,7 @@ def toggle_bookmark(user_id: str, content_id: str) -> Optional[bool]:
 
 def delete_content(content_id: str, user_id: str) -> bool:
     """
-    Deletes a post or discussion and reverses the karma gain.
+    Deletes a post or discussion.
     Only the author can delete their own content.
     
     Args:
@@ -522,9 +516,6 @@ def delete_content(content_id: str, user_id: str) -> bool:
                 {"google_id": user_id},
                 {"$pull": {"discussion_ids": content_id}}
             )
-        
-        # Reverse the karma gain
-        karma.update_karma_on_delete(user_id, content_type)
         
         # Remove from all users' bookmarks
         db.users.update_many({}, {"$pull": {"bookmark_ids": content_id}})
@@ -580,9 +571,6 @@ def admin_delete_content(content_id: str) -> bool:
                     {"google_id": author_id},
                     {"$pull": {"discussion_ids": content_id}}
                 )
-            
-            # Reverse the karma gain for the author
-            karma.update_karma_on_delete(author_id, content_type)
         
         # Remove from all users' bookmarks
         db.users.update_many({}, {"$pull": {"bookmark_ids": content_id}})
@@ -593,7 +581,7 @@ def admin_delete_content(content_id: str) -> bool:
 
 def delete_comment(comment_id: str, user_id: str) -> bool:
     """
-    Deletes a comment and reverses the karma gain.
+    Deletes a comment.
     Only the author can delete their own comment.
     Also removes the comment from its parent's list.
     
@@ -629,9 +617,7 @@ def delete_comment(comment_id: str, user_id: str) -> bool:
         db.posts.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.discussions.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.comments.update_one({"_id": parent_id}, {"$pull": {"reply_ids": comment_id}})
-        
-        # Reverse the karma gain
-        karma.update_karma_on_delete(user_id, "comment")
+
         return True
     
     return False
@@ -652,8 +638,7 @@ def admin_delete_comment(comment_id: str) -> bool:
     
     if not comment:
         return False
-    
-    author_id = comment.get('author_id')
+
     parent_id = comment.get('parent_id')
     
     # Delete all replies recursively
@@ -669,17 +654,13 @@ def admin_delete_comment(comment_id: str) -> bool:
         db.posts.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.discussions.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.comments.update_one({"_id": parent_id}, {"$pull": {"reply_ids": comment_id}})
-        
-        # Reverse the karma gain for the author
-        if author_id:
-            karma.update_karma_on_delete(author_id, "comment")
         return True
     
     return False
 
 def _delete_comment_recursive(comment_id: str) -> None:
     """
-    Recursively deletes a comment and all its replies, updating karma for each.
+    Recursively deletes a comment and all its replies.
     This is a helper function used when deleting parent content.
     
     Args:
@@ -695,9 +676,5 @@ def _delete_comment_recursive(comment_id: str) -> None:
     for reply_id in reply_ids:
         _delete_comment_recursive(reply_id)
     
-    # Delete this comment and reverse karma
-    author_id = comment.get('author_id')
+    # Delete this comment.
     db.comments.delete_one({"_id": comment_id})
-    
-    if author_id:
-        karma.update_karma_on_delete(author_id, "comment")

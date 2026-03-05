@@ -7,7 +7,7 @@ A social content platform for sharing and discussing documents with interest-bas
 - 📝 **Content Sharing**: Create and share posts and documents with the community
 - 💬 **Discussions**: Engage in threaded discussions with comments
 - 🏷️ **Interest-Based Tags**: Organize content with tags and get personalized recommendations
-- 👤 **User Profiles**: View user profiles with karma, bio, and interests
+- 👤 **User Profiles**: View user profiles with bio, and interests
 - 👥 **Social Features**: Follow users, like content, and build your network
 - 🔐 **Google OAuth**: Secure authentication via Google Sign-In
 - 📤 **File Uploads**: Attach files to your posts and documents
@@ -137,7 +137,6 @@ INKLY/
 │   │   ├── content.py         # Content management
 │   │   ├── dbconn.py          # Database connection
 │   │   ├── files.py           # File upload handling
-│   │   ├── karma.py           # Karma system
 │   │   └── tags.py            # Tag management
 │   ├── api.py                 # API routes
 │   ├── main.py                # FastAPI application entry point
