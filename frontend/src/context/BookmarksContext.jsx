@@ -15,18 +15,24 @@ export const useBookmarks = () => {
 export const BookmarksProvider = ({ children }) => {
     const [bookmarkedNotes, setBookmarkedNotes] = useState([]);
     const { profileData } = useProfileContext();
+    const lastFetchedId = React.useRef(null);
 
     useEffect(() => {
         const fetchBookmarks = async () => {
-            if (profileData) {
+            const currentId = profileData?.google_id || profileData?._id;
+            if (currentId) {
+                if (lastFetchedId.current === currentId) return;
+                lastFetchedId.current = currentId;
                 try {
                     const data = await api.get('/bookmarks');
                     setBookmarkedNotes(data.data || []);
                 } catch (error) {
                     console.error('Failed to fetch bookmarks:', error);
+                    lastFetchedId.current = null;
                 }
             } else {
                 setBookmarkedNotes([]);
+                lastFetchedId.current = null;
             }
         };
         fetchBookmarks();

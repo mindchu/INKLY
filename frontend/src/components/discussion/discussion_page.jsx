@@ -15,27 +15,12 @@ import FollowChip from '../common/FollowChip';
 const Discussion_page = () => {
     const navigate = useNavigate();
     const { toggleBookmark, isBookmarked } = useBookmarks();
-    const { sortBy } = useSortContext();
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { sortBy, content, loading, setContent } = useSortContext();
 
-    useEffect(() => {
-        const fetchDiscussions = async () => {
-            setLoading(true);
-            try {
-                const params = new URLSearchParams();
-                params.append('type', 'discussion');
-                params.append('sort', sortBy === 'hot' ? 'views' : (sortBy === 'top' ? 'likes' : 'recent'));
-                const data = await api.get(`/content/recommended?${params.toString()}`);
-                setPosts(data.data || []);
-            } catch (error) {
-                console.error('Failed to fetch discussions:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchDiscussions();
-    }, [sortBy]);
+    // Filter content to only show discussions
+    const posts = React.useMemo(() => content.filter(item => item.type === 'discussion'), [content]);
+
+    // Removed local fetchDiscussions logic as it's now handled by SortContext
 
     const handleLike = async (postId, e) => {
         e.stopPropagation();

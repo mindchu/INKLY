@@ -17,14 +17,18 @@ export const useProfileContext = () => {
 export const ProfileProvider = ({ children }) => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const fetchedProfile = React.useRef(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (fetchedProfile.current) return;
+      fetchedProfile.current = true;
       try {
         const data = await api.get('/users/me');
         setProfileData(data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
+        fetchedProfile.current = false;
         // If not logged in, profile remains null
       } finally {
         setLoading(false);

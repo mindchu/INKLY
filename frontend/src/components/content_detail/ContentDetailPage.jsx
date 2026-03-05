@@ -22,9 +22,12 @@ const ContentDetailPage = () => {
     const [postingComment, setPostingComment] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const lastFetchedId = React.useRef(null);
 
     useEffect(() => {
         const fetchContent = async () => {
+            if (lastFetchedId.current === contentId) return;
+            lastFetchedId.current = contentId;
             setLoading(true);
             try {
                 const response = await api.get(`/content/${contentId}`);
@@ -33,6 +36,7 @@ const ContentDetailPage = () => {
                 setLoadingComments(false);
             } catch (error) {
                 console.error('Failed to fetch content details:', error);
+                lastFetchedId.current = null;
             } finally {
                 setLoading(false);
             }

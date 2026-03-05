@@ -17,28 +17,9 @@ import FollowChip from '../common/FollowChip';
 const Home_page = () => {
     const navigate = useNavigate();
     const { toggleBookmark, isBookmarked } = useBookmarks();
-    const { sortBy } = useSortContext();
+    const { sortBy, content: notes, loading, setContent: setNotes } = useSortContext();
 
-    const [notes, setNotes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    // const [selectedNote, setSelectedNote] = useState(null);
-
-    useEffect(() => {
-        const fetchNotes = async () => {
-            setLoading(true);
-            try {
-                const params = new URLSearchParams();
-                params.append('sort', sortBy === 'hot' ? 'views' : (sortBy === 'top' ? 'likes' : 'recent'));
-                const data = await api.get(`/content/recommended?${params.toString()}`);
-                setNotes(data.data || []);
-            } catch (error) {
-                console.error('Failed to fetch notes:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchNotes();
-    }, [sortBy]);
+    // Removed local fetchNotes logic as it's now handled by SortContext
 
     const formatViews = (views) => {
         if (views >= 1000) {

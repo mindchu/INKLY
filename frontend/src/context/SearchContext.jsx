@@ -23,9 +23,12 @@ export const SearchProvider = ({ children }) => {
         type: 'all'
     });
     const [allTags, setAllTags] = useState([]);
+    const fetchedTags = React.useRef(false);
 
     useEffect(() => {
         const fetchTags = async () => {
+            if (fetchedTags.current) return;
+            fetchedTags.current = true;
             try {
                 const res = await api.get('/tags/all');
                 if (res.tags) {
@@ -33,6 +36,7 @@ export const SearchProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error('Failed to fetch tags:', error);
+                fetchedTags.current = false; // Allow retry on error if needed
             }
         };
         fetchTags();

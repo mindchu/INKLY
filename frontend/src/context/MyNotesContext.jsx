@@ -14,6 +14,7 @@ export const useMyNotesContext = () => {
 
 export const MyNotesProvider = ({ children }) => {
   const { profileData } = useProfileContext();
+  const lastFetchedId = React.useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_created');
   const [documents, setDocuments] = useState([]);
@@ -22,7 +23,10 @@ export const MyNotesProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchMyContent = async () => {
-      if (profileData) {
+      const currentId = profileData?.google_id || profileData?._id;
+      if (currentId) {
+        if (lastFetchedId.current === currentId) return;
+        lastFetchedId.current = currentId;
         setLoading(true);
         try {
           // Fetch user's posts
@@ -34,9 +38,12 @@ export const MyNotesProvider = ({ children }) => {
           setDiscussions(discs.data || []);
         } catch (error) {
           console.error('Failed to fetch user content:', error);
+          lastFetchedId.current = null;
         } finally {
           setLoading(false);
         }
+      } else {
+        lastFetchedId.current = null;
       }
     };
     fetchMyContent();

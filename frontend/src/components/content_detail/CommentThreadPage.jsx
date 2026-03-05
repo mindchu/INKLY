@@ -12,6 +12,7 @@ const CommentThreadPage = () => {
     const [replies, setReplies] = useState([]);
     const [contentTitle, setContentTitle] = useState('');
     const [loading, setLoading] = useState(true);
+    const lastFetchedId = React.useRef(null);
 
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
@@ -19,6 +20,8 @@ const CommentThreadPage = () => {
 
     useEffect(() => {
         const fetchThread = async () => {
+            if (lastFetchedId.current === commentId) return;
+            lastFetchedId.current = commentId;
             setLoading(true);
             try {
                 const response = await api.get(`/content/${contentId}/comment/${commentId}`);
@@ -27,6 +30,7 @@ const CommentThreadPage = () => {
                 setContentTitle(response.content_title || '');
             } catch (error) {
                 console.error('Failed to fetch comment thread:', error);
+                lastFetchedId.current = null;
             } finally {
                 setLoading(false);
             }

@@ -14,34 +14,13 @@ import FollowChip from '../common/FollowChip';
 
 const Note_forum_page = () => {
     const navigate = useNavigate();
-    const { sortBy } = useSortContext();
+    const { sortBy, content, loading, setContent } = useSortContext();
     const { toggleBookmark, isBookmarked } = useBookmarks();
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
 
-    const handleBookmark = (post, e) => {
-        e.stopPropagation();
-        toggleBookmark(post);
-    };
+    // Filter content to only show posts
+    const posts = React.useMemo(() => content.filter(item => item.type === 'post'), [content]);
 
-    const fetchPosts = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams();
-            params.append('type', 'post');
-            params.append('sort', sortBy === 'hot' ? 'views' : (sortBy === 'top' ? 'likes' : 'recent'));
-            const response = await api.get(`/content/recommended?${params.toString()}`);
-            setPosts(response.data || []);
-        } catch (error) {
-            console.error('Failed to fetch forum posts:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchPosts();
-    }, [sortBy]);
+    // Removed local fetchPosts logic as it's now handled by SortContext
 
     const handleLike = async (postId, e) => {
         e.stopPropagation();

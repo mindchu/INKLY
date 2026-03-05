@@ -11,10 +11,13 @@ const EditContentPage = () => {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const lastFetchedId = React.useRef(null);
 
     useEffect(() => {
         let isMounted = true;
         const fetchContent = async () => {
+            if (lastFetchedId.current === contentId) return;
+            lastFetchedId.current = contentId;
             try {
                 const response = await api.get(`/content/${contentId}`);
                 if (response?.data && isMounted) {
@@ -28,6 +31,7 @@ const EditContentPage = () => {
                 }
             } catch (error) {
                 console.error('Failed to fetch content details:', error);
+                lastFetchedId.current = null;
                 if (isMounted) {
                     alert('Failed to load content for editing.');
                     navigate(-1);
