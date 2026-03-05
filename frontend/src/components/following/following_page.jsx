@@ -10,17 +10,27 @@ const Following_page = () => {
     const [loading, setLoading] = useState(true);
     const [showNotification, setShowNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
+    const lastFetchedId = React.useRef(null);
 
     useEffect(() => {
         const fetchFollowing = async () => {
-            if (!profileData?.google_id) return;
-            setLoading(true);
-            try {
-                const data = await api.get(`/users/${profileData.google_id}/following`);
-                setFollowedUsers(data.data || []);
-            } catch (error) {
-                console.error('Failed to fetch following:', error);
-            } finally {
+            const currentId = profileData?.google_id;
+            if (currentId) {
+                if (lastFetchedId.current === currentId) return;
+                lastFetchedId.current = currentId;
+                setLoading(true);
+                try {
+                    const data = await api.get(`/users/${currentId}/following`);
+                    setFollowedUsers(data.data || []);
+                } catch (error) {
+                    console.error('Failed to fetch following:', error);
+                    lastFetchedId.current = null;
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                setFollowedUsers([]);
+                lastFetchedId.current = null;
                 setLoading(false);
             }
         };

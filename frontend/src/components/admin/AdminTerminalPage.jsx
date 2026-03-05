@@ -31,9 +31,12 @@ const AdminTerminalPage = () => {
     const [deleteCommentLoading, setDeleteCommentLoading] = useState(false);
     const [deleteCommentMessage, setDeleteCommentMessage] = useState('');
     const [deleteCommentError, setDeleteCommentError] = useState('');
+    const hasFetched = React.useRef(false);
 
     useEffect(() => {
         const fetchTagsData = async () => {
+            if (hasFetched.current) return;
+            hasFetched.current = true;
             try {
                 const [allTagsRes, profileRes] = await Promise.all([
                     api.get('/tags/all'),
@@ -43,10 +46,13 @@ const AdminTerminalPage = () => {
                 setUserInterests(profileRes.interested_tags || []);
             } catch (error) {
                 console.error('Error fetching tags:', error);
+                hasFetched.current = false;
             }
         };
         if (profileData?.is_admin) {
             fetchTagsData();
+        } else {
+            hasFetched.current = false;
         }
     }, [profileData]);
 

@@ -22,14 +22,18 @@ const Edit_profile_page = () => {
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState('')
+  const hasFetchedTags = useRef(false)
 
   useEffect(() => {
     const fetchAllTags = async () => {
+      if (hasFetchedTags.current) return
+      hasFetchedTags.current = true
       try {
         const response = await api.get('/tags/all')
         setAllTags(response.tags || [])
       } catch (error) {
         console.error('Failed to fetch tags:', error)
+        hasFetchedTags.current = false
       }
     }
     fetchAllTags()

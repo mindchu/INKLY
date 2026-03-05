@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AdminMockChip from './components/common/AdminMockChip'
+import ProtectedRoute from './components/common/ProtectedRoute'
 import Sidebar from './components/side_bar'
 import Home_Top_bar from './components/home/home_top_bar'
 import Home_page from './components/home/home_page'
@@ -50,22 +51,7 @@ const App = () => {
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={
-                    <div className="flex h-screen overflow-hidden">
-                      <Sidebar />
-                      <div className="flex flex-col flex-1 min-h-0">
-                        <div className="shrink-0">
-                          <Home_Top_bar />
-                        </div>
-                        <div className="flex-1 min-h-0 overflow-y-auto">
-                          <Home_page />
-                        </div>
-                      </div>
-                    </div>
-                  } />
-                  <Route path="/signin" element={<Signin />} />
-                  <Route
-                    path="/home"
-                    element={
+                    <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
                         <div className="flex flex-col flex-1 min-h-0">
@@ -77,246 +63,297 @@ const App = () => {
                           </div>
                         </div>
                       </div>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/signin" element={<Signin />} />
+                  <Route
+                    path="/home"
+                    element={
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Home_Top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Home_page />
+                            </div>
+                          </div>
+                        </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/discussion"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <Discussion_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <Discussion_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Discussion_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Discussion_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/note_forum"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <NoteForum_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <NoteForum_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <NoteForum_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <NoteForum_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/search"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <Search_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <Search_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Search_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Search_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/following"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <Following_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <Following_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Following_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Following_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/my_notes"
                     element={
-                      <MyNotesProvider>
-                        <div className="flex h-screen overflow-hidden">
-                          <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
-                            <div className="shrink-0">
-                              <Mynotes_top_bar />
-                            </div>
-                            <div className="flex-1 min-h-0 overflow-y-auto">
-                              <MyNotes_page />
+                      <ProtectedRoute>
+                        <MyNotesProvider>
+                          <div className="flex h-screen overflow-hidden">
+                            <Sidebar />
+                            <div className="flex flex-col flex-1 min-h-0">
+                              <div className="shrink-0">
+                                <Mynotes_top_bar />
+                              </div>
+                              <div className="flex-1 min-h-0 overflow-y-auto">
+                                <MyNotes_page />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </MyNotesProvider>
+                        </MyNotesProvider>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/my_discussions"
                     element={
-                      <MyNotesProvider>
-                        <div className="flex h-screen overflow-hidden">
-                          <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
-                            <div className="shrink-0">
-                              <My_discussions_top_bar />
-                            </div>
-                            <div className="flex-1 min-h-0 overflow-y-auto">
-                              <My_discussions_page />
+                      <ProtectedRoute>
+                        <MyNotesProvider>
+                          <div className="flex h-screen overflow-hidden">
+                            <Sidebar />
+                            <div className="flex flex-col flex-1 min-h-0">
+                              <div className="shrink-0">
+                                <My_discussions_top_bar />
+                              </div>
+                              <div className="flex-1 min-h-0 overflow-y-auto">
+                                <My_discussions_page />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </MyNotesProvider>
+                        </MyNotesProvider>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/create_note"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <CreateNote_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <CreateNote_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <CreateNote_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <CreateNote_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/create_discussion"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <CreateDiscussion_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <CreateDiscussion_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <CreateDiscussion_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <CreateDiscussion_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/bookmarks"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <Bookmarks_wrapper />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <Bookmarks_wrapper />
+                          </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/interests"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <Interests_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <Interests_page />
+                          </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/profile"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <Profile_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <Profile_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Profile_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Profile_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/edit_profile"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <Profile_top_bar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <Edit_profile_page />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Profile_top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Edit_profile_page />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/content/:contentId"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <ContentDetailPage />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <ContentDetailPage />
+                          </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/content/:contentId/comment/:commentId"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <CommentThreadPage />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <CommentThreadPage />
+                          </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/edit/:contentId"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <EditContentTopBar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto">
-                            <EditContentPage />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <EditContentTopBar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <EditContentPage />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/admin"
                     element={
-                      <div className="flex h-screen overflow-hidden">
-                        <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
-                          <div className="shrink-0">
-                            <AdminTerminalTopBar />
-                          </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto w-full">
-                            <AdminTerminalPage />
+                      <ProtectedRoute>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <AdminTerminalTopBar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto w-full">
+                              <AdminTerminalPage />
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                 </Routes>

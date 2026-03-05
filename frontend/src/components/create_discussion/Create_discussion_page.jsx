@@ -17,9 +17,12 @@ const Create_discussion_page = () => {
     const [userInterests, setUserInterests] = useState([]);
     const [popularTags, setPopularTags] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const hasFetched = React.useRef(false);
 
     useEffect(() => {
         const fetchTags = async () => {
+            if (hasFetched.current) return;
+            hasFetched.current = true;
             try {
                 const [allTagsRes, profileRes] = await Promise.all([
                     api.get('/tags/all'),
@@ -29,6 +32,7 @@ const Create_discussion_page = () => {
                 setUserInterests(profileRes.interested_tags || []);
             } catch (error) {
                 console.error('Error fetching tags:', error);
+                hasFetched.current = false;
             }
         };
         fetchTags();

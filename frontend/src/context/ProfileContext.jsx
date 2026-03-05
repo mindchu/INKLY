@@ -67,8 +67,19 @@ export const ProfileProvider = ({ children }) => {
     }
   };
 
+  // Logout function
+  const logout = async () => {
+    try {
+      await api.get('/logout'); // Assuming logout is a GET request based on backend routes/auth.py
+      setProfileData(null);
+      // Optional: window.location.href = '/signin'; or handle it in the component
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
+
   return (
-    <ProfileContext.Provider value={{ profileData, updateProfile, loading, toggleAdmin }}>
+    <ProfileContext.Provider value={{ profileData, updateProfile, loading, toggleAdmin, logout }}>
       {children}
     </ProfileContext.Provider>
   );

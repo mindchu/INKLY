@@ -10,9 +10,12 @@ const Interests_page = () => {
     const [tagInput, setTagInput] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const hasFetched = React.useRef(false);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (hasFetched.current) return;
+            hasFetched.current = true;
             try {
                 const tagsRes = await api.get('/tags/all');
                 setAllTags(tagsRes.tags || []);
@@ -22,6 +25,7 @@ const Interests_page = () => {
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
+                hasFetched.current = false;
             } finally {
                 setLoading(false);
             }

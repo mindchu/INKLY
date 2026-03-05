@@ -17,9 +17,14 @@ import { useProfileContext } from '../context/ProfileContext';
 
 const Side_bar = () => {
     const { isOpen, toggleSidebar, closeSidebar } = useSidebar();
-    const { profileData } = useProfileContext();
+    const { profileData, logout } = useProfileContext();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const handleSignOut = async () => {
+        await logout();
+        navigate('/signin');
+    };
 
     // Close sidebar automatically on mobile when navigating
     useEffect(() => {
@@ -51,7 +56,7 @@ const Side_bar = () => {
             section: 'Account', items: [
                 { label: 'Profile', icon: <CgProfile size={20} />, path: '/profile' },
                 { label: 'Interests', icon: <LuPencil size={20} />, path: '/interests' },
-                { label: 'Sign Out', icon: <PiSignOutBold size={20} />, path: '/signin' },
+                { label: 'Sign Out', icon: <PiSignOutBold size={20} />, onClick: handleSignOut },
             ]
         },
     ];
@@ -109,7 +114,7 @@ const Side_bar = () => {
                                     return (
                                         <div key={itemIdx} className="relative group w-full px-2">
                                             <button
-                                                onClick={() => navigate(item.path)}
+                                                onClick={item.onClick || (() => navigate(item.path))}
                                                 className={`
                                                     flex flex-row items-center w-full h-[40px] rounded-xl transition-all duration-200 
                                                     ${isActive ? 'bg-[#E8FFDF] text-[#124C09]' : 'hover:bg-gray-100 text-gray-700'}
