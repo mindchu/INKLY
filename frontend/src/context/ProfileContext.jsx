@@ -79,7 +79,7 @@ export const ProfileProvider = ({ children }) => {
   };
 
   return (
-    <ProfileContext.Provider value={{ profileData, updateProfile, loading, toggleAdmin, logout }}>
+    <ProfileContext.Provider value={{ profileData, setProfileData, updateProfile, loading, toggleAdmin, logout }}>
       {children}
     </ProfileContext.Provider>
   );

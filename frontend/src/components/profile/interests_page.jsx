@@ -4,7 +4,7 @@ import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
 
 const Interests_page = () => {
-    const { profileData, loading: profileLoading } = useProfileContext();
+    const { profileData, loading: profileLoading, updateProfile } = useProfileContext();
     const [allTags, setAllTags] = useState([]);
     const [userInterests, setUserInterests] = useState([]);
     const [tagInput, setTagInput] = useState('');
@@ -55,7 +55,11 @@ const Interests_page = () => {
     const saveInterests = async (tags) => {
         setSaving(true);
         try {
-            await api.post('/users/me/interests', { tags });
+            await updateProfile({
+                username: profileData.username,
+                bio: profileData.bio,
+                interests: tags
+            });
         } catch (error) {
             console.error('Error saving interests:', error);
             alert('Failed to save interests');

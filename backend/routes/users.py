@@ -3,21 +3,13 @@ from pydantic import BaseModel
 from typing import List
 from middleware.auth import require_auth
 from middleware.validate import validate
-from validation_schema.user_schema import UserInterests, BioUpdate, ProfileUpdate
+from validation_schema.user_schema import BioUpdate, ProfileUpdate
 from util import tags, files as file_util
 from util.admin import is_user_admin
 from util.dbconn import db
 from fastapi import UploadFile, File
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-@router.post("/me/interests")
-async def update_user_interests(interests_data: dict, request: Request):
-    require_auth(request)
-    interests = validate(interests_data, UserInterests)
-    user = request.session.get('user')
-    success = tags.update_user_interests(user['google_id'], interests.tags)
-    return {"success": success, "interests": interests.tags}
 
 @router.get("/me")
 async def get_current_user(request: Request):

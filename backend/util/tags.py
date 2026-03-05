@@ -52,12 +52,3 @@ def ensure_tags_exist(tags: List[str], created_by: Optional[str] = None):
             )
             db.tags.insert_one(new_tag.to_dict())
 
-def update_user_interests(google_id: str, tags: List[str]) -> bool:
-    """
-    Updates the interested_tags for a given user.
-    """
-    result = db.users.update_one(
-        {"google_id": google_id},
-        {"$set": {"interested_tags": tags}}
-    )
-    return result.modified_count > 0 or result.matched_count > 0
