@@ -86,7 +86,7 @@ const Edit_profile_page = () => {
 
     setUploading(true)
     try {
-      const response = await api.post('/users/me/avatar', formData)
+      const response = await api.post('/users/me/avatar', formData, true)
       if (response.success) {
         setProfileData(prev => ({
           ...prev,
