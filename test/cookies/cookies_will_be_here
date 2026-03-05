@@ -1,0 +1,54 @@
+# How to Generate and Store Session Cookies
+
+To use the cookie injection method for multiple users, follow these steps to capture your session cookies.
+
+## 1. Structure of a Cookie File
+
+The Selenium test expects a JSON file containing an array of cookie dictionaries. 
+Example (`user1_cookies.json`):
+
+```json
+[
+  {
+    "domain": "localhost",
+    "httpOnly": true,
+    "name": "session",
+    "path": "/",
+    "sameSite": "Lax",
+    "secure": false,
+    "value": "your-session-jwt-or-token-here"
+  }
+]
+```
+
+## 2. Setting Up Your Session
+
+1. Run your frontend and backend.
+2. Open your browser (Chrome/Edge/etc.).
+3. Go to `http://localhost:6601/signin` and log in with Google.
+4. Once you are redirected to the Home page, open the **Developer Tools** (F12).
+5. Go to the **Application** tab -> **Cookies** -> `http://localhost:6601`.
+6. Look for a cookie usually named `session`.
+
+## 3. Creating the JSON File
+
+Copy the value of the `session` cookie and create a file in `test/cookies/` (e.g., `user1_cookies.json`) using the format above.
+
+Repeat this for a second user (using a different Google account or private window) and save it as `user2_cookies.json`.
+
+---
+
+## Example Cookie for Reference (Format only)
+
+```json
+[
+  {
+    "name": "session",
+    "value": "eyJnbyI6InRoZXBzIn0.Zid_fA.some-randomtrace-of-session-data",
+    "domain": "localhost",
+    "path": "/",
+    "httpOnly": true,
+    "secure": false
+  }
+]
+```
