@@ -93,9 +93,9 @@ const Discussion_page = () => {
                             </div>
 
                             <div className='mt-[16px] flex gap-4'>
-                                <div className="flex-1">
-                                    <p className='font-["Inter"] text-[18px] font-semibold text-gray-800'>{post.title}</p>
-                                    <p className='font-["Inter"] text-[13px] font-regular text-gray-600 mt-[12px]'>{post.text}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className='font-["Inter"] text-[18px] font-semibold text-gray-800 break-all'>{post.title}</p>
+                                    <p className='font-["Inter"] text-[13px] font-regular text-gray-600 mt-[12px] break-all whitespace-pre-wrap line-clamp-3'>{post.text}</p>
                                 </div>
                                 {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                     <div className="w-[100px] h-[80px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">

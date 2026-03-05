@@ -93,9 +93,9 @@ const Note_forum_page = () => {
                             )}
                         </div>
                         <div className='mt-[12px] flex gap-4'>
-                            <div className="flex-1">
-                                <p className='font-["Inter"] text-[18px] font-semibold text-[#124C09]'>{post.title}</p>
-                                <p className='font-["Inter"] text-[13px] text-gray-600 mt-2 line-clamp-2'>{post.text}</p>
+                            <div className="flex-1 min-w-0">
+                                <p className='font-["Inter"] text-[18px] font-semibold text-[#124C09] break-all'>{post.title}</p>
+                                <p className='font-["Inter"] text-[13px] text-gray-600 mt-2 line-clamp-2 break-all'>{post.text}</p>
                             </div>
                             {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                 <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
