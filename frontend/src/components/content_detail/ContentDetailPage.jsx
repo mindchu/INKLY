@@ -140,9 +140,17 @@ const ContentDetailPage = () => {
         return commentList.map((comment) => (
             <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
                 <div className="flex items-start gap-2">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold">
-                        {comment.author_username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+                    {comment.author_profile_picture_url ? (
+                        <img
+                            src={comment.author_profile_picture_url.startsWith('http') ? comment.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${comment.author_profile_picture_url.replace('/api', '')}`}
+                            alt={comment.author_username}
+                            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
+                            {comment.author_username?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                    )}
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm">{comment.author_username || 'Anonymous'}</span>
@@ -378,9 +386,17 @@ const ContentDetailPage = () => {
                         {/* Add Comment Input */}
                         <form onSubmit={handleAddComment} className="mb-8">
                             <div className="flex gap-3">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold flex-shrink-0">
-                                    Me
-                                </div>
+                                {profileData?.profile_picture_url ? (
+                                    <img
+                                        src={profileData.profile_picture_url.startsWith('http') ? profileData.profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${profileData.profile_picture_url.replace('/api', '')}`}
+                                        alt="Me"
+                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-[12px] text-green-700 font-bold flex-shrink-0">
+                                        {profileData?.username?.[0]?.toUpperCase() || 'Me'}
+                                    </div>
+                                )}
                                 <div className="flex-1 flex gap-2">
                                     <input
                                         type="text"

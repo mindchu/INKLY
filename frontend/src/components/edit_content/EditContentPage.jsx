@@ -11,43 +11,32 @@ const EditContentPage = () => {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const lastFetchedId = React.useRef(null);
 
     useEffect(() => {
-        let isMounted = true;
         const fetchContent = async () => {
-            if (lastFetchedId.current === contentId) return;
-            lastFetchedId.current = contentId;
             try {
                 const response = await api.get(`/content/${contentId}`);
-                if (response?.data && isMounted) {
+                if (response?.data) {
                     if (profileData && response.data.author_id !== profileData.google_id) {
                         alert('You are not authorized to edit this content.');
                         navigate(-1);
                         return;
                     }
-                    setNoteTitle(response.data.title);
-                    setContent(response.data.text);
+                    setNoteTitle(response.data.title || '');
+                    setContent(response.data.text || '');
                 }
             } catch (error) {
                 console.error('Failed to fetch content details:', error);
-                lastFetchedId.current = null;
-                if (isMounted) {
-                    alert('Failed to load content for editing.');
-                    navigate(-1);
-                }
+                alert('Failed to load content for editing.');
+                navigate(-1);
             } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
+                setLoading(false);
             }
         };
 
         if (profileData) {
             fetchContent();
         }
-
-        return () => { isMounted = false; };
     }, [contentId, navigate, profileData]);
 
     const handleSave = async () => {
