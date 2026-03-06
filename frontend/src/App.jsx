@@ -51,24 +51,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={
                   <ProtectedRoute>
-                    <div className="flex h-screen overflow-hidden">
-                      <Sidebar />
-                      <div className="flex flex-col flex-1 min-h-0">
-                        <div className="shrink-0">
-                          <Home_Top_bar />
-                        </div>
-                        <div className="flex-1 min-h-0 overflow-y-auto">
-                          <Home_page />
-                        </div>
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                } />
-                <Route path="/signin" element={<Signin />} />
-                <Route
-                  path="/home"
-                  element={
-                    <ProtectedRoute>
+                    <SortProvider>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
                         <div className="flex flex-col flex-1 min-h-0">
@@ -80,6 +63,27 @@ const App = () => {
                           </div>
                         </div>
                       </div>
+                    </SortProvider>
+                  </ProtectedRoute>
+                } />
+                <Route path="/signin" element={<Signin />} />
+                <Route
+                  path="/home"
+                  element={
+                    <ProtectedRoute>
+                      <SortProvider>
+                        <div className="flex h-screen overflow-hidden">
+                          <Sidebar />
+                          <div className="flex flex-col flex-1 min-h-0">
+                            <div className="shrink-0">
+                              <Home_Top_bar />
+                            </div>
+                            <div className="flex-1 min-h-0 overflow-y-auto">
+                              <Home_page />
+                            </div>
+                          </div>
+                        </div>
+                      </SortProvider>
                     </ProtectedRoute>
                   }
                 />
