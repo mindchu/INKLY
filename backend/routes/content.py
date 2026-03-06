@@ -109,7 +109,7 @@ async def search_content(
     tags: List[str] = Query(None, description="Filter by tags"),
     exclude_tags: List[str] = Query(None, description="Exclude tags"),
     sort_by: str = Query("recent", description="recent or popular"),
-    scope: str = Query("all", description="search scope: all, bookmarks, or following")
+    scope: str = Query("all", description="search scope: all, bookmarks, following, or owned")
 ):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None

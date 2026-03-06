@@ -43,6 +43,11 @@ const Discussion_page = () => {
         }
     };
 
+    const handleBookmark = (post, e) => {
+        e.stopPropagation();
+        toggleBookmark(post);
+    };
+
     if (loading) {
         return (
             <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>

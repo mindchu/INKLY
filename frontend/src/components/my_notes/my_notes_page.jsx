@@ -33,14 +33,7 @@ const My_notes_page = () => {
   ]
 
   const filteredAndSortedNotes = useMemo(() => {
-    let filtered = localNotes.filter(note => {
-      const query = searchQuery.toLowerCase();
-      return (
-        (note.title || '').toLowerCase().includes(query) ||
-        (note.text || '').toLowerCase().includes(query) ||
-        (note.tags || []).some(tag => tag.toLowerCase().includes(query))
-      );
-    });
+    let filtered = [...localNotes];
 
     let sorted = [...filtered];
     switch (sortBy) {

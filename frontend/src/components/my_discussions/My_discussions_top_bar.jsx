@@ -8,8 +8,18 @@ import { useMyNotesContext } from '../../context/MyNotesContext';
 import { useProfileContext } from '../../context/ProfileContext';
 
 const My_discussions_top_bar = () => {
-    const { searchQuery, setSearchQuery, sortBy, setSortBy } = useMyNotesContext();
+    const { searchQuery, localSearch, setLocalSearch, fetchSearch, sortBy, setSortBy } = useMyNotesContext();
     const { profileData } = useProfileContext();
+
+    const handleSearchSubmit = () => {
+        fetchSearch(localSearch);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     return (
         <div className='w-full bg-white shadow-md py-3'>
@@ -25,15 +35,16 @@ const My_discussions_top_bar = () => {
                 )}
             </div>
             <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 items-center border-2 rounded-2xl p-1.5 pl-4 '>
-                <button className='cursor-pointer'>
+                <button className='cursor-pointer' onClick={handleSearchSubmit}>
                     <RiSearch2Line size={22} className='flex opacity-50' />
                 </button>
                 <input
                     type='text'
                     placeholder='Search discussions by title, text, or tags...'
                     className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={localSearch}
+                    onChange={(e) => setLocalSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
             </div>
             <div className='ml-8 mt-3 flex flex-row items-center gap-3'>

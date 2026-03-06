@@ -8,8 +8,18 @@ import { useMyNotesContext } from '../../context/MyNotesContext';
 import { useProfileContext } from '../../context/ProfileContext';
 
 const My_notes_top_bar = () => {
-    const { searchQuery, setSearchQuery, sortBy, setSortBy } = useMyNotesContext();
+    const { searchQuery, localSearch, setLocalSearch, fetchSearch, sortBy, setSortBy } = useMyNotesContext();
     const { profileData } = useProfileContext();
+
+    const handleSearchSubmit = () => {
+        fetchSearch(localSearch);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     return (
         <div className='w-full bg-white shadow-md py-3'>
@@ -25,15 +35,16 @@ const My_notes_top_bar = () => {
                 )}
             </div>
             <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 w- items-center border-2 rounded-2xl p-1.5 pl-4 '>
-                <button className='cursor-pointer'>
+                <button className='cursor-pointer' onClick={handleSearchSubmit}>
                     <RiSearch2Line size={22} className='flex opacity-50' />
                 </button>
                 <input
                     type='text'
                     placeholder='Search notes by title, subject, or tags...'
                     className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={localSearch}
+                    onChange={(e) => setLocalSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
             </div>
             <div className='ml-8 mt-3 flex flex-row items-center gap-3'>
@@ -44,8 +55,8 @@ const My_notes_top_bar = () => {
                     <button
                         onClick={() => setSortBy('date_created')}
                         className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'date_created'
-                                ? 'bg-[#8B7355] text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-[#8B7355] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <MdOutlineDateRange size={16} />
@@ -54,8 +65,8 @@ const My_notes_top_bar = () => {
                     <button
                         onClick={() => setSortBy('most_recent')}
                         className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'most_recent'
-                                ? 'bg-[#6B9BD1] text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-[#6B9BD1] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <IoTimeOutline size={16} />
@@ -64,8 +75,8 @@ const My_notes_top_bar = () => {
                     <button
                         onClick={() => setSortBy('title_az')}
                         className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'title_az'
-                                ? 'bg-[#7CAA6D] text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-[#7CAA6D] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <BiSortAZ size={16} />
@@ -74,8 +85,8 @@ const My_notes_top_bar = () => {
                     <button
                         onClick={() => setSortBy('title_za')}
                         className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'title_za'
-                                ? 'bg-[#C97064] text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-[#C97064] text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <BiSortZA size={16} />

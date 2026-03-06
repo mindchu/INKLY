@@ -33,14 +33,7 @@ const My_discussions_page = () => {
     ]
 
     const filteredAndSortedDiscussions = useMemo(() => {
-        let filtered = localDiscussions.filter(disc => {
-            const query = searchQuery.toLowerCase();
-            return (
-                (disc.title || '').toLowerCase().includes(query) ||
-                (disc.text || '').toLowerCase().includes(query) ||
-                (disc.tags || []).some(tag => tag.toLowerCase().includes(query))
-            );
-        });
+        let filtered = [...localDiscussions];
 
         let sorted = [...filtered];
         switch (sortBy) {

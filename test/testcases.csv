@@ -1,0 +1,121 @@
+TC ID,Title,Test Type,Requirement IDs,Preconditions,Test Steps,Test Data,Expected Result,Test Case Priority,Actual Result
+TC-AUTH-01,Successful registered,Functional - Positive,"FR-AUTH-01, FR-PROF-01",N/A,1. Click 'Register with Google',"Valid email & password
+",User is registered and redirect to edit profile page,Critical,
+TC-AUTH-02,Registered user try to register again,Functional - Negative,FR-AUTH-01,User is registered,1. Click 'Register with Google',"Valid email & password
+",System identifies the user and redirects to home page (No duplicate account created),Critical,
+TC-AUTH-03,Successful login,Functional - Positive,FR-AUTH-02,User is registered,1. Click 'Sign in with Google',"Valid email & password
+",User is authenticated and redirected to home page,Critical,
+TC-AUTH-02,Cancel Google Authentication,Functional - Negative,"FR-AUTH-01, FR-AUTH-02",User is on the login page,"1. Click 'Sign in with Google'
+2. Close or cancel the Google popup",N/A,User is not authenticated; returns to login page.,Medium,
+TC-PROF-01,Set unique account name,Functional - Positive,"FR-PROF-02, FR-PROF-03",User is authenticated and on edit profile page,"1. Enter a unique account name
+2. Click Save",Name: 'InklyFan99',Profile name is saved successfully.,High,
+TC-PROF-02,Set duplicate account name,Functional - Negative,FR-PROF-02,Account name 'InklyFan99' already exists in DB,"1. Enter existing account name
+2. Click Save",Name: 'InklyFan99',System rejects name and displays 'Account name already exists' error.,High,
+TC-PROF-03,Set already existed interest tag in profile,Functional - Positive,"FR-PROF-03, FR-SRCH-06",User is authenticated and on edit profile page,"1. Search for interest tag
+2. Select interest tag
+3. Click Save",Tag database,User set their interest tag for their profile,Medium,
+TC-PROF-04,Set profile picture,Functional - Positive,FR-PROF-03,User is authenticated and on edit profile page,"1. Upload image file of profile picture
+2. Click Save",Valid image file,User set image as their profile picture,High,
+TC-PERM-01,Upload with agreement checked,Functional - Positive,FR-PERM-01,User is creating a post with an attachment  for the first time,"1. Attach file
+2. Check the 'File Ownership Agreement' box
+3. Submit post",Valid image file,Post with attachment is published successfully.,High,
+TC-PERM-02,Upload without agreement checked,Functional - Negative,FR-PERM-01,User is creating a post with an attachment for the first time,"1. Attach file
+2. Leave the 'File Ownership Agreement' box unchecked
+3. Click Submit",Valid image file,Submission blocked; system prompts user to check the agreement box.,High,
+TC-POST-01,Create text post without forum selection,Functional - Negative,FR-POST-02,User is authenticated,"1. Enter post title and text
+2. Do NOT select a forum category
+3. Click Publish","Title: 'Hello', Text: 'World'",Publish fails; validation error requesting forum selection.,High,
+TC-POST-02,Post character limit - Exact boundary,Boundary,"FR-POST-01, NFR-CAP-04","User is authenticated, valid forum selected","1. Enter exactly 5000 characters in post body
+2. Click Publish",5000 character string,Post is published successfully.,Medium,
+TC-POST-03,Post character limit - Exceeded,Functional - Negative,"FR-POST-01, NFR-CAP-04","User is authenticated, valid forum selected","1. Enter 5001 characters in post body
+2. Click Publish",5001 character string,Publish blocked; error message regarding max 5000 characters.,Medium,
+TC-POST-04,Set already existed tag in post,Functional - Positive,"FR-TAG-01, FR-SRCH-06",User is creating a post,"1. Search  tag
+2. Select tag
+3. Click Save",Tag database,User attached tag to their post,High,
+TC-TAG-01,Auto-create non-existent tag,Functional - Positive,FR-TAG-02,"User is authenticated, creating post","1. Enter a completely new tag name
+2. Publish post",Tag: '#NeverBeforeSeenTag',Post published; new tag is created in global database.,Medium,
+TC-TAG-02,Admin create tag,Functional - Positive,FR-TAG-03,Admin is authenticated and viewing admin interface,"1. Enter a completely new tag name
+2. Click Save",Tag: '#NeverBeforeSeenTag',New tag is created in global database.,Medium,
+TC-TAG-03,Admin merge tag,Functional - Positive,FR-TAG-04,Admin is authenticated and viewing admin interface,"1. Select two or more tag
+2. Click Merge","Tag: '#Physic', '#Physics'","New tag is created in global database. All the content under old tag change to new tag, Delete old tag in global database",Medium,
+TC-FILE-01,Image size limit - Exact boundary,Boundary,"FR-POST-03, NFR-CAP-01",User is authenticated,"1. Attach an image exactly 5.0 MB in size
+2. Submit",5.0MB .jpg file,File uploads and attaches successfully.,Medium,
+TC-FILE-02,Image size limit - Exceeded,Functional - Negative,"FR-POST-03, NFR-CAP-01",User is authenticated,1. Attach an image 5.1 MB in size,5.1MB .png file,Upload blocked immediately; file size error displayed.,High,
+TC-FILE-03,Invalid file format upload,Functional - Negative,"FR-POST-03, NFR-CAP-03",User is authenticated,1. Attach an executable file,script.bat or virus.exe,Upload rejected; system displays invalid file type error.,Critical,
+TC-FILE-04,File size limit - Exact boundary,Boundary,"FR-POST-03, NFR-CAP-02",User is authenticated,"1. Attach a file exactly 20.0 MB in size
+2. Submit",20.0MB .pdf file,File uploads and attaches successfully.,Medium,
+TC-FILE-05,File size limit - Exceeded,Functional - Negative,"FR-POST-03, NFR-CAP-02",User is authenticated,1. Attach a file 20.1 MB in size,20.1MB .pdf file,Upload blocked immediately; file size error displayed.,High,
+TC-AUTHZ-01,Edit own post,Functional - Positive,FR-POST-04,User is viewing their own published post,"1. Click Edit
+2. Modify text
+3. Click Save",Appended text: 'Updated',Post updates successfully and displays modified content.,High,
+TC-AUTHZ-02,Edit someone else's post,Functional - Negative,FR-POST-04,User A is logged in and viewing User B's post,"1. Look for Edit button
+2. Try to force Edit via URL manipulation",Target Post ID belonging to User B,Edit button is hidden; URL manipulation returns 403 Forbidden.,Critical,
+TC-DEL-01,Delete own post,Functional - Positive,FR-POST-05,User is viewing their own published post,1. Click Delete,Appended text: 'Deleted',Post Delete sucessfully,High,
+TC-DEL-02,Delete someone else's post,Functional - Negative,FR-POST-05,User A is logged in and viewing User B's post,"1. Look for Delete button
+2. Try to force Delete via URL manipulation",Target Post ID belonging to User B,Delete button is hidden; URL manipulation returns 403 Forbidden.,Critical,
+TC-DEL-03,Admin delete post,Functional - Positive,FR-POST-06,Admin is viewing User A's post,1. Click Delete,"Appended text: 'Deleted', Target Post ID belonging to User B",Post Delete sucessfully,Medium,
+TC-DEL-04,Delete own comment,Functional - Positive,FR-INT-07,User is viewing their own published comment,1. Click Delete,Appended text: 'Deleted',Comment Delete sucessfully,High,
+TC-DEL-05,Delete someone else's comment,Functional - Negative,FR-INT-07,User A is logged in and viewing User B's comment,"1. Look for Delete button
+2. Try to force Delete via URL manipulation",Target Comment ID belonging to User B,Delete button is hidden; URL manipulation returns 403 Forbidden.,Critical,
+TC-DEL-06,Admin delete comment,Functional - Positive,FR-INT-08,Admin is viewing User A's comment,1. Click Delete,"Appended text: 'Deleted', Target Comment ID belonging to User B",Comment Delete sucessfully,Medium,
+TC-CMT-01,Comment character limit - Exact boundary,Boundary,"FR-INT-04, NFR-CAP-04","User is authenticated, viewing a post","1. Enter exactly 1000 characters in comment box
+2. Click Post Comment",1000 character string,Comment is appended to the post successfully.,Medium,
+TC-CMT-02,Comment character limit - Exceeded,Functional - Negative,"FR-INT-04, NFR-CAP-04","User is authenticated, viewing a post","1. Enter 1001 characters in comment box
+2. Click Post Comment",1001 character string,Submission blocked; error message regarding max 1000 characters.,Medium,
+TC-SRCH-01,Search post,Functional - Positive,FR-SRCH-01,User viewing search bar,1. Enter keyword,Post database,Found the post that match keyword,Critical,
+TC-SRCH-02,Filter Post,Functional - Positive,"FR-SRCH-02, FR-SRCH-06",User viewing filter bar,"1. Search tag
+2. Select tag","Post database, Tag database",Found the post attached with tag selected,Critical,
+TC-SRCH-03,Sort Post,Functional - Positive,FR-SRCH-03,User viewing sort bar,1. Select sort option,Post database,Reorder the displayed list of posts based on selected option,Critical,
+TC-SRCH-04,Search follower,Functional - Positive,FR-SRCH-04,User viewing followed page and open search bar,1. User A enter User B name,"User database, User A follow User B",Found User B account,Medium,
+TC-SRCH-05,Search bookmark,Functional - Positive,FR-SRCH-05,User viewing bookmark page and open search bar,1. Enter keyword of Post A,"Post database, User bookmark Post A",Found Post A,Medium,
+TC-FOW-01,Follow user,Functional - Positive,FR-FOW-01,User viewing other user's profile page,1. Click follow,"User A, User B",User A follow User B. User B appear in User A followed list.,Low,
+TC-FOW-02,Unfollow user,Functional - Positive,FR-FOW-02,User viewing other user's profile page,1. Click unfollow,User A already follow User B,User A unfolllow User B. User B remove from User A followed list,Low,
+TC-BKM-01,Bookmark post,Functional - Positive,FR-BKM-01,User viewing post,1. Click bookmark,"User A, Post A",User A bookmark Post A. Post A appear in User A bookmark list,Low,
+TC-BKM-02,Unbookmark post,Functional - Positive,FR-BKM-02,User viewing post,2. Click unbookmark,User A already bookmark Post A,User A unbookmark Post A. Post A remove from User A bookmark list,Low,
+TC-INT-01,Like post,Functional - Positive,FR-INT-01,User viewing post,1. Click like icon,Post A,User like Post A,Low,
+TC-INT-02,Unlike post,Functional - Positive,FR-INT-01,"User viewing post, User already like that post before",1. Click like icon,Post A,User unlike Post A,Low,
+TC-INT-03,Share post,Functional - Positive,FR-INT-02,User viewing post,1. Click share,Post A,User get a share link of the post,Critical,
+TC-INT-04,Download file attachment,Functional - Positive,FR-INT-03,User viewing post,1. Click download,Post A,User download file attachment on their local storage,Critical,
+TC-INT-05,Comment under the post,Functional - Positive,FR-INT-04,User viewing post and open comment section,"1. Click comment on Post A
+2. Enter text
+3. Click send",Post A,User published comment on Post A,Low,
+TC-INT-06,Reply comment,Functional - Positive,FR-INT-05,User viewing post and open comment section,"1. Click comment on the User B's comment
+2. Enter text
+3. Click send","Post A, User B comment",User published comment under User B's comment,Low,
+TC-INT-07,Like comment,Functional - Positive,FR-INT-06,User viewing post and open comment section,1. Click like icon on the comment,"Post A, User B comment",User like User B's comment,Low,
+TC-SEC-01,Verify HTTPS Encryption,Security - Positive,NFR-SEC-01,System is deployed to a server,"1. Access the Inkly URL.
+2. Click the padlock icon in the browser address bar.
+3. Inspect the SSL/TLS certificate.",URL: https://inkly.com,"Connection is secure; Certificate uses TLS 1.2 or 1.3. Browser does not show ""Not Secure"" warning.",Critical,
+TC-SEC-02,Attempt HTTP access,Security - Negative,NFR-SEC-01,System is live,1. Type the URL using http:// instead of https://.,URL: http://inkly.com,The system automatically redirects the user to the https:// version.,Critical,
+TC-SEC-03,Database Password Inspection,Security - Positive,NFR-SEC-02,Access to User Database (Dev/Test Env),"1. Register a new user via Google.
+2. Open the 'Users' table in the database.
+3. Check for a 'Password' column.",N/A,No password column exists; Only OAuth tokens or User IDs are stored.,Critical,
+TC-SEC-04,Session Timeout (24h Inactivity),Security - Positive,NFR-SEC-03,User is logged in; Test environment clock can be manipulated.,"1. Log in to Inkly.
+2. Close the browser.
+3. Wait 24 hours (or fast-forward server time).
+4. Re-open browser and navigate to Inkly.",N/A,The session is invalid; User is redirected to the login page.,Critical,
+TC-SEC-05,XSS Script Injection in Comments,Security - Negative,NFR-SEC-04,User is authenticated and viewing a post.,"1. Type a malicious script into the comment box.
+2. Click ""Post Comment"".
+3. Refresh the page.",<script>alert('XSS')</script>,The script is sanitized/escaped. No alert box appears; script appears as plain text or is removed.,Critical,
+TC-SEC-06,Secure Hyperlink Rendering,Security - Positive,NFR-SEC-04,User is authenticated.,"1. Create a post with an external link.
+2. View the post and inspect the HTML of the link.",https://google.com,"The link contains rel=""noopener noreferrer"" to prevent tab-napping attacks.",Critical,
+TC-PERF-01,Verify Lazy Loading of Media,Performance - Positive,NFR-PERF-01,Feed has 20+ images; Open Browser DevTools (Network tab),"1. Load home page.
+2. Observe network requests.
+3. Scroll down to bottom.",N/A,Only initial images load on start; new images download only when scrolled into view.,High,
+TC-PERF-02,Search Query Response Time,Performance - Positive,NFR-PERF-02,Database has 500+ posts,"1. Enter keyword in search.
+2. Use a stopwatch or DevTools to measure time from 'Enter' to results appearing.","Keyword: ""Notes""",Results appear in less than 2 seconds.,High,
+TC-PERF-03,Auto-Compression of Images,Performance - Positive,NFR-PERF-03,User is on profile edit page,"1. Upload a high-resolution 4MB photo.
+2. Inspect the saved file size on the server/storage.",4MB .jpg file,"The stored file size is significantly smaller than the original (e.g., < 1MB) with clear visibility.",High,
+TC-USA-01,Mobile Responsiveness (Viewport),Usability - Positive,NFR-USA-01,Browser DevTools open (Mobile Mode),"1. Switch viewport to iPhone 12 or 390px width.
+2. Check menu and post layout.",N/A,Navigation menu collapses into a 'hamburger'; content wraps without horizontal scrolling.,High,
+TC-USA-02,Cross-Browser Consistency,Usability - Positive,NFR-USA-02,"Latest Chrome, Safari, and Edge installed","1. Open Inkly in each browser.
+2. Compare button colors, fonts, and layouts.",N/A,Visuals and functionality are identical across all browsers.,High,
+TC-USA-03,Human-Readable Error Message,Usability - Positive,NFR-USA-03,"Intentional failure (e.g., upload 100MB file)","1. Trigger an error.
+2. Read the displayed message.",100MB of any valid file type,"Message is clear (""File too large"") rather than technical code (""Error 413 Payload Too Large"").",High,
+TC-BUS-01,Free-to-Use Verification,Business - Positive,BR-01,New user registration,"1. Complete registration.
+2. Access all features (Post, Bookmark, Search).",N/A,User is never prompted for payment or credit card info to access features.,High,
+TC-BUS-02,Legal Liability Compliance,Business - Positive,"BR-02, FR-PERM-01",User is on upload screen,"1. Verify presence of ""Ownership Agreement"" text.
+2. Verify link to Open Source terms.",N/A,Legal text clearly states relinquishing rights; checkbox is mandatory.,Critical,
+TC-BUS-03,Intellectual Hub UI/UX Audit,Usability - Positive,BR-03,User on Home Feed,"1. Inspect UI elements.
+2. Compare against ""low-effort"" platforms (no flashing ads, focus on text/files).",N/A,"UI is clean, academic, and professional, favoring content over ""likes/clout.""",Low,
+TC-BUS-04,"""Inkly-Only"" Feature Check",Business - Positive,BR-04,Viewing specific threads,"1. Verify ""Note Forum"" functionality which allows deep file-based discussion.",N/A,System provides unique features (like direct PDF discussion) not found on standard social media.,Low,

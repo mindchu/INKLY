@@ -6,6 +6,7 @@ import argparse
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from utils.browser import BrowserUtility
+from utils.reporter import TestReporter
 from cases.auth_tests import run_auth_tests
 from cases.post_tests import run_post_tests
 from cases.profile_tests import run_profile_tests
@@ -25,26 +26,29 @@ def main():
 
     # Initialize Browser
     browser = BrowserUtility(headless=args.headless)
+    reporter = TestReporter()
 
     try:
         # 1. Run Auth Tests (TC-AUTH)
-        run_auth_tests(browser, args.testcases)
+        run_auth_tests(browser, reporter, args.testcases)
 
         # 2. Run Profile Tests (TC-PROF)
-        run_profile_tests(browser, args.testcases)
+        run_profile_tests(browser, reporter, args.testcases)
 
         # 3. Run Post Tests (TC-POST, TC-TAG, TC-FILE)
-        run_post_tests(browser, args.testcases)
+        run_post_tests(browser, reporter, args.testcases) 
 
         # 4. Run Interaction Tests (TC-INT, TC-FOW, TC-BKM)
-        run_interaction_tests(browser, args.testcases)
+        run_interaction_tests(browser, reporter, args.testcases) 
+
+        # 5. Run Authz / Delete Tests
+        from cases.authz_tests import run_authz_tests
+        run_authz_tests(browser, reporter, args.testcases)
 
     except Exception as e:
         print(f"\n[Error] Test Suite interrupted: {e}")
     finally:
-        print("\n========================================")
-        print("   TEST SUITE EXECUTION FINISHED         ")
-        print("========================================")
+        reporter.generate_report()
         browser.quit()
 
 if __name__ == "__main__":

@@ -68,7 +68,11 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
 
 def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limit: int = 10, filter_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
     """
-    Fetches content (posts and discussions) with bulk like checking.
+    Fetches content (posts and discussions).
+    If filter_tags is provided, it filters by those specific tags.
+    Otherwise, if user_id is provided and they have interested_tags, it filters by those tags.
+    If content_type is provided ('post' or 'discussion'), it only returns that type.
+    Fallbacks to showing all content if no specific filters apply or no matches found.
     """
     interested_tags = []
     following_ids = []
@@ -93,6 +97,14 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
             discussions = list(db.discussions.find(query))
             for d in discussions: d['type'] = 'discussion'
         
+        user_bookmarks = []
+        user_following = []
+        if user_id:
+            user_doc = db.users.find_one({"google_id": user_id}, {"bookmark_ids": 1, "following_ids": 1})
+            if user_doc:
+                user_bookmarks = user_doc.get('bookmark_ids', [])
+                user_following = user_doc.get('following_ids', [])
+
         all_content = posts + discussions
         
         # --- BULK LIKE CHECKING TO PREVENT N+1 PROBLEM ---
@@ -108,8 +120,9 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
         # --------------------------------------------------
 
         for doc in all_content:
-            doc_id_str = str(doc['_id'])
-            doc['_id'] = doc_id_str
+            doc['_id'] = str(doc['_id'])
+            liked_by = doc.get('liked_by_user_ids', [])
+            comment_ids = doc.get('comment_ids', [])
             
             doc['likes_count'] = doc.get('like_count', 0)
             doc['comments_count'] = len(doc.get('comment_ids', []))
@@ -167,11 +180,12 @@ def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optiona
     
     if doc:
         doc['_id'] = str(doc['_id'])
-        doc['comments_count'] = len(doc.get('comment_ids', []))
+        liked_by = doc.get('liked_by_user_ids', [])
+        comment_ids = doc.get('comment_ids', [])
         
-        # New Like Logic
-        doc['likes_count'] = doc.get('like_count', 0)
-        doc.pop('liked_by_user_ids', None) # Clean up legacy data
+        doc['likes_count'] = len(liked_by)
+        doc['comments_count'] = len(comment_ids)
+        doc['is_liked'] = user_id in liked_by if user_id else False
         
         if user_id:
             # Check the likes collection
@@ -231,7 +245,10 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
 def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all") -> List[Dict[str, Any]]:
     query: Dict[str, Any] = {}
     
-    if scope == "bookmarks" and user_id:
+    # 1. Scope Filtering
+    if scope == "owned" and user_id:
+        query["author_id"] = user_id
+    elif scope == "bookmarks" and user_id:
         user_doc = db.users.find_one({"google_id": user_id}, {"bookmark_ids": 1})
         bookmark_ids = user_doc.get('bookmark_ids', []) if user_doc else []
         query["_id"] = {"$in": bookmark_ids}
@@ -240,6 +257,9 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         following_ids = user_doc.get('following_ids', []) if user_doc else []
         query["author_id"] = {"$in": following_ids}
 
+    # 2. Text Search (Optional if q is provided, we use semantic search primarily)
+    # We remove the hard regex filter so we can do semantic search on ALL matching scope documents
+    
     if tags_filter:
         query["tags"] = {"$all": tags_filter}
 
@@ -289,13 +309,31 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
 
     if q and results:
         query_embedding = embeddings.embedding_manager.generate_embedding(q)
+        filtered_results = []
+        lower_q = q.lower()
+        
         for doc in results:
             doc_embedding = doc.get('title_embedding')
+            title = doc.get('title', '')
+            
+            # Exact/partial text match gets a massive boost
+            text_match_bonus = 1.0 if lower_q in title.lower() else 0.0
+            
             if doc_embedding:
-                score = embeddings.embedding_manager.cosine_similarity(query_embedding, doc_embedding)
+                semantic_score = embeddings.embedding_manager.cosine_similarity(query_embedding, doc_embedding)
             else:
-                score = 0.0
-            doc['search_score'] = score
+                semantic_score = 0.0
+                
+            final_score = semantic_score + text_match_bonus
+            doc['search_score'] = final_score
+            
+            # Only keep results that are either somewhat semantically similar or have a text match
+            if final_score > 0.3 or text_match_bonus > 0:
+                filtered_results.append(doc)
+                
+        results = filtered_results
+        
+        # Sort by search score primarily if a query is provided
         results.sort(key=lambda x: x.get('search_score', 0), reverse=True)
     else:
         if sort_by in ["popular", "top", "likes"]:

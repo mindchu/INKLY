@@ -1,8 +1,9 @@
 from utils.browser import BrowserUtility, FRONTEND_URL
+from utils.reporter import TestReporter
 from selenium.webdriver.common.by import By
 import time
 
-def run_auth_tests(browser: BrowserUtility, target_tests: list = None):
+def run_auth_tests(browser: BrowserUtility, reporter: TestReporter, target_tests: list = None):
     print("\n--- Running Auth Tests ---")
     
     # TC-AUTH-03: Successful login (Verification via cookie injection)
@@ -14,11 +15,11 @@ def run_auth_tests(browser: BrowserUtility, target_tests: list = None):
             
             # Check if we are NO LONGER on the signin/login page
             if "/signin" not in current_url and "/login" not in current_url:
-                print("[Pass] TC-AUTH-03: Session injected and redirected away from login.")
+                reporter.add_result("TC-AUTH-03", "Successful login", "Pass", "Session injected & redirected away from login")
             else:
-                print("[Fail] TC-AUTH-03: Injection failed; still on login page.")
+                reporter.add_result("TC-AUTH-03", "Successful login", "Fail", "Injection failed; still on login page")
         else:
-            print("[Fail] TC-AUTH-03: Cookie injection failed (file error).")
+            reporter.add_result("TC-AUTH-03", "Successful login", "Fail", "Cookie injection failed (file error)")
 
     # TC-AUTH-05: Logout
     if not target_tests or "TC-AUTH-05" in target_tests:

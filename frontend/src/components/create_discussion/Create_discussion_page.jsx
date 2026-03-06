@@ -6,7 +6,7 @@ import { api } from '../../util/api';
 
 const Create_discussion_page = () => {
     const navigate = useNavigate();
-    const [discTitle, setDiscTitle] = useState('');
+    const [discussionTitle, setDiscussionTitle] = useState('');
     const [content, setContent] = useState('');
     const [tagInput, setTagInput] = useState('');
     const [tags, setTags] = useState([]);
@@ -40,10 +40,22 @@ const Create_discussion_page = () => {
 
     useEffect(() => {
         if (tagInput.trim()) {
-            const allSuggestions = Array.from(new Set([...userInterests, ...popularTags]));
-            const filtered = allSuggestions.filter(tag =>
-                tag.toLowerCase().includes(tagInput.toLowerCase()) &&
-                !tags.includes(tag)
+            // Combine interests (strings) and popular tags (objects)
+            const interestTagObjects = userInterests.map(name => {
+                const found = popularTags.find(t => t.name === name);
+                return found || { name, color: '#E8F0E5' };
+            });
+
+            const combined = [...popularTags];
+            interestTagObjects.forEach(it => {
+                if (!combined.find(t => t.name === it.name)) {
+                    combined.push(it);
+                }
+            });
+
+            const filtered = combined.filter(tag =>
+                tag.name.toLowerCase().includes(tagInput.toLowerCase()) &&
+                !tags.includes(tag.name)
             );
             setSuggestions(filtered);
             setShowSuggestions(filtered.length > 0);
@@ -108,7 +120,7 @@ const Create_discussion_page = () => {
     };
 
     const handlePublish = async () => {
-        if (!discTitle.trim() || !content.trim()) {
+        if (!discussionTitle.trim() || !content.trim()) {
             alert('Please fill in both title and content fields.');
             return;
         }
@@ -116,7 +128,7 @@ const Create_discussion_page = () => {
         setPublishing(true);
         try {
             const formData = new FormData();
-            formData.append('title', discTitle);
+            formData.append('title', discussionTitle);
             formData.append('text', content);
             formData.append('type', 'discussion');
 
@@ -146,7 +158,7 @@ const Create_discussion_page = () => {
 
     const handleCancel = () => {
         if (window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-            setDiscTitle('');
+            setDiscussionTitle('');
             setContent('');
             setTags([]);
             setAttachments([]);
@@ -162,7 +174,7 @@ const Create_discussion_page = () => {
             delete window.handlePublishNote;
             delete window.handleCancelNote;
         };
-    }, [discTitle, content, tags, attachments]);
+    }, [discussionTitle, content, tags, attachments]);
 
     return (
         <div className='w-full min-h-screen bg-[#EEF2E1] overflow-auto font-["Inter"]'>
@@ -177,8 +189,8 @@ const Create_discussion_page = () => {
                         </label>
                         <input
                             type='text'
-                            value={discTitle}
-                            onChange={(e) => setDiscTitle(e.target.value)}
+                            value={discussionTitle}
+                            onChange={(e) => setDiscussionTitle(e.target.value)}
                             placeholder='Enter title...'
                             className='w-full px-4 py-3 border border-[#D4D9C6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent transition-all text-[#2C3E28] placeholder:text-[#9AAF94]'
                         />

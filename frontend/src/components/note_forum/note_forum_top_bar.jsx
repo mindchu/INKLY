@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BiMessageSquare } from "react-icons/bi";
 import { RiSearch2Line } from "react-icons/ri";
 import { MdOutlineWhatshot } from "react-icons/md";
@@ -10,9 +10,19 @@ import { useSidebar } from '../../context/SidebarContext';
 import { useProfileContext } from '../../context/ProfileContext';
 
 const Note_forum_top_bar = () => {
-    const { sortBy, setSortBy } = useSortContext();
+    const { sortBy, setSortBy, searchQuery, localSearch, setLocalSearch, fetchSearch } = useSortContext();
     const { toggleSidebar } = useSidebar();
     const { profileData } = useProfileContext();
+
+    const handleSearchSubmit = () => {
+        fetchSearch(localSearch);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     return (
         <div className='w-full bg-white shadow-md py-3'>
@@ -31,10 +41,17 @@ const Note_forum_top_bar = () => {
                 )}
             </div>
             <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 w- items-center border-2 rounded-2xl p-1.5 pl-4 '>
-                <button className='cursor-pointer'>
+                <button className='cursor-pointer' onClick={handleSearchSubmit}>
                     <RiSearch2Line size={22} className='flex opacity-50' />
                 </button>
-                <input type='text' placeholder='Search discussions by title, subject, or tags...' className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'></input>
+                <input
+                    type='text'
+                    placeholder='Search discussions by title, subject, or tags...'
+                    className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'
+                    value={localSearch}
+                    onChange={(e) => setLocalSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
             </div>
             <div className='ml-8 mt-3 flex flex-row items-center gap-3'>
                 <p className='text-[#577F4E] font-["Inter"] text-[16px] select-none'>

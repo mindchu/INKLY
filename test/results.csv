@@ -1,0 +1,6 @@
+TC ID,Test Name,Status,Message
+TC-AUTH-03,Successful login,Pass,Session injected & redirected away from login
+TC-PROF-01,Set unique account name,Pass,Account name updated successfully
+TC-PROF-02,Set duplicate account name,Fail,No validation alert shown for duplicate name
+TC-PROF-03,Set interest tag,Fail,Error: Message: invalid session id: session deleted as th
+TC-PROF-04,Set profile picture,Fail,Error: Message: invalid session id; For documentation on 

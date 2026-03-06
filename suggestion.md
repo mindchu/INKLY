@@ -1,169 +1,62 @@
-# Bypassing Google UI for Automated Testing (Selenium)
+# Suggested Sequence Diagrams for INKLY
 
-To make automated tests reliable and avoid Google's bot detection, we can bypass the Google login interface entirely. This is standard practice in professional CI/CD pipelines.
+Here are 5 core use-cases in the INKLY project that are ideal for sequence diagrams. Only the chain of execution is provided below.
 
-## Suggested Strategy: Mocking the OAuth Flow
+## 1. User Authentication (Google Login & Session Creation)
+**Chain of Execution:**
+1. **User** clicks "Login with Google" on the **Frontend**.
+2. **Frontend** triggers the Google OAuth popup/redirect.
+3. **Google** authenticates the user and returns an Auth Token to the **Frontend**.
+4. **Frontend** sends the Auth Token to the **Backend** (e.g., `/auth/google`).
+5. **Backend** verifies the token with Google's servers.
+6. **Backend** queries **MongoDB** to check if the user exists:
+   - If no, creates a new user profile.
+   - If yes, fetches the user's details.
+7. **Backend** generates a session JWT/Cookie and sends it in the response to the **Frontend**.
+8. **Frontend** saves the session state and redirects the **User** to the Home Page.
 
-Instead of interacting with Google's servers, we simulate the backend receiving a successful "OK" from Google.
+## 2. Note Upload (with MongoDB GridFS)
+**Chain of Execution:**
+1. **User** fills in note metadata (title, description, tags) and attaches a file on the **Frontend**.
+2. **User** clicks "Upload Note".
+3. **Frontend** prepares the multipart form data and sends a POST request to the **Backend** (`/notes/upload`).
+4. **Backend** receives the request and validates the user session.
+5. **Backend** streams the uploaded file data into **MongoDB GridFS**.
+6. **MongoDB GridFS** returns a unique `file_id` representing the stored file.
+7. **Backend** creates a new Note Document in the regular **MongoDB** collection, linking it to the `file_id`.
+8. **Backend** responds with a success status and the new Note ID.
+9. **Frontend** updates the UI and navigates the **User** to the newly created Note page.
 
-### 1. Backend Preparation (Mock Endpoint)
+## 3. Generating the Personalized Feed (Interests & Followers)
+**Chain of Execution:**
+1. **User** navigates to the Home Feed on the **Frontend**.
+2. **Frontend** sends a GET request to the **Backend** (`/feed`) including the user's session cookies.
+3. **Backend** validates the session and identifies the requesting user.
+4. **Backend** queries **MongoDB** to fetch the user's "Interests" and "Following" lists.
+5. **Backend** queries the Notes/Discussions collections in **MongoDB** for documents matching the user's interests OR created by followed users.
+6. **Backend** aggregates the results, applying sorting (e.g., chronological) and pagination limits.
+7. **Backend** returns the generated list of feed items to the **Frontend**.
+8. **Frontend** iterates through the list and renders the content for the **User**.
 
-Add a temporary "Test-Only" route in your backend (`backend/routes/auth.py`). This route should only be active in development or testing environments.
+## 4. Discussion Interaction (Adding a Comment)
+**Chain of Execution:**
+1. **User** types a comment on a specific Discussion page and clicks "Submit" on the **Frontend**.
+2. **Frontend** sends a POST request with the comment text to the **Backend** (`/discussions/{discussion_id}/comments`).
+3. **Backend** validates the session and the comment payload (e.g., checking for empty text or max length).
+4. **Backend** accesses **MongoDB** and appends the new comment object to the specified Discussion document.
+5. *(Optional)* **Backend** creates a notification document in **MongoDB** for the owner of the Discussion.
+6. **Backend** responds to the **Frontend** with the newly created comment object and success status.
+7. **Frontend** dynamically adds the new comment to the discussion thread on the UI without requiring a full page reload.
 
-```python
-# Example Mock Endpoint in backend/routes/auth.py
-@router.get("/auth/mock-login")
-async def mock_login(request: Request, email: str = "testuser@gmail.com"):
-    # 1. Simulated User Data (matching what Google would return)
-    user_info = {
-        'email': email,
-        'name': 'Test User',
-        'is_new': False # Or True to test registration flow
-    }
-    
-    # 2. Replicate the backend session logic
-    user_data = db.users.find_one({"email": email})
-    if not user_data:
-        # Create user if doesn't exist (simulating registration)
-        from obj.user import User
-        new_user = User.from_google_info(user_info)
-        result = db.users.insert_one(new_user.to_dict())
-        user_data = new_user.to_dict()
-        user_data['_id'] = str(result.inserted_id)
-        user_data['is_new'] = True
-    else:
-        user_data['_id'] = str(user_data['_id'])
-        user_data['is_new'] = False
-
-    # 3. Set the session exactly like the real auth flow
-    request.session['user'] = user_data
-    
-    # 4. Redirect to Frontend
-    redirect_url = f"{FRONTEND_URL}/"
-    if user_data.get('is_new'):
-        redirect_url = f"{FRONTEND_URL}/interests"
-        
-    return RedirectResponse(url=redirect_url)
-```
-
-### 2. Refined Selenium Script (Skipping Google UI)
-
-The script now directly triggers the mock login, which handles the session and redirects to the app.
-
-```python
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-
-def test_login_bypassing_google():
-    chrome_options = Options()
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
-    try:
-        # FRONTEND and BACKEND URLs
-        frontend_url = "http://localhost:6601"
-        backend_url = "http://localhost:8000" # Change to your backend port
-
-        # 1. Directly call the mock backend endpoint
-        # This will set the session cookie in the browser and redirect to the frontend
-        print("Triggering mock login...")
-        driver.get(f"{backend_url}/auth/mock-login?email=test@example.com")
-
-        # 2. Wait for redirect back to frontend
-        time.sleep(2) 
-        
-        # 3. Verify we are on the Home page or Interests page
-        current_url = driver.current_url
-        print(f"Logged in successfully! Current URL: {current_url}")
-        
-        if frontend_url in current_url:
-            print("Verified: User session active and redirected to application.")
-            # Now you can proceed to test other features (Post, Search, etc.)
-        else:
-            print("Failed: Was not redirected to the application.")
-
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        driver.quit()
-
-if __name__ == "__main__":
-    test_login_bypassing_google()
-```
-
-## Why this is better:
-1.  **Speed**: Tests run in seconds, not waiting for Google's UI transitions.
-2.  **Reliability**: Zero chance of being blocked by Google's anti-bot system.
-3.  **Isolation**: Focuses testing on *your* code, not Google's.
-4.  **Deterministic**: You can force "New User" or "Existing User" states by changing the mock parameters.
-
----
-
-## Alternative Strategy: "Dupe Cookies" (Session Injection)
-
-The "Dupe Cookies" method involves logging in manually once, capturing the session cookie, and then "injecting" that cookie into your automated Selenium browser. This effectively bypasses the login flow by telling the backend you already have an active session.
-
-### How it works:
-1. **Login Manually**: You log in to INKLY in your browser.
-2. **Save Cookies**: You run a script once to save the browser's cookies to a file (e.g., `cookies.pkl` or `cookies.json`).
-3. **Inject Cookies**: In your test suite, you load these cookies and add them to the Selenium driver.
-
-### Code Example: Injecting Cookies in Selenium
-
-```python
-import pickle
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-
-def test_with_injected_cookies():
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-    
-    # 1. You MUST visit the domain first so Selenium knows where to apply the cookies
-    frontend_url = "http://localhost:6601"
-    driver.get(frontend_url) 
-    
-    # 2. Load cookies from a file (e.g., using pickle)
-    # Note: You need to have created this file previously by logging in and running
-    # pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
-    try:
-        cookies = pickle.load(open("cookies.pkl", "rb"))
-        for cookie in cookies:
-            driver.add_cookie(cookie)
-        
-        # 3. Refresh or navigate to a protected page
-        driver.refresh()
-        print("Cookies injected. Session should be active.")
-        
-        # Verify login (e.g., look for a profile element or check URL)
-        time.sleep(2)
-        print(f"Current URL after injection: {driver.current_url}")
-        
-    except FileNotFoundError:
-        print("Error: cookies.pkl not found. Please log in manually once and save cookies.")
-    
-    finally:
-        driver.quit()
-
-if __name__ == "__main__":
-    test_with_injected_cookies()
-```
-
-### When to use this:
-- **Pros**: Very fast; bypasses Google UI entirely without needing backend code changes (like mocking).
-- **Cons**: Cookies expire. You will need to manually log in and update the `cookies.pkl` file whenever your session times out (typically every 24 hours as per your requirements).
-
----
-
-### Comparison of Methods
-
-| Method | Reliability | Speed | Setup Complexity | Best For |
-| :--- | :--- | :--- | :--- | :--- |
-| **Standard UI** | Low (Blocked by Google) | Slow | Low | Basic smoke tests (if undetected) |
-| **Mocking OAuth** | High | Very Fast | Medium (Backend change required) | CI/CD Pipelines, rigorous testing |
-| **Cookie Injection**| High | Fast | Low | Quick local dev testing, skipping UI |
-
-I have updated the suggestions with the "Dupe Cookies" method. Which approach fits your workflow better?
+## 5. User Follow Action (Preventing Self-Follow)
+**Chain of Execution:**
+1. **User A** visits **User B**'s profile and clicks the "Follow" button on the **Frontend**.
+2. **Frontend** sends a POST request to the **Backend** (`/users/{user_b_id}/follow`).
+3. **Backend** validates the session to identify the actor (**User A**).
+4. **Backend** checks business logic constraints: Is **User A**'s ID the same as **User B**'s ID? (If yes, abort and return error).
+5. **Backend** queries **MongoDB** to check if **User A** is already following **User B**.
+6. If not following, **Backend** performs a transactional update in **MongoDB**:
+   - Adds **User B**'s ID to **User A**'s `following` array.
+   - Adds **User A**'s ID to **User B**'s `followers` array.
+7. **Backend** responds with a success message to the **Frontend**.
+8. **Frontend** changes the "Follow" button state to "Following" for **User A**.
