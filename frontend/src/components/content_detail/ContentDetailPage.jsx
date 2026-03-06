@@ -228,7 +228,15 @@ const ContentDetailPage = () => {
             <div className="max-w-4xl mx-auto px-4 py-8">
                 {/* Back Button */}
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => {
+                        if (content.type === 'discussion') {
+                            navigate('/discussion');
+                        } else if (content.type === 'post') {
+                            navigate('/note_forum');
+                        } else {
+                            navigate(-1);
+                        }
+                    }}
                     className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-6 transition-colors font-medium"
                 >
                     <MdArrowBack size={20} />

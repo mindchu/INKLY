@@ -20,7 +20,7 @@ class BaseContent:
         self.created_at = created_at or datetime.now(timezone.utc).isoformat()
         self.like_count = like_count
 
-    def to_dict(self) -> dict:
+    def to_dict(self, **kwargs) -> dict:
         """Common dictionary mapping for all content types."""
         return {
             "_id": self.content_id,
@@ -42,8 +42,8 @@ class Post(BaseContent):
         self.tags = tags or []
         self.comment_ids = kwargs.get("comment_ids", [])
 
-    def to_dict(self) -> dict:
-        data = super().to_dict()
+    def to_dict(self, **kwargs) -> dict:
+        data = super().to_dict(**kwargs)
         data.update({
             "title": self.title,
             "type": "post",
@@ -64,8 +64,8 @@ class Discussion(BaseContent):
         self.tags = tags or []
         self.comment_ids = kwargs.get("comment_ids", [])
 
-    def to_dict(self) -> dict:
-        data = super().to_dict()
+    def to_dict(self, **kwargs) -> dict:
+        data = super().to_dict(**kwargs)
         data.update({
             "title": self.title,
             "type": "discussion",
