@@ -120,7 +120,8 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
         # --------------------------------------------------
 
         for doc in all_content:
-            doc['_id'] = str(doc['_id'])
+            doc_id_str = str(doc['_id'])
+            doc['_id'] = doc_id_str
             liked_by = doc.get('liked_by_user_ids', [])
             comment_ids = doc.get('comment_ids', [])
             
