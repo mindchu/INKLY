@@ -42,13 +42,36 @@ async def get_user_by_id(user_id: str):
     return user_data
 
 @router.get("/{user_id}/posts")
-async def get_user_posts(user_id: str):
+async def get_user_posts(user_id: str, request: Request):
     posts = list(db.posts.find({"author_id": user_id}))
+    
+    # Figure out who is currently looking at the screen
+    current_user = request.session.get('user')
+    current_user_id = current_user['google_id'] if current_user else None
+
+    # BULK LIKE CHECKING
+    post_ids = [str(post['_id']) for post in posts]
+    user_liked_set = set()
+    
+    if current_user_id and post_ids:
+        liked_docs = db.likes.find({
+            "user_id": current_user_id, 
+            "content_id": {"$in": post_ids}
+        })
+        user_liked_set = {ld["content_id"] for ld in liked_docs}
+
+    # Format the data for React
     for post in posts:
-        post['_id'] = str(post['_id'])
+        post_id_str = str(post['_id'])
+        post['_id'] = post_id_str
+        post['likes_count'] = post.get('like_count', 0)
+        post['is_liked'] = post_id_str in user_liked_set
+        post['comments_count'] = len(post.get('comment_ids', [])) 
+        
         author = db.users.find_one({"google_id": post.get('author_id')}, {"username": 1, "profile_picture_url": 1})
         post['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
         post['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
+        
     posts.sort(key=lambda x: x.get('created_at', ''), reverse=True)
     return {"data": posts}
 
