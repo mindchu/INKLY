@@ -1,14 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Eye } from 'lucide-react'
-import { IoHeartOutline, IoHeart } from "react-icons/io5"
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
-import { MdDelete } from 'react-icons/md';
+
+// Import your new reusable components (Adjust the path if needed based on your folder structure)
+import LikeButton from '../../components/button/LikeButton';
+import DeleteButton from '../../components/button/DeleteButton';
+
 import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
-import { api } from '../../util/api'
 import FollowChip from '../common/FollowChip'
 
 const My_notes_page = () => {
@@ -18,9 +20,8 @@ const My_notes_page = () => {
 
   const [selectedNote, setSelectedNote] = useState(null);
   const [localNotes, setLocalNotes] = useState([]);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+
+  // Look at that! All the state for the delete modal is gone.
 
   useEffect(() => {
     setLocalNotes([...documents]);
@@ -56,26 +57,7 @@ const My_notes_page = () => {
     return sorted;
   }, [localNotes, searchQuery, sortBy]);
 
-  const handleLike = async (noteId, e) => {
-    e.stopPropagation();
-    try {
-      const response = await api.post(`/content/${noteId}/like`);
-      if (response.success) {
-        setLocalNotes(prev => prev.map(note => {
-          if ((note._id || note.id) === noteId) {
-            return {
-              ...note,
-              is_liked: response.is_liked,
-              likes_count: response.is_liked ? (note.likes_count || 0) + 1 : (note.likes_count || 1) - 1
-            };
-          }
-          return note;
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to toggle like:', error);
-    }
-  };
+  // handleLike, handleDeleteClick, and handleDeleteNote have all been deleted!
 
   const handleBookmark = (note, e) => {
     e.stopPropagation();
@@ -85,32 +67,6 @@ const My_notes_page = () => {
   const handleEdit = (note, e) => {
     e.stopPropagation();
     navigate(`/edit/${note._id || note.id}`);
-  };
-
-  const handleDeleteClick = (note, e) => {
-    e.stopPropagation();
-    setItemToDelete(note);
-    setShowDeleteConfirm(true);
-  };
-
-  const handleDeleteNote = async () => {
-    if (!itemToDelete) return;
-    setDeleting(true);
-    const noteId = itemToDelete._id || itemToDelete.id;
-    try {
-      const response = await api.delete(`/content/${noteId}`);
-      if (response.success) {
-        setLocalNotes(prev => prev.filter(note => (note._id || note.id) !== noteId));
-      } else {
-        console.error('Failed to delete note:', response.message);
-      }
-    } catch (error) {
-      console.error('Failed to delete note:', error);
-    } finally {
-      setDeleting(false);
-      setShowDeleteConfirm(false);
-      setItemToDelete(null);
-    }
   };
 
   const handleCardClick = (note) => {
@@ -211,19 +167,27 @@ const My_notes_page = () => {
 
               <div className='flex items-center justify-between text-sm text-gray-600'>
                 <div className='flex items-center gap-4'>
-                  <button
-                    onClick={(e) => handleLike(note._id || note.id, e)}
-                    className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
-                  >
-                    {note.is_liked ? (
-                      <IoHeart size={16} className='text-red-500' />
-                    ) : (
-                      <IoHeartOutline size={16} />
-                    )}
-                    <span className={note.is_liked ? 'text-red-500' : ''}>
-                      {note.likes_count || 0}
-                    </span>
-                  </button>
+                  
+                  {/* REPLACED WITH NEW LIKE BUTTON COMPONENT */}
+                  <LikeButton 
+                    targetId={note._id || note.id} 
+                    initialIsLiked={note.is_liked}
+                    initialLikesCount={note.likes_count || 0}
+                    onLikeSuccess={(id, isLiked) => {
+                      // Keep local notes updated so the total stats at the top recalculate properly
+                      setLocalNotes(prev => prev.map(n => {
+                        if ((n._id || n.id) === id) {
+                          return {
+                            ...n,
+                            is_liked: isLiked,
+                            likes_count: isLiked ? (n.likes_count || 0) + 1 : (n.likes_count || 1) - 1
+                          };
+                        }
+                        return n;
+                      }));
+                    }}
+                  />
+
                   <div className='flex items-center gap-1'>
                     <MessageCircle size={16} />
                     <span>{note.comments_count || 0}</span>
@@ -240,13 +204,16 @@ const My_notes_page = () => {
                   >
                     <FaRegEdit size={16} />
                   </button>
-                  <button
-                    className='hover:text-red-500 transition'
-                    onClick={(e) => handleDeleteClick(note, e)}
-                    title="Delete Note"
-                  >
-                    <MdDelete size={18} />
-                  </button>
+
+                  {/* REPLACED WITH NEW DELETE BUTTON COMPONENT */}
+                  <DeleteButton 
+                    targetId={note._id || note.id}
+                    itemName="Note"
+                    onDeleteSuccess={(deletedId) => {
+                      setLocalNotes(prev => prev.filter(n => (n._id || n.id) !== deletedId));
+                    }}
+                  />
+
                   <button
                     className={`transition ${isBookmarked(note._id || note.id) ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-700 hover:text-gray-900'}`}
                     onClick={(e) => handleBookmark(note, e)}
@@ -264,45 +231,7 @@ const My_notes_page = () => {
         </div>
       </div>
 
-      {/* {selectedNote && (
-        <NoteModal note={selectedNote} onClose={handleCloseModal} />
-      )} */}
-
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-6 mx-auto">
-              <MdDelete size={32} />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Delete Note?</h3>
-            <p className="text-gray-500 text-center mb-8">
-              Are you sure you want to delete "{itemToDelete?.title}"? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteNote}
-                disabled={deleting}
-                className="flex-1 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {deleting ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  'Delete'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* The entire Delete Confirmation Modal code block has been completely removed! */}
     </div>
   )
 }

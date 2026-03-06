@@ -1,9 +1,15 @@
+// frontend/src/components/content_detail/CommentThreadPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
-import { IoHeartOutline, IoHeart, IoArrowForward } from "react-icons/io5";
+import { IoArrowForward } from "react-icons/io5"; // Removed IoHeart imports
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
+
+// Import reusable components
+import LikeButton from '../../components/button/LikeButton';
+import DeleteButton from '../../components/button/DeleteButton';
 
 const CommentThreadPage = () => {
     const { contentId, commentId } = useParams();
@@ -61,6 +67,62 @@ const CommentThreadPage = () => {
         }
     };
 
+    // --- Helper functions to deeply update/delete nested comments ---
+    const updateCommentInTree = (commentsList, targetId, updateFn) => {
+        return commentsList.map(comment => {
+            if (comment._id === targetId) {
+                return updateFn(comment);
+            }
+            if (comment.replies && comment.replies.length > 0) {
+                return { ...comment, replies: updateCommentInTree(comment.replies, targetId, updateFn) };
+            }
+            return comment;
+        });
+    };
+
+    const deleteCommentFromTree = (commentsList, targetId) => {
+        return commentsList
+            .filter(comment => comment._id !== targetId)
+            .map(comment => {
+                if (comment.replies && comment.replies.length > 0) {
+                    return { ...comment, replies: deleteCommentFromTree(comment.replies, targetId) };
+                }
+                return comment;
+            });
+    };
+
+    // --- Handlers for passing into our reusable buttons ---
+    const handleLikeSuccess = (id, isLiked) => {
+        const updateFn = (c) => ({
+            ...c,
+            is_liked: isLiked,
+            likes_count: isLiked ? (c.likes_count || 0) + 1 : Math.max(0, (c.likes_count || 1) - 1)
+        });
+
+        // Update anchor comment if it's the target
+        if (anchorComment && anchorComment._id === id) {
+            setAnchorComment(prev => updateFn(prev));
+            return;
+        }
+
+        // Otherwise search the replies tree
+        setReplies(prevReplies => updateCommentInTree(prevReplies, id, updateFn));
+    };
+
+    const handleDeleteSuccess = (id) => {
+        setReplyingTo(null); // Clear reply box just in case the deleted comment was being replied to
+
+        // If they delete the main thread anchor, kick them back to the content page
+        if (anchorComment && anchorComment._id === id) {
+            navigate(`/content/${contentId}`);
+            return;
+        }
+
+        // Otherwise slice it out of the nested replies tree
+        setReplies(prevReplies => deleteCommentFromTree(prevReplies, id));
+    };
+
+
     const renderComments = (commentList, level = 0) => {
         return commentList.map((comment) => (
             <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
@@ -76,12 +138,27 @@ const CommentThreadPage = () => {
                         <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
 
                         <div className="flex items-center gap-4 mt-2">
+                            
+                            <LikeButton 
+                                targetId={comment._id}
+                                initialIsLiked={comment.is_liked}
+                                initialLikesCount={comment.likes_count || 0}
+                                onLikeSuccess={handleLikeSuccess}
+                            />
+
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
                                 className="text-xs text-green-600 font-medium hover:underline"
                             >
                                 {replyingTo === comment._id ? 'Cancel' : 'Reply'}
                             </button>
+
+                            <DeleteButton 
+                                targetId={comment._id}
+                                itemName="Comment"
+                                onDeleteSuccess={handleDeleteSuccess}
+                            />
+
                         </div>
 
                         {replyingTo === comment._id && (
@@ -105,11 +182,21 @@ const CommentThreadPage = () => {
                         )}
                     </div>
                 </div>
-                {/* Notice: We don't limit depth here, or we could limit it further if needed, 
-                    but the user asked to limit to 5 per level. In a thread view, 
-                    we usually show more or just allow infinite recursion for that subtree.
-                    I'll keep infinite recursion here as it's a dedicated thread view. */}
-                {comment.replies && comment.replies.length > 0 && renderComments(comment.replies, level + 1)}
+                {level < 2 ? (
+                    comment.replies && comment.replies.length > 0 && renderComments(comment.replies, level + 1)
+                ) : (
+                    comment.replies && comment.replies.length > 0 && (
+                        <div className="mt-4 ml-8">
+                            <Link
+                                to={`/content/${contentId}/comment/${comment._id}`}
+                                className="flex items-center gap-2 text-xs font-semibold text-green-700 hover:text-green-800 transition-colors bg-green-50 px-3 py-2 rounded-lg w-fit"
+                            >
+                                <span>View more replies</span>
+                                <IoArrowForward size={14} />
+                            </Link>
+                        </div>
+                    )
+                )}
             </div>
         ));
     };
@@ -164,12 +251,27 @@ const CommentThreadPage = () => {
                                     </p>
 
                                     <div className="flex items-center gap-4 mt-3">
+                                        
+                                        <LikeButton 
+                                            targetId={anchorComment._id}
+                                            initialIsLiked={anchorComment.is_liked}
+                                            initialLikesCount={anchorComment.likes_count || 0}
+                                            onLikeSuccess={handleLikeSuccess}
+                                        />
+
                                         <button
                                             onClick={() => setReplyingTo(replyingTo === anchorComment._id ? null : anchorComment._id)}
                                             className="text-sm text-green-600 font-semibold hover:underline"
                                         >
                                             {replyingTo === anchorComment._id ? 'Cancel' : 'Reply to this thread'}
                                         </button>
+
+                                        <DeleteButton 
+                                            targetId={anchorComment._id}
+                                            itemName="Comment"
+                                            onDeleteSuccess={handleDeleteSuccess}
+                                        />
+
                                     </div>
 
                                     {replyingTo === anchorComment._id && (

@@ -1,14 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Eye } from 'lucide-react'
-import { IoHeartOutline, IoHeart } from "react-icons/io5"
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
-import { MdDelete } from 'react-icons/md';
+
+// Import your reusable components
+import LikeButton from '../../components/button/LikeButton';
+import DeleteButton from '../../components/button/DeleteButton';
+
 import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
-import { api } from '../../util/api'
 import FollowChip from '../common/FollowChip'
 
 const My_discussions_page = () => {
@@ -18,9 +20,6 @@ const My_discussions_page = () => {
 
     const [selectedNote, setSelectedNote] = useState(null);
     const [localDiscussions, setLocalDiscussions] = useState([]);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState(null);
-    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         setLocalDiscussions([...discussions]);
@@ -56,27 +55,6 @@ const My_discussions_page = () => {
         return sorted;
     }, [localDiscussions, searchQuery, sortBy]);
 
-    const handleLike = async (discId, e) => {
-        e.stopPropagation();
-        try {
-            const response = await api.post(`/content/${discId}/like`);
-            if (response.success) {
-                setLocalDiscussions(prev => prev.map(disc => {
-                    if ((disc._id || disc.id) === discId) {
-                        return {
-                            ...disc,
-                            is_liked: response.is_liked,
-                            likes_count: response.is_liked ? (disc.likes_count || 0) + 1 : (disc.likes_count || 1) - 1
-                        };
-                    }
-                    return disc;
-                }));
-            }
-        } catch (error) {
-            console.error('Failed to toggle like:', error);
-        }
-    };
-
     const handleBookmark = (disc, e) => {
         e.stopPropagation();
         toggleBookmark(disc);
@@ -85,32 +63,6 @@ const My_discussions_page = () => {
     const handleEdit = (disc, e) => {
         e.stopPropagation();
         navigate(`/edit/${disc._id || disc.id}`);
-    };
-
-    const handleDeleteClick = (disc, e) => {
-        e.stopPropagation();
-        setItemToDelete(disc);
-        setShowDeleteConfirm(true);
-    };
-
-    const handleDeleteDiscussion = async () => {
-        if (!itemToDelete) return;
-        setDeleting(true);
-        const discId = itemToDelete._id || itemToDelete.id;
-        try {
-            const response = await api.delete(`/content/${discId}`);
-            if (response.success) {
-                setLocalDiscussions(prev => prev.filter(disc => (disc._id || disc.id) !== discId));
-            } else {
-                console.error('Failed to delete discussion:', response.message);
-            }
-        } catch (error) {
-            console.error('Failed to delete discussion:', error);
-        } finally {
-            setDeleting(false);
-            setShowDeleteConfirm(false);
-            setItemToDelete(null);
-        }
     };
 
     const handleCardClick = (disc) => {
@@ -211,19 +163,26 @@ const My_discussions_page = () => {
 
                             <div className='flex items-center justify-between text-sm text-gray-600'>
                                 <div className='flex items-center gap-4'>
-                                    <button
-                                        onClick={(e) => handleLike(disc._id || disc.id, e)}
-                                        className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
-                                    >
-                                        {disc.is_liked ? (
-                                            <IoHeart size={16} className='text-red-500' />
-                                        ) : (
-                                            <IoHeartOutline size={16} />
-                                        )}
-                                        <span className={disc.is_liked ? 'text-red-500' : ''}>
-                                            {disc.likes_count || 0}
-                                        </span>
-                                    </button>
+
+                                    {/* NEW LIKE BUTTON */}
+                                    <LikeButton 
+                                        targetId={disc._id || disc.id}
+                                        initialIsLiked={disc.is_liked}
+                                        initialLikesCount={disc.likes_count || 0}
+                                        onLikeSuccess={(id, isLiked) => {
+                                            setLocalDiscussions(prev => prev.map(d => {
+                                                if ((d._id || d.id) === id) {
+                                                    return {
+                                                        ...d,
+                                                        is_liked: isLiked,
+                                                        likes_count: isLiked ? (d.likes_count || 0) + 1 : (d.likes_count || 1) - 1
+                                                    };
+                                                }
+                                                return d;
+                                            }));
+                                        }}
+                                    />
+
                                     <div className='flex items-center gap-1'>
                                         <MessageCircle size={16} />
                                         <span>{disc.comments_count || 0}</span>
@@ -240,13 +199,16 @@ const My_discussions_page = () => {
                                     >
                                         <FaRegEdit size={16} />
                                     </button>
-                                    <button
-                                        className='hover:text-red-500 transition'
-                                        onClick={(e) => handleDeleteClick(disc, e)}
-                                        title="Delete Discussion"
-                                    >
-                                        <MdDelete size={18} />
-                                    </button>
+
+                                    {/* NEW DELETE BUTTON */}
+                                    <DeleteButton 
+                                        targetId={disc._id || disc.id}
+                                        itemName="Discussion"
+                                        onDeleteSuccess={(deletedId) => {
+                                            setLocalDiscussions(prev => prev.filter(d => (d._id || d.id) !== deletedId));
+                                        }}
+                                    />
+
                                     <button
                                         className={`transition ${isBookmarked(disc._id || disc.id) ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-700 hover:text-gray-900'}`}
                                         onClick={(e) => handleBookmark(disc, e)}
@@ -263,46 +225,6 @@ const My_discussions_page = () => {
                     ))}
                 </div>
             </div>
-
-            {/* {selectedNote && (
-                <NoteModal note={selectedNote} onClose={handleCloseModal} />
-            )} */}
-
-
-            {/* Delete Confirmation Modal */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200">
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-6 mx-auto">
-                            <MdDelete size={32} />
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Delete Discussion?</h3>
-                        <p className="text-gray-500 text-center mb-8">
-                            Are you sure you want to delete "{itemToDelete?.title}"? This action cannot be undone.
-                        </p>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                disabled={deleting}
-                                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDeleteDiscussion}
-                                disabled={deleting}
-                                className="flex-1 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                                {deleting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    'Delete'
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

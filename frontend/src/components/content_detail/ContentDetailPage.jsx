@@ -1,29 +1,76 @@
-import React, { useState, useEffect } from 'react';
+// frontend/src/components/content_detail/ContentDetailPage.jsx
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { GoPaperclip } from 'react-icons/go';
-import { MdOutlineFileDownload, MdArrowBack, MdDelete } from 'react-icons/md';
+import { MdOutlineFileDownload, MdArrowBack, MdDelete, MdEdit } from 'react-icons/md';
 import { LuEye } from 'react-icons/lu';
 import { IoHeartOutline, IoHeart, IoArrowForward } from "react-icons/io5";
-import { MdEdit } from "react-icons/md";
 import { api } from '../../util/api';
-import { CONFIG } from '../../config';
+// import { CONFIG } from '../../config'; // Uncomment if you move the base URL here
 import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
+
+// --- Helper Functions ---
+
+// Centralized URL formatting to keep the component DRY
+const getMediaUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:6001/api';
+    return `${baseUrl}${path.replace('/api', '')}`;
+};
+
+// Recursive function to update the comment tree locally without refetching the whole page
+const addReplyToTree = (comments, parentId, newReply) => {
+    return comments.map(comment => {
+        if (comment._id === parentId) {
+            return { ...comment, replies: [...(comment.replies || []), newReply] };
+        }
+        if (comment.replies?.length > 0) {
+            return { ...comment, replies: addReplyToTree(comment.replies, parentId, newReply) };
+        }
+        return comment;
+    });
+};
+
+const getFileIcon = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    switch (extension) {
+        case 'pdf': return { label: 'PDF', color: 'bg-green-600' };
+        case 'xlsx':
+        case 'xls': return { label: 'XLS', color: 'bg-green-600' };
+        case 'docx':
+        case 'doc': return { label: 'DOC', color: 'bg-blue-600' };
+        default: return { label: 'FILE', color: 'bg-gray-600' };
+    }
+};
 
 const ContentDetailPage = () => {
     const { profileData } = useProfileContext();
     const { contentId } = useParams();
     const navigate = useNavigate();
+    
+    // Core State
     const [content, setContent] = useState(null);
     const [comments, setComments] = useState([]);
-    const [newComment, setNewComment] = useState('');
+    
+    // UI/Loading State
     const [loading, setLoading] = useState(true);
     const [loadingComments, setLoadingComments] = useState(true);
     const [postingComment, setPostingComment] = useState(false);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [postingReply, setPostingReply] = useState(false);
     const [deleting, setDeleting] = useState(false);
-    const lastFetchedId = React.useRef(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    
+    // Input State
+    const [newComment, setNewComment] = useState('');
+    const [replyText, setReplyText] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
 
+    const lastFetchedId = useRef(null);
+
+    // --- Effects ---
     useEffect(() => {
         const fetchContent = async () => {
             if (lastFetchedId.current === contentId) return;
@@ -31,19 +78,23 @@ const ContentDetailPage = () => {
             setLoading(true);
             try {
                 const response = await api.get(`/content/${contentId}`);
+
+                console.log("🔍 DATA FROM BACKEND:", response.data);
+
                 setContent(response.data);
                 setComments(response.comments || []);
-                setLoadingComments(false);
             } catch (error) {
                 console.error('Failed to fetch content details:', error);
                 lastFetchedId.current = null;
             } finally {
                 setLoading(false);
+                setLoadingComments(false);
             }
         };
         fetchContent();
     }, [contentId]);
 
+    // --- Handlers ---
     const handleLike = async () => {
         try {
             const response = await api.post(`/content/${contentId}/like`);
@@ -51,7 +102,7 @@ const ContentDetailPage = () => {
                 setContent(prev => ({
                     ...prev,
                     is_liked: response.is_liked,
-                    likes_count: response.is_liked ? (prev.likes_count || 0) + 1 : (prev.likes_count || 1) - 1
+                    like_count: response.is_liked ? (prev.like_count || 0) + 1 : (prev.like_count || 1) - 1
                 }));
             }
         } catch (error) {
@@ -94,23 +145,6 @@ const ContentDetailPage = () => {
         }
     };
 
-    const getFileIcon = (filename) => {
-        const extension = filename.split('.').pop().toLowerCase();
-        if (extension === 'pdf') {
-            return { label: 'PDF', color: 'bg-green-600' };
-        } else if (extension === 'xlsx' || extension === 'xls') {
-            return { label: 'XLS', color: 'bg-green-600' };
-        } else if (extension === 'docx' || extension === 'doc') {
-            return { label: 'DOC', color: 'bg-blue-600' };
-        } else {
-            return { label: 'FILE', color: 'bg-gray-600' };
-        }
-    };
-
-    const [replyingTo, setReplyingTo] = useState(null);
-    const [replyText, setReplyText] = useState('');
-    const [postingReply, setPostingReply] = useState(false);
-
     const handleReply = async (parentId) => {
         if (!replyText.trim()) return;
 
@@ -121,11 +155,8 @@ const ContentDetailPage = () => {
                 parent_id: parentId
             });
             if (response.success) {
-                // To keep it simple and avoid complex tree updates, we refetch content
-                // which includes the updated comment tree
-                const updatedContent = await api.get(`/content/${contentId}`);
-                setContent(updatedContent.data);
-                setComments(updatedContent.comments || []);
+                // Update local state recursively instead of refetching the whole page!
+                setComments(prev => addReplyToTree(prev, parentId, response.data));
                 setReplyText('');
                 setReplyingTo(null);
             }
@@ -136,13 +167,14 @@ const ContentDetailPage = () => {
         }
     };
 
+    // --- Render Helpers ---
     const renderComments = (commentList, level = 0) => {
         return commentList.map((comment) => (
             <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
                 <div className="flex items-start gap-2">
                     {comment.author_profile_picture_url ? (
                         <img
-                            src={comment.author_profile_picture_url.startsWith('http') ? comment.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${comment.author_profile_picture_url.replace('/api', '')}`}
+                            src={getMediaUrl(comment.author_profile_picture_url)}
                             alt={comment.author_username}
                             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                         />
@@ -188,10 +220,12 @@ const ContentDetailPage = () => {
                         )}
                     </div>
                 </div>
-                {level < 4 ? (
-                    comment.replies && comment.replies.length > 0 && renderComments(comment.replies, level + 1)
+                
+                {/* Recursion Guard: Limit to 2 levels deep */}
+                {level < 2 ? (
+                    comment.replies?.length > 0 && renderComments(comment.replies, level + 1)
                 ) : (
-                    comment.replies && comment.replies.length > 0 && (
+                    comment.replies?.length > 0 && (
                         <div className="mt-4 ml-8">
                             <Link
                                 to={`/content/${contentId}/comment/${comment._id}`}
@@ -207,6 +241,7 @@ const ContentDetailPage = () => {
         ));
     };
 
+    // --- Loading & Error States ---
     if (loading) {
         return (
             <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
@@ -223,9 +258,11 @@ const ContentDetailPage = () => {
         );
     }
 
+    // --- Main Render ---
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
             <div className="max-w-4xl mx-auto px-4 py-8">
+                
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
@@ -236,14 +273,12 @@ const ContentDetailPage = () => {
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    
                     {/* Header */}
                     <div className="p-8 border-b border-gray-100">
                         <div className="flex flex-wrap gap-2 mb-4">
                             {content.tags?.map((tag, index) => (
-                                <span
-                                    key={index}
-                                    className="text-xs px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium"
-                                >
+                                <span key={index} className="text-xs px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium">
                                     #{tag}
                                 </span>
                             ))}
@@ -253,7 +288,7 @@ const ContentDetailPage = () => {
                             <div className="flex items-center gap-3">
                                 {content.author_profile_picture_url ? (
                                     <img
-                                        src={content.author_profile_picture_url.startsWith('http') ? content.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${content.author_profile_picture_url.replace('/api', '')}`}
+                                        src={getMediaUrl(content.author_profile_picture_url)}
                                         alt={content.author_username}
                                         className="w-12 h-12 rounded-full object-cover"
                                     />
@@ -273,33 +308,18 @@ const ContentDetailPage = () => {
                             <div className="flex items-center gap-6 text-gray-400">
                                 {profileData && profileData.google_id === content.author_id && (
                                     <>
-                                        <button
-                                            onClick={() => navigate(`/edit/${contentId}`)}
-                                            className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-                                            title="Edit Content"
-                                        >
+                                        <button onClick={() => navigate(`/edit/${contentId}`)} className="flex items-center gap-2 hover:text-blue-500 transition-colors" title="Edit Content">
                                             <MdEdit size={24} />
                                         </button>
-                                        <button
-                                            onClick={() => setShowDeleteConfirm(true)}
-                                            className="flex items-center gap-2 hover:text-red-500 transition-colors"
-                                            title="Delete Content"
-                                        >
+                                        <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-2 hover:text-red-500 transition-colors" title="Delete Content">
                                             <MdDelete size={24} />
                                         </button>
                                     </>
                                 )}
-                                <button
-                                    onClick={handleLike}
-                                    className="flex items-center gap-2 hover:text-red-500 transition-colors"
-                                >
-                                    {content.is_liked ? (
-                                        <IoHeart size={24} className="text-red-500" />
-                                    ) : (
-                                        <IoHeartOutline size={24} />
-                                    )}
+                                <button onClick={handleLike} className="flex items-center gap-2 hover:text-red-500 transition-colors">
+                                    {content.is_liked ? <IoHeart size={24} className="text-red-500" /> : <IoHeartOutline size={24} />}
                                     <span className={content.is_liked ? 'text-red-500 font-medium' : 'font-medium'}>
-                                        {content.likes_count || 0}
+                                        {content.like_count || 0} {/* Changed from likes_count to like_count! */}
                                     </span>
                                 </button>
                                 <div className="flex items-center gap-2">
@@ -312,7 +332,10 @@ const ContentDetailPage = () => {
 
                     {/* Body */}
                     <div className="p-8">
-                        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed text-lg mb-8">
+                        {/* Note: If content.text is raw HTML, consider using:
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.text) }} />
+                        */}
+                        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed text-lg mb-8 whitespace-pre-wrap">
                             {content.text}
                         </div>
 
@@ -328,20 +351,14 @@ const ContentDetailPage = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {content.file_paths.map((file, index) => {
                                         const fileInfo = getFileIcon(file);
+                                        const fileUrl = getMediaUrl(`/uploads/${file}`);
                                         const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase());
 
                                         return (
-                                            <div
-                                                key={index}
-                                                className="flex flex-col border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow group"
-                                            >
+                                            <div key={index} className="flex flex-col border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow group">
                                                 {isImage && (
                                                     <div className="w-full bg-gray-50 flex items-center justify-center p-2 border-b border-gray-100">
-                                                        <img
-                                                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${file}`}
-                                                            alt={file}
-                                                            className="max-h-[300px] object-contain rounded-lg"
-                                                        />
+                                                        <img src={fileUrl} alt={file} className="max-h-[300px] object-contain rounded-lg" />
                                                     </div>
                                                 )}
                                                 <div className="flex items-center justify-between p-4 bg-white">
@@ -352,23 +369,19 @@ const ContentDetailPage = () => {
                                                         <p className="font-medium text-gray-900 truncate">{file}</p>
                                                     </div>
                                                     <div className="flex gap-1 flex-shrink-0">
-                                                        <button
+                                                        <button 
                                                             className="p-2 hover:bg-gray-100 rounded-lg transition text-blue-600"
-                                                            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${file}`, '_blank')}
+                                                            onClick={() => window.open(fileUrl, '_blank')}
                                                         >
                                                             <LuEye size={20} />
                                                         </button>
-                                                        <button
-                                                            className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600"
-                                                            onClick={() => {
-                                                                const link = document.createElement('a');
-                                                                link.href = `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${file}`;
-                                                                link.download = file;
-                                                                link.click();
-                                                            }}
+                                                        <a 
+                                                            href={fileUrl}
+                                                            download={file}
+                                                            className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600 flex items-center justify-center"
                                                         >
                                                             <MdOutlineFileDownload size={20} />
-                                                        </button>
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -388,7 +401,7 @@ const ContentDetailPage = () => {
                             <div className="flex gap-3">
                                 {profileData?.profile_picture_url ? (
                                     <img
-                                        src={profileData.profile_picture_url.startsWith('http') ? profileData.profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${profileData.profile_picture_url.replace('/api', '')}`}
+                                        src={getMediaUrl(profileData.profile_picture_url)}
                                         alt="Me"
                                         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                                     />
@@ -417,6 +430,7 @@ const ContentDetailPage = () => {
                             </div>
                         </form>
 
+                        {/* Comments List */}
                         {loadingComments ? (
                             <div className="text-center py-8 text-gray-400">Loading comments...</div>
                         ) : (
