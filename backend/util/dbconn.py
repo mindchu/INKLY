@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import gridfs
@@ -13,19 +14,32 @@ password = os.getenv("MONGO_PASS")
 
 # Construct the URI using f-strings
 if user and password:
-    uri = f"mongodb://{user}:{password}@localhost:27017/"
+    primary_uri = f"mongodb://{user}:{password}@localhost:27017/"
 else:
-    uri = "mongodb://localhost:27017/"
+    primary_uri = "mongodb://localhost:27017/"
 
-# Fallback mechanism for local dev resilience
-try:
-    client = MongoClient(uri, serverSelectionTimeoutMS=2000)
-    # Trigger connection
-    client.admin.command('ping')
-except Exception:
-    # If auth fails or server unreachable with auth, try unauthenticated
-    uri = "mongodb://localhost:27017/"
-    client = MongoClient(uri, serverSelectionTimeoutMS=2000)
+fallback_uri = "mongodb://localhost:27017/"
+
+# Actively look for a database connection until successful
+while True:
+    try:
+        client = MongoClient(primary_uri, serverSelectionTimeoutMS=2000)
+        # Trigger connection
+        client.admin.command('ping')
+        print("Successfully connected to the database.")
+        break
+    except Exception as e:
+        print(f"Failed to connect using primary URI: {e}")
+        # If auth fails or server unreachable with auth, try unauthenticated
+        try:
+            print("Trying unauthenticated fallback...")
+            client = MongoClient(fallback_uri, serverSelectionTimeoutMS=2000)
+            client.admin.command('ping')
+            print("Successfully connected to the database (unauthenticated).")
+            break
+        except Exception as e_fallback:
+            print(f"Database connection failed. Retrying in 2 seconds...")
+            time.sleep(2)
 
 db = client.inkly
 fs = gridfs.GridFS(db)
