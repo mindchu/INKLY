@@ -3,9 +3,11 @@ import { RiUserUnfollowLine, RiUserAddLine } from 'react-icons/ri'
 import { FaUserCircle } from 'react-icons/fa'
 import { api } from '../../util/api'
 import { useProfileContext } from '../../context/ProfileContext'
+import { useSearch } from '../../context/SearchContext'
 
 const Following_page = () => {
     const { profileData } = useProfileContext();
+    const { query } = useSearch();
     const [followedUsers, setFollowedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showNotification, setShowNotification] = useState(false);
@@ -64,6 +66,11 @@ const Following_page = () => {
         );
     }
 
+    const filteredUsers = followedUsers.filter(user =>
+        user.username.toLowerCase().includes((query || '').toLowerCase()) ||
+        (user.bio && user.bio.toLowerCase().includes((query || '').toLowerCase()))
+    );
+
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto px-8 py-6'>
             {showNotification && (
@@ -80,12 +87,12 @@ const Following_page = () => {
             )}
 
             <h2 className='text-[#5A6B52] text-lg font-semibold mb-6'>
-                People You Followed ({followedUsers.length})
+                People You Followed ({filteredUsers.length})
             </h2>
 
             <div className='bg-white rounded-2xl shadow-sm'>
-                {followedUsers.length > 0 ? (
-                    followedUsers.map((user, index) => (
+                {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user, index) => (
                         <div
                             key={user.google_id || index}
                             className='flex items-center justify-between px-8 py-5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors'
@@ -117,7 +124,7 @@ const Following_page = () => {
                     ))
                 ) : (
                     <div className='py-20 text-center text-gray-500 font-medium'>
-                        You aren't following anyone yet. Explore the feed to find creators!
+                        {query ? "No one matches your search." : "You aren't following anyone yet. Explore the feed to find creators!"}
                     </div>
                 )}
             </div>

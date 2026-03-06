@@ -1,11 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { RiSearch2Line } from "react-icons/ri";
 import { GoPeople } from "react-icons/go";
 
 import { useProfileContext } from '../../context/ProfileContext';
+import { useSearch } from '../../context/SearchContext';
 
 const Follow_top_bar = () => {
     const { profileData } = useProfileContext();
+    const { query, setQuery } = useSearch();
+
+    useEffect(() => {
+        setQuery('');
+        return () => setQuery('');
+    }, [setQuery]);
 
     return (
         <div className='w-full bg-white shadow-md py-3'>
@@ -24,7 +31,12 @@ const Follow_top_bar = () => {
                 <button className='cursor-pointer'>
                     <RiSearch2Line size={22} className='flex opacity-50' />
                 </button>
-                <input type='text' placeholder='Search discussions by title, subject, or tags...' className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'></input>
+                <input
+                    type='text'
+                    placeholder='Search people you followed.'
+                    value={query || ''}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className='select-none flex flex-1 items-center bg-transparent font-["Inter"] text-[18px] outline-none border-none focus:outline-none focus:ring-0'></input>
             </div>
 
         </div>
