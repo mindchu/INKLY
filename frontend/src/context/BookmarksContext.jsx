@@ -14,28 +14,72 @@ export const useBookmarks = () => {
 
 export const BookmarksProvider = ({ children }) => {
     const [bookmarkedNotes, setBookmarkedNotes] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [localSearch, setLocalSearch] = useState('');
+    const [loading, setLoading] = useState(false);
     const { profileData } = useProfileContext();
     const lastFetchedId = React.useRef(null);
 
+    const lastFetchedSearch = React.useRef(null);
+
+    const fetchBookmarks = async (force = false) => {
+        const currentId = profileData?.google_id || profileData?._id;
+        if (!currentId) {
+            setBookmarkedNotes([]);
+            lastFetchedId.current = null;
+            return;
+        }
+
+        if (!force && lastFetchedId.current === currentId && lastFetchedSearch.current === null) return;
+
+        lastFetchedId.current = currentId;
+        lastFetchedSearch.current = null;
+        setLoading(true);
+        try {
+            const response = await api.get('/search?scope=bookmarks&sort_by=recent');
+            setBookmarkedNotes(response.data || []);
+        } catch (error) {
+            console.error('Failed to fetch bookmarks:', error);
+            lastFetchedId.current = null;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchSearch = async (query) => {
+        const currentId = profileData?.google_id || profileData?._id;
+        if (!currentId) return;
+
+        if (!query.trim()) {
+            setSearchQuery('');
+            return fetchBookmarks(true);
+        }
+
+        lastFetchedSearch.current = query;
+        lastFetchedId.current = currentId;
+        setLoading(true);
+        setSearchQuery(query);
+        try {
+            const params = new URLSearchParams();
+            params.append('q', query);
+            params.append('sort_by', 'recent');
+            params.append('scope', 'bookmarks');
+
+            const response = await api.get(`/search?${params.toString()}`);
+            setBookmarkedNotes(response.data || []);
+        } catch (error) {
+            console.error('Failed to search bookmarks:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchBookmarks = async () => {
-            const currentId = profileData?.google_id || profileData?._id;
-            if (currentId) {
-                if (lastFetchedId.current === currentId) return;
-                lastFetchedId.current = currentId;
-                try {
-                    const data = await api.get('/bookmarks');
-                    setBookmarkedNotes(data.data || []);
-                } catch (error) {
-                    console.error('Failed to fetch bookmarks:', error);
-                    lastFetchedId.current = null;
-                }
-            } else {
-                setBookmarkedNotes([]);
-                lastFetchedId.current = null;
-            }
-        };
-        fetchBookmarks();
+        if (lastFetchedSearch.current) {
+            fetchSearch(lastFetchedSearch.current);
+        } else {
+            fetchBookmarks()
+        }
     }, [profileData]);
 
     const toggleBookmark = async (note) => {
@@ -58,7 +102,16 @@ export const BookmarksProvider = ({ children }) => {
     };
 
     return (
-        <BookmarksContext.Provider value={{ bookmarkedNotes, toggleBookmark, isBookmarked }}>
+        <BookmarksContext.Provider value={{
+            bookmarkedNotes,
+            toggleBookmark,
+            isBookmarked,
+            searchQuery,
+            localSearch,
+            setLocalSearch,
+            fetchSearch,
+            loading
+        }}>
             {children}
         </BookmarksContext.Provider>
     );
