@@ -79,10 +79,10 @@ async def get_uploaded_file(filename: str):
     return StreamingResponse(iterfile(), media_type=content_type)
 
 @router.get("/content/recommended")
-async def get_recommended(request: Request, sort: str = 'likes', tags: Optional[List[str]] = Query(None), type: Optional[str] = Query(None)):
+async def get_recommended(request: Request, sort: str = 'likes', tags: Optional[List[str]] = Query(None), type: Optional[str] = Query(None), skip: int = Query(0), limit: int = Query(10)):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    recommended = content_util.get_recommended_content(user_id, sort_by=sort, filter_tags=tags, content_type=type)
+    recommended = content_util.get_recommended_content(user_id, sort_by=sort, filter_tags=tags, content_type=type, skip=skip, limit=limit)
     return {"data": recommended}
 
 @router.get("/content/{content_id}")
@@ -109,11 +109,13 @@ async def search_content(
     tags: List[str] = Query(None, description="Filter by tags"),
     exclude_tags: List[str] = Query(None, description="Exclude tags"),
     sort_by: str = Query("recent", description="recent or popular"),
-    scope: str = Query("all", description="search scope: all, bookmarks, following, or owned")
+    scope: str = Query("all", description="search scope: all, bookmarks, following, or owned"),
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Max number of items to return")
 ):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    results = content_util.get_search_results(user_id, q, tags, exclude_tags, sort_by, scope)
+    results = content_util.get_search_results(user_id, q, tags, exclude_tags, sort_by, scope, skip, limit)
     return {"data": results}
 
 

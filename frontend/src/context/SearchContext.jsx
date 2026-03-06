@@ -22,6 +22,9 @@ export const SearchProvider = ({ children }) => {
         exclude_tags: [],
         type: 'all'
     });
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const limit = 5;
     const [allTags, setAllTags] = useState([]);
     const fetchedTags = React.useRef(false);
 
@@ -42,7 +45,7 @@ export const SearchProvider = ({ children }) => {
         fetchTags();
     }, []);
 
-    const performSearch = useCallback(async (searchQuery = query, searchFilters = filters) => {
+    const performSearch = useCallback(async (searchQuery = query, searchFilters = filters, pageNum = 0) => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -57,10 +60,24 @@ export const SearchProvider = ({ children }) => {
             if (searchFilters.type !== 'all') {
                 params.append('type', searchFilters.type);
             }
+            params.append('skip', pageNum * limit);
+            params.append('limit', limit);
 
             const data = await api.get(`/search?${params.toString()}`);
             if (data.data) {
-                setResults(data.data);
+                const fetchedItems = data.data;
+
+                if (fetchedItems.length < limit) {
+                    setHasMore(false);
+                } else {
+                    setHasMore(true);
+                }
+
+                if (pageNum === 0) {
+                    setResults(fetchedItems);
+                } else {
+                    setResults(prev => [...prev, ...fetchedItems]);
+                }
             }
         } catch (error) {
             console.error('Search failed:', error);
@@ -69,13 +86,28 @@ export const SearchProvider = ({ children }) => {
         }
     }, [query, filters]);
 
+    // Reset pagination when query or filters change
+    useEffect(() => {
+        setPage(0);
+        setHasMore(true);
+    }, [query, filters]);
+
+    // Fetch when page changes, ensuring we don't fetch page 0 twice
+    // since the Search UI naturally kicks off a performSearch() externally
+    useEffect(() => {
+        if (page > 0) {
+            performSearch(query, filters, page);
+        }
+    }, [page]);
+
     return (
         <SearchContext.Provider value={{
             query, setQuery,
             results, setResults,
             loading, performSearch,
             filters, setFilters,
-            allTags
+            allTags,
+            page, setPage, hasMore
         }}>
             {children}
         </SearchContext.Provider>

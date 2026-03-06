@@ -66,7 +66,7 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         
     return None
 
-def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limit: int = 10, filter_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
+def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limit: int = 10, skip: int = 0, filter_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
     """
     Fetches content (posts and discussions).
     If filter_tags is provided, it filters by those specific tags.
@@ -166,7 +166,7 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
     else: # recent
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
-    return content[:limit]
+    return content[skip:skip+limit]
 
 
 def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -243,7 +243,7 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
         
     return all_content
 
-def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all") -> List[Dict[str, Any]]:
+def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all", skip: int = 0, limit: int = 10) -> List[Dict[str, Any]]:
     query: Dict[str, Any] = {}
     
     # 1. Scope Filtering
@@ -344,7 +344,11 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         else: # recent / new
             results.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
-    return results
+    final_results = results[skip:skip+limit]
+    for doc in final_results:
+        doc.pop('title_embedding', None)
+        
+    return final_results
 
 
 def create_comment(parent_id: str, author_id: str, text: str) -> Optional[Dict[str, Any]]:

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { GiPlainCircle } from "react-icons/gi";
 import { GoPaperclip } from "react-icons/go";
@@ -14,8 +14,20 @@ import FollowChip from '../common/FollowChip';
 
 const Note_forum_page = () => {
     const navigate = useNavigate();
-    const { sortBy, content, loading, setContent } = useSortContext();
+    const { sortBy, content, loading, setContent, page, setPage, hasMore } = useSortContext();
     const { toggleBookmark, isBookmarked } = useBookmarks();
+
+    const observer = useRef();
+    const lastPostElementRef = useCallback(node => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && Array.isArray(content) && content.length > 0 && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore]);
 
     // Filter content to only show posts
     const posts = React.useMemo(() => content.filter(item => item.type === 'post'), [content]);
@@ -48,7 +60,7 @@ const Note_forum_page = () => {
         toggleBookmark(post);
     };
 
-    if (loading) {
+    if (loading && posts.length === 0) {
         return (
             <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
                 <p className='font-[Inter] text-xl animate-pulse text-gray-600'>Fetching notes...</p>
@@ -63,105 +75,122 @@ const Note_forum_page = () => {
                     <p className='font-[Inter] text-lg text-gray-500'>No notes found in the forum.</p>
                 </div>
             ) : (
-                posts.map((post) => (
-                    <div
-                        key={post._id}
-                        className='flex flex-col w-full min-h-[150px] max-w-[calc(100%-80px)] mx-[40px] mb-[24px] bg-white rounded-[12px] shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer'
-                        onClick={() => navigate(`/content/${post._id}`)}
-                    >
-                        <div className='flex justify-between flex-row w-full'>
-                            <div className='flex flex-row items-center gap-[12px]'>
-                                {post.author_profile_picture_url ? (
-                                    <img
-                                        src={post.author_profile_picture_url.startsWith('http') ? post.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${post.author_profile_picture_url.replace('/api', '')}`}
-                                        alt={post.author_username}
-                                        className="w-8 h-8 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div className='w-8 h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-white text-xs font-bold'>
-                                        {post.author_username?.[0]?.toUpperCase() || 'U'}
+                <>
+                    {posts.map((post, index) => {
+                        // Trigger fetch when 3 items away from the bottom to make scroll smoother
+                        const isTriggerPost = index === Math.max(0, posts.length - 3);
+                        return (
+                            <div
+                                ref={isTriggerPost ? lastPostElementRef : null}
+                                key={post._id}
+                                className='flex flex-col w-full min-h-[150px] max-w-[calc(100%-80px)] mx-[40px] mb-[24px] bg-white rounded-[12px] shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer'
+                                onClick={() => navigate(`/content/${post._id}`)}
+                            >
+                                <div className='flex justify-between flex-row w-full'>
+                                    <div className='flex flex-row items-center gap-[12px]'>
+                                        {post.author_profile_picture_url ? (
+                                            <img
+                                                src={post.author_profile_picture_url.startsWith('http') ? post.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${post.author_profile_picture_url.replace('/api', '')}`}
+                                                alt={post.author_username}
+                                                className="w-8 h-8 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className='w-8 h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-white text-xs font-bold'>
+                                                {post.author_username?.[0]?.toUpperCase() || 'U'}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className='font-["Inter"] text-[14px] font-semibold text-[#124C09] flex items-center gap-2'>
+                                                {post.author_username}
+                                                <FollowChip authorId={post.author_id} initialIsFollowing={post.is_following} />
+                                            </p>
+                                            <p className='font-["Inter"] text-[9px] text-gray-400'>{new Date(post.created_at).toLocaleDateString()}</p>
+                                        </div>
                                     </div>
-                                )}
-                                <div>
-                                    <p className='font-["Inter"] text-[14px] font-semibold text-[#124C09] flex items-center gap-2'>
-                                        {post.author_username}
-                                        <FollowChip authorId={post.author_id} initialIsFollowing={post.is_following} />
-                                    </p>
-                                    <p className='font-["Inter"] text-[9px] text-gray-400'>{new Date(post.created_at).toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                            {post.file_paths?.length > 0 && (
-                                <button className='h-[30px] px-4 bg-[#B3B3B6]/60 text-white items-center flex justify-center rounded-[12px] gap-[8px] cursor-pointer select-none hover:bg-[#B3B3B6]/80'>
-                                    <GoPaperclip size={14} className='text-white' />
-                                    <p className='text-sm'>{post.file_paths.length} Attachment(s)</p>
-                                </button>
-                            )}
-                        </div>
-                        <div className='mt-[12px] flex gap-4'>
-                            <div className="flex-1 min-w-0">
-                                <p className='font-["Inter"] text-[18px] font-semibold text-[#124C09] break-all'>{post.title}</p>
-                                <p className='font-["Inter"] text-[13px] text-gray-600 mt-2 line-clamp-2 break-all'>{post.text}</p>
-                            </div>
-                            {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                                    <img
-                                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
-                                        alt="Thumbnail"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <div className='flex flex-row flex-wrap items-center gap-[8px] mt-4'>
-                            {post.tags?.map((tag, idx) => (
-                                <p key={idx} className='bg-[#E8FFDF] px-[10px] py-1 rounded-[12px] text-[#124C09]/70 font-["Inter"] text-[12px]'>
-                                    #{tag}
-                                </p>
-                            ))}
-                        </div>
-                        <div className='flex flex-row justify-between items-center mt-4 border-t border-gray-100 pt-3'>
-                            <div></div>
-                            <div className='flex flex-row gap-[18px] items-center'>
-                                <button
-                                    onClick={(e) => handleLike(post._id, e)}
-                                    className='cursor-pointer gap-[6px] items-center flex flex-row'
-                                >
-                                    {post.is_liked ? (
-                                        <IoHeart size={14} className='text-red-500' />
-                                    ) : (
-                                        <IoHeartOutline size={14} className='text-[#292D32]' />
+                                    {post.file_paths?.length > 0 && (
+                                        <button className='h-[30px] px-4 bg-[#B3B3B6]/60 text-white items-center flex justify-center rounded-[12px] gap-[8px] cursor-pointer select-none hover:bg-[#B3B3B6]/80'>
+                                            <GoPaperclip size={14} className='text-white' />
+                                            <p className='text-sm'>{post.file_paths.length} Attachment(s)</p>
+                                        </button>
                                     )}
-                                    <p className={`font-["Inter"] text-[12px] ${post.is_liked ? 'text-red-500' : 'text-gray-500'}`}>
-                                        {post.likes_count || 0}
-                                    </p>
-                                </button>
-                                <button className='cursor-pointer gap-[6px] items-center flex flex-row group'>
-                                    <GoComment size={14} className='text-[#292D32] group-hover:text-blue-500' />
-                                    <p className='font-["Inter"] text-[12px] text-gray-500 group-hover:text-blue-500'>
-                                        {post.comments_count || 0}
-                                    </p>
-                                </button>
-                                <div className='gap-[6px] items-center flex flex-row'>
-                                    <LuEye size={14} className='text-[#292D32]' />
-                                    <p className='font-["Inter"] text-[12px] text-gray-500'>{post.views || 0}</p>
                                 </div>
-                                <button
-                                    className='hover:text-yellow-500 transition-colors'
-                                    onClick={(e) => handleBookmark(post, e)}
-                                >
-                                    {isBookmarked(post._id || post.id) ? (
-                                        <BsBookmarkDashFill size={16} className='text-yellow-400' />
-                                    ) : (
-                                        <LuBookmarkMinus size={16} className='text-[#292D32]' />
+                                <div className='mt-[12px] flex gap-4'>
+                                    <div className="flex-1 min-w-0">
+                                        <p className='font-["Inter"] text-[18px] font-semibold text-[#124C09] break-all'>{post.title}</p>
+                                        <p className='font-["Inter"] text-[13px] text-gray-600 mt-2 line-clamp-2 break-all'>{post.text}</p>
+                                    </div>
+                                    {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
+                                        <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                                            <img
+                                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                                                alt="Thumbnail"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     )}
-                                </button>
-                                <button className='hover:text-green-600'>
-                                    <MdOutlineFileDownload size={16} className='text-[#292D32]' />
-                                </button>
+                                </div>
+                                <div className='flex flex-row flex-wrap items-center gap-[8px] mt-4'>
+                                    {post.tags?.map((tag, idx) => (
+                                        <p key={idx} className='bg-[#E8FFDF] px-[10px] py-1 rounded-[12px] text-[#124C09]/70 font-["Inter"] text-[12px]'>
+                                            #{tag}
+                                        </p>
+                                    ))}
+                                </div>
+                                <div className='flex flex-row justify-between items-center mt-4 border-t border-gray-100 pt-3'>
+                                    <div></div>
+                                    <div className='flex flex-row gap-[18px] items-center'>
+                                        <button
+                                            onClick={(e) => handleLike(post._id, e)}
+                                            className='cursor-pointer gap-[6px] items-center flex flex-row'
+                                        >
+                                            {post.is_liked ? (
+                                                <IoHeart size={14} className='text-red-500' />
+                                            ) : (
+                                                <IoHeartOutline size={14} className='text-[#292D32]' />
+                                            )}
+                                            <p className={`font-["Inter"] text-[12px] ${post.is_liked ? 'text-red-500' : 'text-gray-500'}`}>
+                                                {post.likes_count || 0}
+                                            </p>
+                                        </button>
+                                        <button className='cursor-pointer gap-[6px] items-center flex flex-row group'>
+                                            <GoComment size={14} className='text-[#292D32] group-hover:text-blue-500' />
+                                            <p className='font-["Inter"] text-[12px] text-gray-500 group-hover:text-blue-500'>
+                                                {post.comments_count || 0}
+                                            </p>
+                                        </button>
+                                        <div className='gap-[6px] items-center flex flex-row'>
+                                            <LuEye size={14} className='text-[#292D32]' />
+                                            <p className='font-["Inter"] text-[12px] text-gray-500'>{post.views || 0}</p>
+                                        </div>
+                                        <button
+                                            className='hover:text-yellow-500 transition-colors'
+                                            onClick={(e) => handleBookmark(post, e)}
+                                        >
+                                            {isBookmarked(post._id || post.id) ? (
+                                                <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                            ) : (
+                                                <LuBookmarkMinus size={16} className='text-[#292D32]' />
+                                            )}
+                                        </button>
+                                        <button className='hover:text-green-600'>
+                                            <MdOutlineFileDownload size={16} className='text-[#292D32]' />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        );
+                    })}
+                    {loading && posts.length > 0 && (
+                        <div className="w-full flex justify-center pb-8 pt-4">
+                            <p className="text-gray-500 font-['Inter'] animate-pulse">Loading more...</p>
                         </div>
-                    </div>
-                ))
+                    )}
+                    {!hasMore && posts.length > 0 && (
+                        <div className="w-full flex justify-center pb-8 pt-4">
+                            <p className="text-gray-400 font-['Inter'] text-sm">You've reached the end!</p>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     )
