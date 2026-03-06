@@ -20,7 +20,7 @@ class BaseContent:
         self.created_at = created_at or datetime.now(timezone.utc).isoformat()
         self.like_count = like_count
 
-    def to_dict(self) -> dict:
+    def to_dict(self, **kwargs) -> dict:
         """Common dictionary mapping for all content types."""
         return {
             "_id": self.content_id,
