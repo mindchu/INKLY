@@ -11,6 +11,8 @@ import { useBookmarks } from '../../context/BookmarksContext';
 import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
+import { getMediaUrl } from '../../config';
+
 
 const Note_forum_page = () => {
     const navigate = useNavigate();
@@ -90,7 +92,7 @@ const Note_forum_page = () => {
                                     <div className='flex flex-row items-center gap-[12px]'>
                                         {post.author_profile_picture_url ? (
                                             <img
-                                                src={post.author_profile_picture_url.startsWith('http') ? post.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${post.author_profile_picture_url.replace('/api', '')}`}
+                                                src={getMediaUrl(post.author_profile_picture_url)}
                                                 alt={post.author_username}
                                                 className="w-8 h-8 rounded-full object-cover"
                                             />
@@ -122,7 +124,7 @@ const Note_forum_page = () => {
                                     {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                         <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                             <img
-                                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                                                src={getMediaUrl(`/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                                 alt="Thumbnail"
                                                 className="w-full h-full object-cover"
                                             />

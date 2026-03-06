@@ -13,6 +13,8 @@ import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
 // import NoteModal from './NoteModal';
 import FollowChip from '../common/FollowChip';
+import { getMediaUrl } from '../../config';
+
 
 const Home_page = () => {
     const navigate = useNavigate();
@@ -115,7 +117,7 @@ const Home_page = () => {
                             <div className='flex items-center gap-2 mb-3'>
                                 {note.author_profile_picture_url ? (
                                     <img
-                                        src={note.author_profile_picture_url.startsWith('http') ? note.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${note.author_profile_picture_url.replace('/api', '')}`}
+                                        src={getMediaUrl(note.author_profile_picture_url)}
                                         alt={note.author_username}
                                         className="w-6 h-6 rounded-full object-cover"
                                     />
@@ -137,7 +139,7 @@ const Home_page = () => {
                                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                         <img
-                                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                                            src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                             alt="Thumbnail"
                                             className="w-full h-full object-cover"
                                         />
@@ -195,7 +197,7 @@ const Home_page = () => {
                                         className='hover:text-gray-800 transition'
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (note.file_paths?.[0]) window.open(`${CONFIG.API_URL}/uploads/${note.file_paths[0]}`, '_blank');
+                                            if (note.file_paths?.[0]) window.open(getMediaUrl(`/uploads/${note.file_paths[0]}`), '_blank');
                                         }}
                                     >
                                         <MdOutlineFileDownload size={16} />

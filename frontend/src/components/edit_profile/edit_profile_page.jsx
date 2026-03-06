@@ -4,6 +4,8 @@ import { MdPhotoCamera } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
 import { useProfileContext } from '../../context/ProfileContext'
 import { api } from '../../util/api'
+import { getMediaUrl } from '../../config'
+
 
 const Edit_profile_page = () => {
   const navigate = useNavigate()
@@ -80,6 +82,14 @@ const Edit_profile_page = () => {
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file.')
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+      return
+    }
 
     const formData = new FormData()
     formData.append('file', file)
@@ -161,7 +171,7 @@ const Edit_profile_page = () => {
               {profileData.profile_picture_url ? (
                 <div
                   className={`w-28 h-28 rounded-full bg-cover bg-center border-2 border-green-100 ${uploading ? 'opacity-50' : ''}`}
-                  style={{ backgroundImage: `url(${profileData.profile_picture_url})` }}
+                  style={{ backgroundImage: `url(${getMediaUrl(profileData.profile_picture_url)})` }}
                 />
               ) : (
                 <div className={`w-28 h-28 rounded-full flex items-center justify-center bg-green-50 ${uploading ? 'opacity-50' : ''}`}>

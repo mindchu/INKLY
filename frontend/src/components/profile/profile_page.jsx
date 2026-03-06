@@ -1,6 +1,8 @@
 import React from 'react'
 import { FaUserCircle } from 'react-icons/fa'
 import { useProfileContext } from '../../context/ProfileContext'
+import { getMediaUrl } from '../../config'
+
 
 const Profile_page = () => {
   const { profileData, loading } = useProfileContext()
@@ -31,7 +33,7 @@ const Profile_page = () => {
             {profileData.profile_picture_url ? (
               <div
                 className='w-32 h-32 rounded-full flex-shrink-0 bg-cover bg-center border border-gray-100'
-                style={{ backgroundImage: `url(${profileData.profile_picture_url})` }}
+                style={{ backgroundImage: `url(${getMediaUrl(profileData.profile_picture_url)})` }}
               />
             ) : (
               <div className='w-32 h-32 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100'>

@@ -14,6 +14,9 @@ import { PiSignOutBold } from "react-icons/pi";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { useSidebar } from '../context/SidebarContext';
 import { useProfileContext } from '../context/ProfileContext';
+import { getMediaUrl } from '../config';
+import { FaUserCircle } from 'react-icons/fa';
+
 
 const Side_bar = () => {
     const { isOpen, toggleSidebar, closeSidebar } = useSidebar();
@@ -101,6 +104,31 @@ const Side_bar = () => {
                 </div>
 
                 <div className={`flex flex-col gap-3 select-none grow mt-8 ${isOpen ? 'overflow-y-auto' : 'overflow-visible md:items-center'}`}>
+                    {/* Profile Section in Sidebar */}
+                    <div className={`px-4 mb-4 ${!isOpen && 'md:px-0'}`}>
+                        <div
+                            onClick={() => navigate('/profile')}
+                            className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors ${!isOpen && 'md:justify-center'}`}
+                        >
+                            {profileData?.profile_picture_url ? (
+                                <div
+                                    className="w-10 h-10 rounded-full bg-cover bg-center border border-gray-100 flex-shrink-0"
+                                    style={{ backgroundImage: `url(${getMediaUrl(profileData.profile_picture_url)})` }}
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <FaUserCircle size={24} className="text-green-600 opacity-70" />
+                                </div>
+                            )}
+                            {isOpen && (
+                                <div className="overflow-hidden">
+                                    <p className="font-['Inter'] text-sm font-semibold text-gray-800 truncate">{profileData?.username || 'User'}</p>
+                                    <p className="font-['Inter'] text-xs text-gray-500 truncate">View Profile</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {menuItems.map((section, idx) => (
                         <div key={idx} className='w-full'>
                             {isOpen ? (

@@ -11,6 +11,8 @@ import { useBookmarks } from '../../context/BookmarksContext';
 import { api } from '../../util/api';
 import { useSortContext } from '../../context/SortContext';
 import FollowChip from '../common/FollowChip';
+import { getMediaUrl } from '../../config';
+
 
 const Discussion_page = () => {
     const navigate = useNavigate();
@@ -87,7 +89,7 @@ const Discussion_page = () => {
                                         <div className='flex flex-row justify-center gap-[12px] items-center'>
                                             {post.author_profile_picture_url ? (
                                                 <img
-                                                    src={post.author_profile_picture_url.startsWith('http') ? post.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${post.author_profile_picture_url.replace('/api', '')}`}
+                                                    src={getMediaUrl(post.author_profile_picture_url)}
                                                     alt={post.author_username}
                                                     className="w-8 h-8 rounded-full object-cover"
                                                 />
@@ -122,7 +124,7 @@ const Discussion_page = () => {
                                         {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                             <div className="w-[100px] h-[80px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                                                    src={getMediaUrl(`/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                                     alt="Thumbnail"
                                                     className="w-full h-full object-cover"
                                                 />

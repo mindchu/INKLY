@@ -7,6 +7,8 @@ import { BsBookmarkDashFill } from "react-icons/bs";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
+import { getMediaUrl } from '../../config';
+
 
 const Bookmarks_page_content = ({ sortBy }) => {
     const { bookmarkedNotes, toggleBookmark, loading, setBookmarkedNotes } = useBookmarks();
@@ -99,7 +101,7 @@ const Bookmarks_page_content = ({ sortBy }) => {
                         <div className='flex items-center gap-2 mb-3'>
                             {note.author_profile_picture_url ? (
                                 <img
-                                    src={note.author_profile_picture_url.startsWith('http') ? note.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${note.author_profile_picture_url.replace('/api', '')}`}
+                                    src={getMediaUrl(note.author_profile_picture_url)}
                                     alt={note.author_username}
                                     className="w-6 h-6 rounded-full object-cover"
                                 />
@@ -121,7 +123,7 @@ const Bookmarks_page_content = ({ sortBy }) => {
                             {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                     <img
-                                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                                        src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                         alt="Thumbnail"
                                         className="w-full h-full object-cover"
                                     />

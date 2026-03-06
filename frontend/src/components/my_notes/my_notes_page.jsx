@@ -12,6 +12,8 @@ import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
 import FollowChip from '../common/FollowChip'
+import { getMediaUrl } from '../../config'
+
 
 const My_notes_page = () => {
   const navigate = useNavigate();
@@ -114,7 +116,7 @@ const My_notes_page = () => {
               <div className='flex items-center gap-2 mb-3'>
                 {note.author_profile_picture_url ? (
                   <img
-                    src={note.author_profile_picture_url.startsWith('http') ? note.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${note.author_profile_picture_url.replace('/api', '')}`}
+                    src={getMediaUrl(note.author_profile_picture_url)}
                     alt={note.author_username}
                     className="w-6 h-6 rounded-full object-cover"
                   />
@@ -136,7 +138,7 @@ const My_notes_page = () => {
                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
                   <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                     <img
-                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`}
+                      src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                       alt="Thumbnail"
                       className="w-full h-full object-cover"
                     />

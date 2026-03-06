@@ -4,6 +4,8 @@ import { FaUserCircle } from 'react-icons/fa'
 import { api } from '../../util/api'
 import { useProfileContext } from '../../context/ProfileContext'
 import { useSearch } from '../../context/SearchContext'
+import { getMediaUrl } from '../../config'
+
 
 const Following_page = () => {
     const { profileData } = useProfileContext();
@@ -101,7 +103,7 @@ const Following_page = () => {
                                 {user.profile_picture_url ? (
                                     <div
                                         className="w-11 h-11 rounded-full bg-cover bg-center border border-gray-200"
-                                        style={{ backgroundImage: `url(${user.profile_picture_url})` }}
+                                        style={{ backgroundImage: `url(${getMediaUrl(user.profile_picture_url)})` }}
                                     />
                                 ) : (
                                     <FaUserCircle className='w-11 h-11 text-[#5A7F4E]' />

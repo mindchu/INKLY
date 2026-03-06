@@ -11,6 +11,8 @@ import { useBookmarks } from '../../context/BookmarksContext';
 import { useSearch } from '../../context/SearchContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
+import { getMediaUrl } from '../../config';
+
 
 const Search_page = () => {
     const { results, loading, setResults, page, setPage, hasMore } = useSearch();
@@ -93,7 +95,7 @@ const Search_page = () => {
                                 <div className='mt-[16px] flex flex-row items-center gap-[10px]'>
                                     {note.author_profile_picture_url ? (
                                         <img
-                                            src={note.author_profile_picture_url.startsWith('http') ? note.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${note.author_profile_picture_url.replace('/api', '')}`}
+                                            src={getMediaUrl(note.author_profile_picture_url)}
                                             alt={note.author_username}
                                             className="w-6 h-6 rounded-full object-cover"
                                         />

@@ -10,16 +10,10 @@ import { api } from '../../util/api';
 // import { CONFIG } from '../../config'; // Uncomment if you move the base URL here
 import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
+import { getMediaUrl } from '../../config';
 
-// --- Helper Functions ---
 
-// Centralized URL formatting to keep the component DRY
-const getMediaUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:6001/api';
-    return `${baseUrl}${path.replace('/api', '')}`;
-};
+
 
 // Recursive function to update the comment tree locally without refetching the whole page
 const addReplyToTree = (comments, parentId, newReply) => {

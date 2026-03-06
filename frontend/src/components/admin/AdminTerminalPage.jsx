@@ -31,6 +31,20 @@ const AdminTerminalPage = () => {
     const [deleteCommentLoading, setDeleteCommentLoading] = useState(false);
     const [deleteCommentMessage, setDeleteCommentMessage] = useState('');
     const [deleteCommentError, setDeleteCommentError] = useState('');
+
+    const [createTagName, setCreateTagName] = useState('');
+    const [createTagLoading, setCreateTagLoading] = useState(false);
+    const [createTagMessage, setCreateTagMessage] = useState('');
+    const [createTagError, setCreateTagError] = useState('');
+
+
+    const [deleteTagName, setDeleteTagName] = useState('');
+    const [deleteTagLoading, setDeleteTagLoading] = useState(false);
+    const [deleteTagMessage, setDeleteTagMessage] = useState('');
+    const [deleteTagError, setDeleteTagError] = useState('');
+    const [deleteSuggestions, setDeleteSuggestions] = useState([]);
+    const [showDeleteSuggestions, setShowDeleteSuggestions] = useState(false);
+
     const hasFetched = React.useRef(false);
 
     useEffect(() => {
@@ -95,6 +109,20 @@ const AdminTerminalPage = () => {
             setShowTargetSuggestions(false);
         }
     }, [targetTag, popularTags]);
+
+    useEffect(() => {
+        if (deleteTagName.trim()) {
+            const filtered = popularTags.filter(tag =>
+                tag.name.toLowerCase().includes(deleteTagName.toLowerCase()) &&
+                tag.name !== deleteTagName
+            );
+            setDeleteSuggestions(filtered);
+            setShowDeleteSuggestions(filtered.length > 0);
+        } else {
+            setDeleteSuggestions([]);
+            setShowDeleteSuggestions(false);
+        }
+    }, [deleteTagName, popularTags]);
 
     const handleAddTag = () => {
         const trimmed = tagInput.trim();
@@ -165,6 +193,49 @@ const AdminTerminalPage = () => {
         }
     };
 
+    const handleCreateTag = async (e) => {
+        e.preventDefault();
+        setCreateTagLoading(true);
+        setCreateTagMessage('');
+        setCreateTagError('');
+
+        try {
+            const response = await api.post('/tags/', {
+                name: createTagName.trim()
+            });
+            setCreateTagMessage(response.message || 'Tag created successfully!');
+            setCreateTagName('');
+        } catch (err) {
+            setCreateTagError(err.message || 'An error occurred while creating the tag.');
+        } finally {
+            setCreateTagLoading(false);
+        }
+    };
+
+    const handleDeleteTag = async (e) => {
+        e.preventDefault();
+
+        if (!window.confirm(`Are you sure you want to delete the tag '${deleteTagName}'? This will remove it from all usage and cannot be undone.`)) {
+            return;
+        }
+
+        setDeleteTagLoading(true);
+        setDeleteTagMessage('');
+        setDeleteTagError('');
+
+        try {
+            // Encode the tag name in case it contains special characters like #
+            const encodedTagName = encodeURIComponent(deleteTagName.trim());
+            const response = await api.delete(`/tags/${encodedTagName}`);
+            setDeleteTagMessage(response.message || 'Tag deleted successfully!');
+            setDeleteTagName('');
+        } catch (err) {
+            setDeleteTagError(err.message || 'An error occurred while deleting the tag.');
+        } finally {
+            setDeleteTagLoading(false);
+        }
+    };
+
     const handleDeleteComment = async (e) => {
         e.preventDefault();
         if (!window.confirm(`Are you sure you want to delete comment ID: ${deleteCommentId}? This action cannot be undone.`)) {
@@ -189,194 +260,306 @@ const AdminTerminalPage = () => {
 
 
     return (
-        <div className="flex flex-col items-center p-8 bg-[#EEF2E1] min-h-full font-['Inter']">
-            <div className="w-full max-w-2xl bg-white rounded-lg p-8 shadow-sm border border-[#E3E8D9] mb-8">
-                <h2 className="text-xl font-semibold mb-4 text-[#3A5335]">Merge Tags</h2>
-                <p className="text-sm text-[#7A8A73] mb-6">
-                    Combine multiple existing tags into a single target tag. This will update all posts, discussions, and user interests. The source tags will be deleted.
-                </p>
+        <div className="flex flex-col items-center p-8 bg-[#EEF2E1] min-h-screen font-['Inter']">
+            <div className="w-full max-w-6xl">
+                {/* Tag Management Section */}
+                <section className="mb-16">
+                    <div className="flex items-center gap-3 mb-8 border-b border-[#D4D9C6] pb-4">
+                        <div className="p-2 bg-[#6B9D63] rounded-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-bold text-[#3A5335]">Tag Management</h2>
+                    </div>
 
-                {message && <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">{message}</div>}
-                {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{error}</div>}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Create Tag Card */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] flex flex-col">
+                            <h3 className="text-xl font-bold mb-2 text-[#3A5335]">Create New Tag</h3>
+                            <p className="text-sm text-[#7A8A73] mb-6">Define new categorizeable labels for posts and discussions.</p>
 
-                <form onSubmit={handleMergeTags} className="flex flex-col gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-[#3A5335] mb-2">Source Tags (Select multiple to merge)</label>
-                        <div className="relative">
-                            <div className="min-h-[46px] w-full p-2 bg-white border border-[#D4D9C6] rounded-md flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-[#6B9D63] transition-all">
-                                {sourceTags.map((tag, index) => (
-                                    <span key={index} className="bg-[#E8F0E5] text-[#577F4E] px-3 py-1 rounded-full text-sm inline-flex items-center gap-2 border border-[#C7D9C1]">
-                                        {tag}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveTag(tag)}
-                                            className="hover:text-red-500 font-bold"
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
-                                <input
-                                    type="text"
-                                    placeholder={sourceTags.length === 0 ? "Search or type tags to merge..." : ""}
-                                    className="flex-1 min-w-[150px] bg-transparent outline-none border-none py-1 text-sm text-[#2C3E28] placeholder:text-[#9AAF94] h-full"
-                                    value={tagInput}
-                                    onChange={(e) => setTagInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAddTag();
-                                        }
-                                    }}
-                                    onFocus={() => tagInput.trim() && suggestions.length > 0 && setShowSuggestions(true)}
-                                />
+                            {createTagMessage && <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm animate-fade-in">{createTagMessage}</div>}
+                            {createTagError && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border border-red-100 text-sm animate-fade-in">{createTagError}</div>}
+
+                            <form onSubmit={handleCreateTag} className="flex flex-col gap-6 mt-auto">
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-semibold text-[#3A5335]">Tag Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Mathematics"
+                                        className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                        value={createTagName}
+                                        onChange={(e) => setCreateTagName(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={createTagLoading}
+                                    className={`w-full py-3.5 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-md ${createTagLoading ? 'bg-[#9AAF94] cursor-not-allowed' : 'bg-[#6B9D63] hover:bg-[#577F4E] hover:shadow-lg'}`}
+                                >
+                                    {createTagLoading ? 'Processing...' : 'Add to System'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Delete Tag Card */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] flex flex-col">
+                            <h3 className="text-xl font-bold mb-2 text-[#C85A5A]">Delete Tag</h3>
+                            <p className="text-sm text-[#7A8A73] mb-6">Permanently remove a tag. This action is irreversible and affects all content.</p>
+
+                            {deleteTagMessage && <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm">{deleteTagMessage}</div>}
+                            {deleteTagError && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border border-red-100 text-sm">{deleteTagError}</div>}
+
+                            <form onSubmit={handleDeleteTag} className="flex flex-col gap-6 mt-auto">
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-semibold text-[#3A5335]">Identify Tag</label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search tag to remove..."
+                                            className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C85A5A] focus:border-transparent text-[#2C3E28] transition-all"
+                                            value={deleteTagName}
+                                            onChange={(e) => setDeleteTagName(e.target.value)}
+                                            onFocus={() => deleteTagName.trim() && deleteSuggestions.length > 0 && setShowDeleteSuggestions(true)}
+                                            required
+                                        />
+                                        {showDeleteSuggestions && (
+                                            <div className="absolute z-10 mt-2 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-xl overflow-hidden max-h-[150px] overflow-y-auto ring-1 ring-black ring-opacity-5">
+                                                {deleteSuggestions.slice(0, 5).map((suggestion, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setDeleteTagName(suggestion.name || suggestion);
+                                                            setShowDeleteSuggestions(false);
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors border-b border-[#F0F2EA] last:border-0 flex items-center justify-between"
+                                                    >
+                                                        <span>{suggestion.name || suggestion}</span>
+                                                        <span className="text-xs font-medium text-[#7A8A73] bg-[#EEF2E1] px-2 py-0.5 rounded-full">{suggestion.use_count || 0}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={deleteTagLoading}
+                                    className={`w-full py-3.5 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-md ${deleteTagLoading ? 'bg-[#9AAF94] cursor-not-allowed' : 'bg-[#C85A5A] hover:bg-[#A84848] hover:shadow-lg'}`}
+                                >
+                                    {deleteTagLoading ? 'Removing...' : 'Delete Permanently'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Merge Tags Card - Full Width in Grid */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] lg:col-span-2">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 className="text-xl font-bold text-[#3A5335]">Merge & Consolidate Tags</h3>
+                                    <p className="text-sm text-[#7A8A73]">Combine multiple legacy tags into a unified target tag.</p>
+                                </div>
                             </div>
 
-                            {showSuggestions && (
-                                <div className="absolute z-10 mt-1 w-full bg-white border border-[#D4D9C6] rounded-md shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
-                                    {suggestions.slice(0, 8).map((suggestion, idx) => (
-                                        <button
-                                            key={idx}
-                                            type="button"
-                                            onClick={() => {
-                                                if (!sourceTags.includes(suggestion.name || suggestion)) {
-                                                    setSourceTags([...sourceTags, suggestion.name || suggestion]);
-                                                }
-                                                setTagInput('');
-                                                setShowSuggestions(false);
-                                            }}
-                                            className="w-full text-left px-4 py-2 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                {suggestion.color && (
-                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: suggestion.color }}></div>
-                                                )}
-                                                <span>{suggestion.name || suggestion}</span>
+                            {message && <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-100">{message}</div>}
+                            {error && <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-100">{error}</div>}
+
+                            <form onSubmit={handleMergeTags} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="block text-sm font-semibold text-[#3A5335]">Source Tags (to be removed)</label>
+                                    <div className="relative">
+                                        <div className="min-h-[120px] w-full p-4 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl flex flex-wrap gap-2 content-start focus-within:ring-2 focus-within:ring-[#6B9D63] focus-within:border-transparent transition-all">
+                                            {sourceTags.map((tag, index) => (
+                                                <span key={index} className="bg-white text-[#577F4E] px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center gap-2 border border-[#E3E8D9] shadow-sm animate-pop-in">
+                                                    {tag}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveTag(tag)}
+                                                        className="text-[#9AAF94] hover:text-[#C85A5A] transition-colors"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            ))}
+                                            <input
+                                                type="text"
+                                                placeholder={sourceTags.length === 0 ? "Search tags to merge..." : "Add more..."}
+                                                className="flex-1 min-w-[120px] bg-transparent outline-none border-none py-1 text-sm text-[#2C3E28] placeholder:text-[#9AAF94]"
+                                                value={tagInput}
+                                                onChange={(e) => setTagInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleAddTag();
+                                                    }
+                                                }}
+                                                onFocus={() => tagInput.trim() && suggestions.length > 0 && setShowSuggestions(true)}
+                                            />
+                                        </div>
+
+                                        {showSuggestions && (
+                                            <div className="absolute z-20 mt-2 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-2xl overflow-hidden max-h-[200px] overflow-y-auto ring-1 ring-black ring-opacity-5">
+                                                {suggestions.slice(0, 8).map((suggestion, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (!sourceTags.includes(suggestion.name || suggestion)) {
+                                                                setSourceTags([...sourceTags, suggestion.name || suggestion]);
+                                                            }
+                                                            setTagInput('');
+                                                            setShowSuggestions(false);
+                                                        }}
+                                                        className="w-full text-left px-5 py-3 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: suggestion.color || '#6B9D63' }}></div>
+                                                            <span className="font-medium">{suggestion.name || suggestion}</span>
+                                                        </div>
+                                                        <span className="text-xs font-bold text-[#7A8A73] bg-[#EEF2E1] px-2 py-1 rounded-md">{suggestion.use_count || 0} usage</span>
+                                                    </button>
+                                                ))}
                                             </div>
-                                            <span className="text-xs text-[#7A8A73]">({suggestion.use_count || 0})</span>
-                                        </button>
-                                    ))}
+                                        )}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-[#3A5335] mb-2">Target Tag</label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="e.g., #Cat"
-                                className="w-full px-4 py-2 bg-white border border-[#D4D9C6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9D63] text-[#2C3E28] placeholder:text-[#9AAF94]"
-                                value={targetTag}
-                                onChange={(e) => setTargetTag(e.target.value)}
-                                onFocus={() => targetTag.trim() && targetSuggestions.length > 0 && setShowTargetSuggestions(true)}
-                                required
-                            />
-                            {showTargetSuggestions && (
-                                <div className="absolute z-10 mt-1 w-full bg-white border border-[#D4D9C6] rounded-md shadow-lg overflow-hidden max-h-[150px] overflow-y-auto">
-                                    {targetSuggestions.slice(0, 5).map((suggestion, idx) => (
-                                        <button
-                                            key={idx}
-                                            type="button"
-                                            onClick={() => {
-                                                setTargetTag(suggestion.name || suggestion);
-                                                setShowTargetSuggestions(false);
-                                            }}
-                                            className="w-full text-left px-4 py-2 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors border-b border-[#F0F2EA] last:border-0"
-                                        >
-                                            {suggestion.name || suggestion}
-                                        </button>
-                                    ))}
+
+                                <div className="flex flex-col justify-between space-y-4">
+                                    <div className="space-y-4">
+                                        <label className="block text-sm font-semibold text-[#3A5335]">Target Tag (the result)</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Enter destination tag name..."
+                                                className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                                value={targetTag}
+                                                onChange={(e) => setTargetTag(e.target.value)}
+                                                onFocus={() => targetTag.trim() && targetSuggestions.length > 0 && setShowTargetSuggestions(true)}
+                                                required
+                                            />
+                                            {showTargetSuggestions && (
+                                                <div className="absolute z-10 mt-2 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-xl overflow-hidden max-h-[150px] overflow-y-auto">
+                                                    {targetSuggestions.slice(0, 5).map((suggestion, idx) => (
+                                                        <button
+                                                            key={idx}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setTargetTag(suggestion.name || suggestion);
+                                                                setShowTargetSuggestions(false);
+                                                            }}
+                                                            className="w-full text-left px-5 py-3 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors border-b border-[#F0F2EA] last:border-0 font-medium"
+                                                        >
+                                                            {suggestion.name || suggestion}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={loading || sourceTags.length === 0}
+                                        className={`w-full py-4 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-lg ${loading || sourceTags.length === 0 ? 'bg-[#9AAF94] cursor-not-allowed shadow-none' : 'bg-[#6B9D63] hover:bg-[#577F4E]'}`}
+                                    >
+                                        {loading ? 'Merging Data...' : `Merge ${sourceTags.length} Tag${sourceTags.length !== 1 ? 's' : ''}`}
+                                    </button>
                                 </div>
-                            )}
+                            </form>
                         </div>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={`w-full py-3 rounded-full font-bold text-white transition-all transform hover:scale-[1.02] ${loading ? 'bg-[#9AAF94]' : 'bg-[#6B9D63] hover:bg-[#577F4E]'
-                            }`}
-                    >
-                        {loading ? 'Merging...' : 'Merge Tags'}
-                    </button>
-                </form>
-            </div>
+                </section>
 
-            <div className="w-full max-w-2xl bg-white rounded-lg p-8 shadow-sm border border-[#E3E8D9] mb-8 font-['Inter']">
-                <h2 className="text-xl font-semibold mb-4 text-[#3A5335]">Delete Content</h2>
-                <p className="text-sm text-[#7A8A73] mb-6">
-                    Permanently delete any post or discussion by its ID. This is intended for removing inappropriate content. All associated comments will also be deleted.
-                </p>
-
-                {deleteMessage && <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">{deleteMessage}</div>}
-                {deleteError && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{deleteError}</div>}
-
-                <form onSubmit={handleDeleteContent} className="flex flex-col gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-[#3A5335] mb-1">Content ID</label>
-                        <input
-                            type="text"
-                            placeholder="Enter the ID of the post or discussion..."
-                            className="w-full px-4 py-2 bg-white border border-[#D4D9C6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9D63] text-[#2C3E28] placeholder:text-[#9AAF94]"
-                            value={deleteContentId}
-                            onChange={(e) => setDeleteContentId(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={deleteLoading}
-                        className={`w-full py-3 rounded-full font-bold text-white transition-all transform hover:scale-[1.02] ${deleteLoading ? 'bg-[#9AAF94]' : 'bg-[#C85A5A] hover:bg-[#A84848]'
-                            }`}
-                    >
-                        {deleteLoading ? 'Deleting...' : 'Delete Content'}
-                    </button>
-                </form>
-            </div>
-
-            <div className="w-full max-w-2xl bg-white rounded-lg p-8 shadow-sm border border-[#E3E8D9] mb-8 font-['Inter']">
-                <h2 className="text-xl font-semibold mb-4 text-[#3A5335]">Delete Comment</h2>
-                <p className="text-sm text-[#7A8A73] mb-6">
-                    Permanently delete any comment by its ID.
-                </p>
-
-                {deleteCommentMessage && <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">{deleteCommentMessage}</div>}
-                {deleteCommentError && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">{deleteCommentError}</div>}
-
-                <form onSubmit={handleDeleteComment} className="flex flex-col gap-6">
-                    <div className="flex gap-4">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-[#3A5335] mb-1">Parent Content ID</label>
-                            <input
-                                type="text"
-                                placeholder="..."
-                                className="w-full px-4 py-2 bg-white border border-[#D4D9C6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9D63] text-[#2C3E28] placeholder:text-[#9AAF94]"
-                                value={deleteCommentParentId}
-                                onChange={(e) => setDeleteCommentParentId(e.target.value)}
-                                required
-                            />
+                {/* Content Moderation Section */}
+                <section>
+                    <div className="flex items-center gap-3 mb-8 border-b border-[#D4D9C6] pb-4">
+                        <div className="p-2 bg-[#C85A5A] rounded-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                         </div>
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-[#3A5335] mb-1">Comment ID</label>
-                            <input
-                                type="text"
-                                placeholder="..."
-                                className="w-full px-4 py-2 bg-white border border-[#D4D9C6] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9D63] text-[#2C3E28] placeholder:text-[#9AAF94]"
-                                value={deleteCommentId}
-                                onChange={(e) => setDeleteCommentId(e.target.value)}
-                                required
-                            />
+                        <h2 className="text-2xl font-bold text-[#3A5335]">Content Moderation</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Delete Content Card */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] flex flex-col">
+                            <h3 className="text-xl font-bold mb-2 text-[#3A5335]">Remove Post/Discussion</h3>
+                            <p className="text-sm text-[#7A8A73] mb-6">Purge any primary content using its specific Identifier.</p>
+
+                            {deleteMessage && <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm">{deleteMessage}</div>}
+                            {deleteError && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border border-red-100 text-sm">{deleteError}</div>}
+
+                            <form onSubmit={handleDeleteContent} className="flex flex-col gap-6 mt-auto">
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-semibold text-[#3A5335]">Content ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Paste ID here..."
+                                        className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                        value={deleteContentId}
+                                        onChange={(e) => setDeleteContentId(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={deleteLoading}
+                                    className={`w-full py-3.5 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-md ${deleteLoading ? 'bg-[#9AAF94] cursor-not-allowed' : 'bg-[#C85A5A] hover:bg-[#A84848] hover:shadow-lg'}`}
+                                >
+                                    {deleteLoading ? 'Processing...' : 'Delete Content'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Delete Comment Card */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] flex flex-col">
+                            <h3 className="text-xl font-bold mb-2 text-[#3A5335]">Remove Comment</h3>
+                            <p className="text-sm text-[#7A8A73] mb-6">Delete specific feedback or responses from a parent post.</p>
+
+                            {deleteCommentMessage && <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm">{deleteCommentMessage}</div>}
+                            {deleteCommentError && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border border-red-100 text-sm">{deleteCommentError}</div>}
+
+                            <form onSubmit={handleDeleteComment} className="flex flex-col gap-6 mt-auto">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-[#3A5335]">Parent ID</label>
+                                        <input
+                                            type="text"
+                                            placeholder="..."
+                                            className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                            value={deleteCommentParentId}
+                                            onChange={(e) => setDeleteCommentParentId(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-[#3A5335]">Comment ID</label>
+                                        <input
+                                            type="text"
+                                            placeholder="..."
+                                            className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                            value={deleteCommentId}
+                                            onChange={(e) => setDeleteCommentId(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={deleteCommentLoading}
+                                    className={`w-full py-3.5 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-md ${deleteCommentLoading ? 'bg-[#9AAF94] cursor-not-allowed' : 'bg-[#C85A5A] hover:bg-[#A84848] hover:shadow-lg'}`}
+                                >
+                                    {deleteCommentLoading ? 'Removing...' : 'Delete Comment'}
+                                </button>
+                            </form>
                         </div>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={deleteCommentLoading}
-                        className={`w-full py-3 rounded-full font-bold text-white transition-all transform hover:scale-[1.02] ${deleteCommentLoading ? 'bg-[#9AAF94]' : 'bg-[#C85A5A] hover:bg-[#A84848]'
-                            }`}
-                    >
-                        {deleteCommentLoading ? 'Deleting...' : 'Delete Comment'}
-                    </button>
-                </form>
+                </section>
             </div>
         </div>
     );

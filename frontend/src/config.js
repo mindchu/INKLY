@@ -15,8 +15,7 @@ export const CONFIG = {
 export const getMediaUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    
-    // Strips '/api' from the base URL to point to the static file server root
-    const baseUrl = CONFIG.API_URL.replace(/\/api$/, '');
-    return `${baseUrl}${path}`;
+
+    // Consistently handle /api prefix by removing it from path before appending to CONFIG.API_URL
+    return `${CONFIG.API_URL}${path.replace('/api', '')}`;
 };

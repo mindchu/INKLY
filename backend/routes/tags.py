@@ -10,6 +10,27 @@ class MergeTagsRequest(BaseModel):
     source_tags: List[str]
     target_tag: str
 
+class CreateTagRequest(BaseModel):
+    name: str
+
+@router.post("/")
+async def create_tag(request: Request, tag_request: CreateTagRequest):
+    require_admin(request)
+    
+    name = tag_request.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Tag name cannot be empty")
+        
+    existing = db.tags.find_one({"name": {"$regex": f"^{name}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Tag '{existing['name']}' already exists")
+        
+    user = getattr(request.state, "user", None)
+    user_id = user["id"] if user else None
+        
+    db.tags.insert_one({"name": name, "use_count": 0, "created_by": user_id})
+    return {"success": True, "message": f"Tag '{name}' created successfully!"}
+
 @router.post("/merge")
 async def merge_tags(request: Request, merge_request: MergeTagsRequest):
     require_admin(request)
@@ -68,3 +89,43 @@ async def merge_tags(request: Request, merge_request: MergeTagsRequest):
     )
 
     return {"success": True, "message": f"Successfully merged {len(source_tags)} tags into '{target_tag}'"}
+
+@router.delete("/{tag_name}")
+async def delete_tag(request: Request, tag_name: str):
+    require_admin(request)
+    
+    tag_name = tag_name.strip()
+    if not tag_name:
+        raise HTTPException(status_code=400, detail="Tag name cannot be empty")
+        
+    # Attempt to find the tag (case-insensitive) just to be sure it exists before doing big updates
+    existing = db.tags.find_one({"name": {"$regex": f"^{tag_name}$", "$options": "i"}})
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Tag '{tag_name}' not found")
+        
+    actual_tag_name = existing["name"]
+
+    # 1. Update all posts and discussions that have this tag
+    db.posts.update_many(
+        {"tags": actual_tag_name},
+        {"$pull": {"tags": actual_tag_name}}
+    )
+    
+    db.discussions.update_many(
+        {"tags": actual_tag_name},
+        {"$pull": {"tags": actual_tag_name}}
+    )
+
+    # 2. Update users' registered interests
+    db.users.update_many(
+        {"interested_tags": actual_tag_name},
+        {"$pull": {"interested_tags": actual_tag_name}}
+    )
+
+    # 3. Delete from tags collection
+    result = db.tags.delete_one({"_id": existing["_id"]})
+    
+    if result.deleted_count == 1:
+        return {"success": True, "message": f"Tag '{actual_tag_name}' deleted successfully!"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete tag")

@@ -3,8 +3,9 @@ import { GoPaperclip } from 'react-icons/go';
 import { MdOutlineFileDownload } from 'react-icons/md';
 import { LuEye } from 'react-icons/lu';
 import { api } from '../../util/api';
-import { CONFIG } from '../../config';
+import { CONFIG, getMediaUrl } from '../../config';
 import FollowChip from '../common/FollowChip';
+
 
 const NoteModal = ({ note, onClose }) => {
     const [comments, setComments] = useState([]);
@@ -100,7 +101,7 @@ const NoteModal = ({ note, onClose }) => {
                         <div className="flex items-center gap-3">
                             {note.author_profile_picture_url ? (
                                 <img
-                                    src={note.author_profile_picture_url.startsWith('http') ? note.author_profile_picture_url : `${import.meta.env.VITE_API_URL || 'http://localhost:6001/api'}${note.author_profile_picture_url.replace('/api', '')}`}
+                                    src={getMediaUrl(note.author_profile_picture_url)}
                                     alt={note.author_username}
                                     className="w-10 h-10 rounded-full object-cover"
                                 />
@@ -169,7 +170,7 @@ const NoteModal = ({ note, onClose }) => {
                                             {isImage && (
                                                 <div className="w-full bg-gray-50 flex items-center justify-center p-2 border-b border-gray-100">
                                                     <img
-                                                        src={`${CONFIG.API_URL}/uploads/${file}`}
+                                                        src={getMediaUrl(`/uploads/${file}`)}
                                                         alt={file}
                                                         className="max-h-[400px] object-contain rounded-lg"
                                                     />
@@ -187,7 +188,7 @@ const NoteModal = ({ note, onClose }) => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         className="p-2 hover:bg-gray-100 rounded-lg transition text-blue-600 hover:text-blue-700"
-                                                        onClick={() => window.open(`${CONFIG.API_URL}/uploads/${file}`, '_blank')}
+                                                        onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}
                                                         title="Open in new tab"
                                                     >
                                                         <LuEye size={20} />
@@ -196,7 +197,7 @@ const NoteModal = ({ note, onClose }) => {
                                                         className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600 hover:text-gray-900"
                                                         onClick={() => {
                                                             const link = document.createElement('a');
-                                                            link.href = `${CONFIG.API_URL}/uploads/${file}`;
+                                                            link.href = getMediaUrl(`/uploads/${file}`);
                                                             link.download = file;
                                                             link.click();
                                                         }}
