@@ -105,7 +105,7 @@ const My_discussions_page = () => {
                             className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
                             onClick={() => handleCardClick(disc)}
                         >
-                            <h3 className='text-lg font-semibold text-gray-800 mb-3'>{disc.title}</h3>
+                            <h3 className='text-lg font-semibold text-gray-800 mb-3 break-all'>{disc.title}</h3>
 
                             <div className='flex items-center gap-2 mb-3'>
                                 {disc.author_profile_picture_url ? (
@@ -126,7 +126,7 @@ const My_discussions_page = () => {
                             </div>
 
                             <div className="flex gap-3 mb-4 flex-grow">
-                                <p className='text-sm text-gray-600 line-clamp-3 flex-1'>
+                                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
                                     {disc.text}
                                 </p>
                                 {disc.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
@@ -165,7 +165,7 @@ const My_discussions_page = () => {
                                 <div className='flex items-center gap-4'>
 
                                     {/* NEW LIKE BUTTON */}
-                                    <LikeButton 
+                                    <LikeButton
                                         targetId={disc._id || disc.id}
                                         initialIsLiked={disc.is_liked}
                                         initialLikesCount={disc.likes_count || 0}
@@ -201,7 +201,7 @@ const My_discussions_page = () => {
                                     </button>
 
                                     {/* NEW DELETE BUTTON */}
-                                    <DeleteButton 
+                                    <DeleteButton
                                         targetId={disc._id || disc.id}
                                         itemName="Discussion"
                                         onDeleteSuccess={(deletedId) => {

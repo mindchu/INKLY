@@ -109,7 +109,7 @@ const My_notes_page = () => {
               className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
               onClick={() => handleCardClick(note)}
             >
-              <h3 className='text-lg font-semibold text-gray-800 mb-3'>{note.title}</h3>
+              <h3 className='text-lg font-semibold text-gray-800 mb-3 break-all'>{note.title}</h3>
 
               <div className='flex items-center gap-2 mb-3'>
                 {note.author_profile_picture_url ? (
@@ -130,7 +130,7 @@ const My_notes_page = () => {
               </div>
 
               <div className="flex gap-3 mb-4 flex-grow">
-                <p className='text-sm text-gray-600 line-clamp-3 flex-1'>
+                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
                   {note.text}
                 </p>
                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
@@ -167,10 +167,10 @@ const My_notes_page = () => {
 
               <div className='flex items-center justify-between text-sm text-gray-600'>
                 <div className='flex items-center gap-4'>
-                  
+
                   {/* REPLACED WITH NEW LIKE BUTTON COMPONENT */}
-                  <LikeButton 
-                    targetId={note._id || note.id} 
+                  <LikeButton
+                    targetId={note._id || note.id}
                     initialIsLiked={note.is_liked}
                     initialLikesCount={note.likes_count || 0}
                     onLikeSuccess={(id, isLiked) => {
@@ -206,7 +206,7 @@ const My_notes_page = () => {
                   </button>
 
                   {/* REPLACED WITH NEW DELETE BUTTON COMPONENT */}
-                  <DeleteButton 
+                  <DeleteButton
                     targetId={note._id || note.id}
                     itemName="Note"
                     onDeleteSuccess={(deletedId) => {

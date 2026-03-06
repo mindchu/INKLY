@@ -50,11 +50,11 @@ const ContentDetailPage = () => {
     const { profileData } = useProfileContext();
     const { contentId } = useParams();
     const navigate = useNavigate();
-    
+
     // Core State
     const [content, setContent] = useState(null);
     const [comments, setComments] = useState([]);
-    
+
     // UI/Loading State
     const [loading, setLoading] = useState(true);
     const [loadingComments, setLoadingComments] = useState(true);
@@ -62,7 +62,7 @@ const ContentDetailPage = () => {
     const [postingReply, setPostingReply] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    
+
     // Input State
     const [newComment, setNewComment] = useState('');
     const [replyText, setReplyText] = useState('');
@@ -220,7 +220,7 @@ const ContentDetailPage = () => {
                         )}
                     </div>
                 </div>
-                
+
                 {/* Recursion Guard: Limit to 2 levels deep */}
                 {level < 2 ? (
                     comment.replies?.length > 0 && renderComments(comment.replies, level + 1)
@@ -262,7 +262,7 @@ const ContentDetailPage = () => {
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
             <div className="max-w-4xl mx-auto px-4 py-8">
-                
+
                 {/* Back Button */}
                 <button
                     onClick={() => {
@@ -281,7 +281,7 @@ const ContentDetailPage = () => {
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                    
+
                     {/* Header */}
                     <div className="p-8 border-b border-gray-100">
                         <div className="flex flex-wrap gap-2 mb-4">
@@ -291,7 +291,7 @@ const ContentDetailPage = () => {
                                 </span>
                             ))}
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-6">{content.title}</h1>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-6 break-all">{content.title}</h1>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 {content.author_profile_picture_url ? (
@@ -343,7 +343,7 @@ const ContentDetailPage = () => {
                         {/* Note: If content.text is raw HTML, consider using:
                             <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.text) }} />
                         */}
-                        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed text-lg mb-8 whitespace-pre-wrap">
+                        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed text-lg mb-8 whitespace-pre-wrap break-all">
                             {content.text}
                         </div>
 
@@ -377,13 +377,13 @@ const ContentDetailPage = () => {
                                                         <p className="font-medium text-gray-900 truncate">{file}</p>
                                                     </div>
                                                     <div className="flex gap-1 flex-shrink-0">
-                                                        <button 
+                                                        <button
                                                             className="p-2 hover:bg-gray-100 rounded-lg transition text-blue-600"
                                                             onClick={() => window.open(fileUrl, '_blank')}
                                                         >
                                                             <LuEye size={20} />
                                                         </button>
-                                                        <a 
+                                                        <a
                                                             href={fileUrl}
                                                             download={file}
                                                             className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600 flex items-center justify-center"
