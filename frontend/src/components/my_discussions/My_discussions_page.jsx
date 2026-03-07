@@ -30,11 +30,10 @@ const My_discussions_page = () => {
         { value: localDiscussions.length.toString(), label: 'Total discussions' },
         { value: localDiscussions.reduce((sum, disc) => sum + (disc.views || 0), 0).toString(), label: 'Total views' },
         { value: localDiscussions.reduce((sum, disc) => sum + (disc.like_count || 0), 0).toString(), label: 'Total likes' }
-    ]
+    ];
 
     const filteredAndSortedDiscussions = useMemo(() => {
         let filtered = [...localDiscussions];
-
         let sorted = [...filtered];
         switch (sortBy) {
             case 'date_created':
@@ -52,7 +51,6 @@ const My_discussions_page = () => {
             default:
                 break;
         }
-
         return sorted;
     }, [localDiscussions, searchQuery, sortBy]);
 
@@ -70,10 +68,6 @@ const My_discussions_page = () => {
         navigate(`/content/${disc._id || disc.id}`, { state: { from: location.pathname } });
     };
 
-    const handleCloseModal = () => {
-        setSelectedNote(null);
-    };
-
     if (loading && localDiscussions.length === 0) {
         return (
             <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
@@ -88,49 +82,54 @@ const My_discussions_page = () => {
                 <div className="absolute inset-0 backdrop-blur-sm bg-white/30 z-10 pointer-events-none" />
             )}
 
-            <div className='px-8 py-6'>
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
+            <div className='px-4 sm:px-8 py-6'>
+                {/* Stats */}
+                <div className='grid grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8'>
                     {stats.map((stat, index) => (
-                        <div key={index} className='bg-white rounded-xl p-6 shadow-sm'>
-                            <div className='text-4xl font-semibold mb-2'>{stat.value}</div>
-                            <div className='text-gray-600'>{stat.label}</div>
+                        <div key={index} className='bg-white rounded-xl p-4 sm:p-6 shadow-sm'>
+                            <div className='text-2xl sm:text-4xl font-semibold mb-1 sm:mb-2'>{stat.value}</div>
+                            <div className='text-gray-600 text-xs sm:text-sm'>{stat.label}</div>
                         </div>
                     ))}
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {/* Cards grid */}
+                <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6'>
                     {filteredAndSortedDiscussions.map((disc) => (
                         <div
                             key={disc._id || disc.id}
-                            className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
+                            className='bg-white rounded-xl p-4 sm:p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
                             onClick={() => handleCardClick(disc)}
                         >
-                            <h3 className='text-lg font-semibold text-gray-800 mb-3 break-all'>{disc.title}</h3>
+                            {/* Title */}
+                            <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-words line-clamp-2'>{disc.title}</h3>
 
-                            <div className='flex items-center gap-2 mb-3'>
+                            {/* Author */}
+                            <div className='flex items-center gap-2 mb-3 min-w-0'>
                                 {disc.author_profile_picture_url ? (
                                     <img
                                         src={getMediaUrl(disc.author_profile_picture_url)}
                                         alt={disc.author_username}
-                                        className="w-6 h-6 rounded-full object-cover"
+                                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                                     />
                                 ) : (
-                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold'>
+                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0'>
                                         {disc.author_username?.[0]?.toUpperCase() || 'U'}
                                     </div>
                                 )}
-                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2'>
-                                    {disc.author_username || 'Me'}
+                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0 truncate'>
+                                    <span className='truncate'>{disc.author_username || 'Me'}</span>
                                     <FollowChip authorId={disc.author_id} initialIsFollowing={disc.is_following} />
                                 </span>
                             </div>
 
+                            {/* Body + thumbnail */}
                             <div className="flex gap-3 mb-4 flex-grow">
-                                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
+                                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-words'>
                                     {disc.text}
                                 </p>
                                 {disc.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                         <img
                                             src={getMediaUrl(`/uploads/${disc.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                             alt="Thumbnail"
@@ -140,7 +139,8 @@ const My_discussions_page = () => {
                                 )}
                             </div>
 
-                            {(disc.file_paths?.length > 0) && (
+                            {/* Attachments badge */}
+                            {disc.file_paths?.length > 0 && (
                                 <div className='mb-4'>
                                     <span className='text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>
                                         📎 {disc.file_paths.length} Attachment(s)
@@ -148,23 +148,26 @@ const My_discussions_page = () => {
                                 </div>
                             )}
 
-                            <div className='flex flex-wrap gap-2 mb-4'>
-                                {disc.tags?.map((tag, tagIndex) => (
-                                    <span
-                                        key={tagIndex}
-                                        className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium'
-                                    >
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
+                            {/* Tags */}
+                            {disc.tags?.length > 0 && (
+                                <div className='flex flex-wrap gap-2 mb-4'>
+                                    {disc.tags.map((tag, tagIndex) => (
+                                        <span
+                                            key={tagIndex}
+                                            className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium whitespace-nowrap'
+                                        >
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
 
                             <div className='border-t border-gray-200 mb-4'></div>
 
-                            <div className='flex items-center justify-between text-sm text-gray-600'>
-                                <div className='flex items-center gap-4'>
-
-                                    {/* NEW LIKE BUTTON */}
+                            {/* Actions */}
+                            <div className='flex items-center justify-between text-sm text-gray-600 gap-2'>
+                                {/* Stats */}
+                                <div className='flex items-center gap-3 min-w-0'>
                                     <LikeButton
                                         targetId={disc._id || disc.id}
                                         initialIsLiked={disc.is_liked}
@@ -182,25 +185,25 @@ const My_discussions_page = () => {
                                             }));
                                         }}
                                     />
-
                                     <div className='flex items-center gap-1'>
-                                        <MessageCircle size={16} />
-                                        <span>{disc.comments_count || 0}</span>
+                                        <MessageCircle size={15} />
+                                        <span className='text-xs sm:text-sm'>{disc.comments_count || 0}</span>
                                     </div>
                                     <div className='flex items-center gap-1'>
-                                        <Eye size={16} />
-                                        <span>{disc.views || 0}</span>
+                                        <Eye size={15} />
+                                        <span className='text-xs sm:text-sm'>{disc.views || 0}</span>
                                     </div>
                                 </div>
-                                <div className='flex items-center gap-2'>
+
+                                {/* Action buttons */}
+                                <div className='flex items-center gap-2 flex-shrink-0'>
                                     <button
                                         className='hover:text-gray-800 transition'
                                         onClick={(e) => handleEdit(disc, e)}
                                     >
-                                        <FaRegEdit size={16} />
+                                        <FaRegEdit size={15} />
                                     </button>
 
-                                    {/* NEW DELETE BUTTON */}
                                     <DeleteButton
                                         targetId={disc._id || disc.id}
                                         itemName="Discussion"
@@ -214,9 +217,9 @@ const My_discussions_page = () => {
                                         onClick={(e) => handleBookmark(disc, e)}
                                     >
                                         {isBookmarked(disc._id || disc.id) ? (
-                                            <BsBookmarkDashFill size={16} />
+                                            <BsBookmarkDashFill size={15} />
                                         ) : (
-                                            <BsBookmarkDash size={16} />
+                                            <BsBookmarkDash size={15} />
                                         )}
                                     </button>
 
@@ -230,9 +233,15 @@ const My_discussions_page = () => {
                         </div>
                     ))}
                 </div>
+
+                {filteredAndSortedDiscussions.length === 0 && !loading && (
+                    <div className='w-full flex justify-center py-20'>
+                        <p className='font-["Inter"] text-xl text-gray-500'>No discussions found.</p>
+                    </div>
+                )}
             </div>
         </div>
-    )
+    );
 }
 
 export default My_discussions_page
