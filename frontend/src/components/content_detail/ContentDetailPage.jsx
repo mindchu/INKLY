@@ -128,19 +128,24 @@ const ContentDetailPage = () => {
     };
 
     const handleDelete = async () => {
-        setDeleting(true);
         try {
-            const response = await api.delete(`/content/${contentId}`);
+            // Separate the endpoints based on admin status
+            const endpointUrl = profileData.is_admin 
+                ? `/admin/content/${contentId}` 
+                : `/content/${contentId}`;
+            const response = await api.delete(endpointUrl);
             if (response.success) {
-                navigate('/home');
-            } else {
-                console.error('Failed to delete content:', response.message);
+                if (location.state && location.state.from) {
+                    navigate(location.state.from);
+                } 
+                else if (content.type === 'discussion') {
+                    navigate('/discussion');
+                } else {
+                    navigate('/note_forum');
+                }
             }
         } catch (error) {
-            console.error('Failed to delete content:', error);
-        } finally {
-            setDeleting(false);
-            setShowDeleteConfirm(false);
+            console.error("Error deleting post:", error);
         }
     };
 
@@ -392,16 +397,21 @@ const ContentDetailPage = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-6 text-gray-400">
+                                {/* EDIT BUTTON: Only the original author can see this */}
                                 {profileData && profileData.google_id === content.author_id && (
-                                    <>
-                                        <button onClick={() => navigate(`/edit/${contentId}`)} className="flex items-center gap-2 hover:text-blue-500 transition-colors" title="Edit Content">
-                                            <MdEdit size={24} />
-                                        </button>
-                                        <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-2 hover:text-red-500 transition-colors" title="Delete Content">
-                                            <MdDelete size={24} />
-                                        </button>
-                                    </>
+                                    <button onClick={() => navigate(`/edit/${contentId}`)} className="flex items-center gap-2 hover:text-blue-500 transition-colors" title="Edit Content">
+                                        <MdEdit size={24} />
+                                    </button>
                                 )}
+
+                                {/* DELETE BUTTON: The author OR an admin can see this */}
+                                {profileData && (profileData.google_id === content.author_id || profileData.is_admin) && (
+                                    <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-2 hover:text-red-500 transition-colors" title="Delete Content">
+                                        <MdDelete size={24} />
+                                    </button>
+                                )}
+
+                                {/* LIKE BUTTON */}
                                 <button onClick={handleLike} className="flex items-center gap-2 hover:text-red-500 transition-colors">
                                     {content.is_liked ? <IoHeart size={24} className="text-red-500" /> : <IoHeartOutline size={24} />}
                                     <span className={content.is_liked ? 'text-red-500 font-medium' : 'font-medium'}>

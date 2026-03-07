@@ -150,12 +150,15 @@ async def toggle_content_like(content_id: str, request: Request):
     return {"success": True, "is_liked": result}
 
 @router.delete("/content/{content_id}")
-async def delete_content(content_id: str, request: Request):
-    user = require_auth(request)
-    result = content_util.delete_content(content_id, user['google_id'])
-    if not result:
-        raise HTTPException(status_code=403, detail="Not authorized or content not found")
-    return {"success": True}
+async def delete_user_content(content_id: str, request: Request):
+    user = request.session.get('user')
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")     
+    user_id = user['google_id']
+    success = content_util.delete_content(content_id, user_id)
+    if not success:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this or content not found")
+    return {"success": True, "message": "Content deleted successfully"}
 
 @router.put("/content/{content_id}")
 async def update_content(
@@ -166,7 +169,7 @@ async def update_content(
     type: str = Form(...),
     tags: List[str] = Form(default=[]),
     existing_file_paths: List[str] = Form(default=[]), 
-    license_agreement: bool = Form(default=False), # ADD THIS LINE!
+    license_agreement: bool = Form(default=False),
     files: Optional[List[UploadFile]] = File(default=None)
 ):
     user = request.session.get('user')

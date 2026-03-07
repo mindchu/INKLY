@@ -480,21 +480,16 @@ def delete_content(content_id: str, user_id: str) -> bool:
     doc = db.posts.find_one({"_id": content_id})
     collection = db.posts
     content_type = "post"
-    
     if not doc:
         doc = db.discussions.find_one({"_id": content_id})
         collection = db.discussions
         content_type = "discussion"
-    
     if not doc or doc.get('author_id') != user_id:
         return False
-    
     comment_ids = doc.get('comment_ids', [])
     for comment_id in comment_ids:
         _delete_comment_recursive(comment_id)
-    
     result = collection.delete_one({"_id": content_id})
-    
     if result.deleted_count > 0:
         db.likes.delete_many({"content_id": content_id})
         if content_type == 'post':
