@@ -18,25 +18,30 @@ import { getMediaUrl } from '../config';
 import { FaUserCircle } from 'react-icons/fa';
 
 
-// ── Mobile tab pages — 4 tabs + next/back per page ─────────────────────────
+// ── Mobile tab pages ────────────────────────────────────────────────────────
+// Page 0: no arrows (full width 4 tabs)
+// Pages 1–3: back + 4 tabs + next (where applicable)
 const TAB_PAGES = [
     [
-        { label: 'Home',       iconOff: AiOutlineHome,  iconOn: AiFillHome,      path: '/home' },
-        { label: 'Discussion', iconOff: BiChat,          iconOn: BiSolidChat,     path: '/discussion' },
-        { label: 'Search',     iconOff: RiSearch2Line,   iconOn: RiSearch2Fill,   path: '/search' },
-        { label: 'Profile',    iconOff: MdPersonOutline, iconOn: MdPerson,        path: '/profile' },
+        { label: 'Home',       iconOff: AiOutlineHome,    iconOn: AiFillHome,         path: '/home' },
+        { label: 'Discussion', iconOff: BiChat,            iconOn: BiSolidChat,         path: '/discussion' },
+        { label: 'Search',     iconOff: RiSearch2Line,     iconOn: RiSearch2Fill,       path: '/search' },
+        { label: 'Profile',    iconOff: MdPersonOutline,   iconOn: MdPerson,            path: '/profile' },
     ],
     [
-        { label: 'Notes',     iconOff: PiNotepadLight, iconOn: PiNotepadBold,   path: '/note_forum' },
-        { label: 'Following', iconOff: HiOutlineUsers, iconOn: HiUsers,         path: '/following' },
-        { label: 'Bookmark',  iconOff: IoBookmarkOutline, iconOn: IoBookmark,   path: '/bookmarks' },
-        { label: 'Create',    iconOff: IoCreateOutline, iconOn: IoCreate,       path: '/create_note' },
+        { label: 'Notes',     iconOff: PiNotepadLight,    iconOn: PiNotepadBold,       path: '/note_forum' },
+        { label: 'Following', iconOff: HiOutlineUsers,    iconOn: HiUsers,             path: '/following' },
+        { label: 'Bookmark',  iconOff: IoBookmarkOutline, iconOn: IoBookmark,          path: '/bookmarks' },
+        { label: 'Create',    iconOff: IoCreateOutline,   iconOn: IoCreate,            path: '/create_note' },
     ],
     [
-        { label: 'My Notes',  iconOff: CgNotes,         iconOn: CgNotes,         path: '/my_notes' },
-        { label: 'My Disc.',  iconOff: BiChat,           iconOn: BiSolidChat,     path: '/my_discussions' },
-        { label: 'Interests', iconOff: MdInterests,      iconOn: MdInterests,     path: '/interests' },
-        { label: 'Sign Out',  iconOff: PiSignOutBold,    iconOn: PiSignOutBold,   path: null, isSignOut: true },
+        { label: 'My Notes',  iconOff: CgNotes,           iconOn: CgNotes,             path: '/my_notes' },
+        { label: 'My Disc.',  iconOff: BiChat,             iconOn: BiSolidChat,         path: '/my_discussions' },
+        { label: 'Interests', iconOff: MdInterests,        iconOn: MdInterests,         path: '/interests' },
+        { label: 'Sign Out',  iconOff: PiSignOutBold,      iconOn: PiSignOutBold,       path: null, isSignOut: true },
+    ],
+    [
+        { label: 'Admin',     iconOff: MdAdminPanelSettings, iconOn: MdAdminPanelSettings, path: '/admin', isAdmin: true },
     ],
 ]
 // ───────────────────────────────────────────────────────────────────────────
@@ -61,7 +66,7 @@ const Side_bar = () => {
     // Auto-jump to correct tab page based on active route
     useEffect(() => {
         TAB_PAGES.forEach((page, pageIdx) => {
-            if (page.some(tab => tab.path === location.pathname)) {
+            if (page.some(tab => tab.path && tab.path === location.pathname)) {
                 setTabPage(pageIdx);
             }
         });
@@ -103,8 +108,14 @@ const Side_bar = () => {
         });
     }
 
-    const totalPages = TAB_PAGES.length;
-    const currentTabs = TAB_PAGES[tabPage];
+    // Only show admin tab page if user is admin
+    const visibleTabPages = profileData?.is_admin ? TAB_PAGES : TAB_PAGES.slice(0, 3);
+    const totalPages = visibleTabPages.length;
+    const currentTabs = visibleTabPages[tabPage] || visibleTabPages[0];
+
+    // Is this the first page? → no arrows, full width
+    const isFirstPage = tabPage === 0;
+    const isLastPage  = tabPage === totalPages - 1;
 
     return (
         <>
@@ -118,9 +129,9 @@ const Side_bar = () => {
 
             {/* ── Desktop sidebar ─────────────────────────────────── */}
             <div className={`
-                hidden md:flex flex-col
+                hidden md:flex flex-col flex-shrink-0
                 ${isOpen ? 'w-[260px]' : 'w-[80px]'}
-                relative z-50 h-screen bg-white shadow-2xl transition-all duration-300 flex-shrink-0
+                relative z-50 h-screen bg-white shadow-2xl transition-all duration-300
             `}>
                 <div className='flex flex-row items-center justify-between'>
                     <div className={`flex flex-row items-center transition-all duration-300 overflow-hidden ${isOpen ? 'opacity-100 ml-6' : 'opacity-0 w-0 ml-0'}`}>
@@ -197,8 +208,9 @@ const Side_bar = () => {
 
             {/* ── Mobile bottom tab bar ───────────────────────────── */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-                {/* Page dots */}
-                <div className="flex justify-center gap-1.5 py-1.5 bg-white/95 backdrop-blur-sm">
+
+                {/* Page indicator dots */}
+                <div className="flex justify-center items-center gap-1.5 py-1.5 bg-white/95 backdrop-blur-sm">
                     {Array.from({ length: totalPages }).map((_, i) => (
                         <button
                             key={i}
@@ -212,26 +224,26 @@ const Side_bar = () => {
                     ))}
                 </div>
 
-                {/* Tab bar */}
+                {/* Tab row */}
                 <div className="bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
-                    <div className="flex items-stretch h-[62px] px-2">
+                    <div className={`flex items-stretch h-[62px] ${isFirstPage ? '' : 'px-2'}`}>
 
-                        {/* ← Back (hidden on first page) */}
-                        <button
-                            onClick={() => setTabPage(p => Math.max(0, p - 1))}
-                            className={`flex flex-col items-center justify-center gap-0.5 w-10 py-2 transition-all duration-200 ${
-                                tabPage === 0 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-[#3E4A34]'
-                            }`}
-                        >
-                            <FiChevronLeft size={18} />
-                        </button>
+                        {/* ← Back — hidden on page 0 */}
+                        {!isFirstPage && (
+                            <button
+                                onClick={() => setTabPage(p => Math.max(0, p - 1))}
+                                className="flex flex-col items-center justify-center w-10 py-2 text-gray-400 hover:text-[#3E4A34] transition-colors"
+                            >
+                                <FiChevronLeft size={18} />
+                            </button>
+                        )}
 
-                        {/* Tabs */}
+                        {/* Tabs — stretch full width on page 0, share space on others */}
                         <div className="flex flex-1 items-stretch">
                             {currentTabs.map((tab) => {
                                 const isActive = location.pathname === tab.path;
                                 const IconOff = tab.iconOff;
-                                const IconOn = tab.iconOn;
+                                const IconOn  = tab.iconOn;
                                 return (
                                     <button
                                         key={tab.label}
@@ -242,12 +254,14 @@ const Side_bar = () => {
                                         className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 px-1 relative transition-all duration-200 ${
                                             tab.isSignOut
                                                 ? 'text-red-400 hover:text-red-600'
-                                                : isActive
-                                                    ? 'text-[#3E4A34]'
-                                                    : 'text-gray-400 hover:text-gray-600'
+                                                : tab.isAdmin
+                                                    ? isActive ? 'text-amber-700' : 'text-amber-500 hover:text-amber-600'
+                                                    : isActive
+                                                        ? 'text-[#3E4A34]'
+                                                        : 'text-gray-400 hover:text-gray-600'
                                         }`}
                                     >
-                                        {/* Active pill background */}
+                                        {/* Active pill */}
                                         {isActive && !tab.isSignOut && (
                                             <span className="absolute inset-x-2 top-1 bottom-1 bg-[#EEF2E1] rounded-xl -z-0" />
                                         )}
@@ -268,15 +282,15 @@ const Side_bar = () => {
                             })}
                         </div>
 
-                        {/* → Next (hidden on last page) */}
-                        <button
-                            onClick={() => setTabPage(p => Math.min(totalPages - 1, p + 1))}
-                            className={`flex flex-col items-center justify-center gap-0.5 w-10 py-2 transition-all duration-200 ${
-                                tabPage === totalPages - 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-[#3E4A34]'
-                            }`}
-                        >
-                            <FiChevronRight size={18} />
-                        </button>
+                        {/* → Next — hidden on last page */}
+                        {!isLastPage && (
+                            <button
+                                onClick={() => setTabPage(p => Math.min(totalPages - 1, p + 1))}
+                                className="flex flex-col items-center justify-center w-10 py-2 text-gray-400 hover:text-[#3E4A34] transition-colors"
+                            >
+                                <FiChevronRight size={18} />
+                            </button>
+                        )}
 
                     </div>
                 </div>
