@@ -105,21 +105,19 @@ const NoteModal = ({ note, onClose }) => {
         >
             <div className="absolute inset-0 bg-black/40" />
 
-            {/* ── Container ────────────────────────────────────────── */}
             <div
                 className="relative z-10 bg-white w-full flex flex-col h-[100dvh] md:h-auto md:rounded-2xl md:shadow-2xl md:max-w-2xl md:max-h-[90vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
-
-                {/* ── Mobile top nav bar ───────────────────────────── */}
+                {/* ── Mobile top nav ───────────────────────────────── */}
                 <div className="md:hidden flex items-center gap-2 px-3 py-2.5 border-b border-gray-100 flex-shrink-0 bg-white">
                     <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-full transition flex-shrink-0">
                         <IoChevronBack size={20} className="text-gray-700" />
                     </button>
-                    <span className="text-sm font-semibold text-gray-700 truncate flex-1">Back</span>
+                    <span className="text-sm font-semibold text-gray-700">Back</span>
                 </div>
 
-                {/* ── Desktop header (unchanged) ───────────────────── */}
+                {/* ── Desktop header ───────────────────────────────── */}
                 <div className="hidden md:flex items-start justify-between p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex-1">
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">{note.title}</h2>
@@ -144,19 +142,18 @@ const NoteModal = ({ note, onClose }) => {
                 </div>
 
                 {/* ── Scrollable body ───────────────────────────────── */}
-                <div className="flex-1 overflow-y-auto bg-[#EEF2E1] md:bg-white">
+                <div className="flex-1 overflow-y-auto">
 
-                    {/* ═══════════════════════════════════════════════
-                        MOBILE LAYOUT — matches the sketch
-                    ═══════════════════════════════════════════════ */}
-                    <div className="md:hidden flex flex-col gap-3 p-3 pb-24">
+                    {/* ══════════════════════════════════════
+                        MOBILE — two separate cards
+                    ══════════════════════════════════════ */}
+                    <div className="md:hidden bg-[#EEF2E1] flex flex-col gap-3 p-3 pb-24 min-h-full">
 
-                        {/* ── Card 1: Note info ─────────────────────── */}
-                        <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+                        {/* ─── CARD 1: Note ─────────────────────── */}
+                        <div className="bg-white rounded-2xl shadow-sm">
 
-                            {/* Tags + title + author */}
+                            {/* Tags + Title + Author */}
                             <div className="px-4 pt-4 pb-3">
-                                {/* Tags */}
                                 {note.tags?.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-2">
                                         {note.tags.map((tag, i) => (
@@ -166,11 +163,7 @@ const NoteModal = ({ note, onClose }) => {
                                         ))}
                                     </div>
                                 )}
-
-                                {/* Title */}
                                 <h2 className="text-lg font-bold text-gray-900 mb-2 leading-snug">{note.title}</h2>
-
-                                {/* Author */}
                                 <div className="flex items-center gap-2">
                                     {note.author_profile_picture_url ? (
                                         <img src={getMediaUrl(note.author_profile_picture_url)} alt={note.author_username} className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
@@ -186,15 +179,14 @@ const NoteModal = ({ note, onClose }) => {
                                 </div>
                             </div>
 
-                            <div className="border-t border-gray-100 mx-4" />
+                            {/* Divider */}
+                            <div className="border-t border-gray-100" />
 
-                            {/* Content + file */}
+                            {/* Content + files */}
                             <div className="px-4 py-3">
                                 <p className="text-sm text-gray-600 leading-relaxed">
                                     {note.text || note.description}
                                 </p>
-
-                                {/* Attachments */}
                                 {note.file_paths?.length > 0 && (
                                     <div className="mt-3 flex flex-col gap-2">
                                         {note.file_paths.map((file, i) => {
@@ -203,26 +195,16 @@ const NoteModal = ({ note, onClose }) => {
                                             return (
                                                 <div key={i} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50">
                                                     {isImage && (
-                                                        <img
-                                                            src={getMediaUrl(`/uploads/${file}`)}
-                                                            alt={file}
-                                                            className="w-full max-h-[200px] object-contain bg-gray-50"
-                                                        />
+                                                        <img src={getMediaUrl(`/uploads/${file}`)} alt={file} className="w-full max-h-[200px] object-contain bg-gray-50" />
                                                     )}
                                                     <div className="flex items-center justify-between px-3 py-2">
                                                         <div className="flex items-center gap-2 min-w-0">
-                                                            <div className={`${fileInfo.color} text-white px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0`}>
-                                                                {fileInfo.label}
-                                                            </div>
+                                                            <div className={`${fileInfo.color} text-white px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0`}>{fileInfo.label}</div>
                                                             <p className="text-xs text-gray-600 truncate max-w-[130px]">{file}</p>
                                                         </div>
                                                         <div className="flex gap-1">
-                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-blue-500" onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}>
-                                                                <LuEye size={15} />
-                                                            </button>
-                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-500" onClick={() => { const a = document.createElement('a'); a.href = getMediaUrl(`/uploads/${file}`); a.download = file; a.click(); }}>
-                                                                <MdOutlineFileDownload size={15} />
-                                                            </button>
+                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-blue-500" onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}><LuEye size={15} /></button>
+                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-500" onClick={() => { const a = document.createElement('a'); a.href = getMediaUrl(`/uploads/${file}`); a.download = file; a.click(); }}><MdOutlineFileDownload size={15} /></button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -232,80 +214,72 @@ const NoteModal = ({ note, onClose }) => {
                                 )}
                             </div>
 
-                            <div className="border-t border-gray-100 mx-4" />
+                            {/* Divider */}
+                            <div className="border-t border-gray-100" />
 
                             {/* Action bar: edit · delete · like · views */}
-                            <div className="flex items-center px-4 py-3 gap-5">
+                            <div className="flex items-center gap-5 px-4 py-3">
                                 <button className="text-gray-400 hover:text-gray-600 transition">
-                                    <LuPencil size={18} />
+                                    <LuPencil size={17} />
                                 </button>
                                 <button className="text-gray-400 hover:text-red-500 transition">
-                                    <LuTrash2 size={18} />
+                                    <LuTrash2 size={17} />
                                 </button>
-                                <button
-                                    onClick={handleLike}
-                                    className={`flex items-center gap-1 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
-                                >
-                                    {isLiked ? <IoHeart size={18} /> : <IoHeartOutline size={18} />}
+                                <button onClick={handleLike} className={`flex items-center gap-1 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}>
+                                    {isLiked ? <IoHeart size={17} /> : <IoHeartOutline size={17} />}
                                     <span className="text-xs font-medium">{likeCount}</span>
                                 </button>
                                 <div className="flex items-center gap-1 text-gray-400">
-                                    <LuEye size={18} />
+                                    <LuEye size={17} />
                                     <span className="text-xs font-medium">{note.views || 0}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* ── Card 2: Comments ──────────────────────── */}
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                            <div className="px-4 pt-4 pb-3">
-                                <h3 className="font-semibold text-gray-900 text-sm mb-3">Comments</h3>
+                        {/* ─── CARD 2: Comments ─────────────────── */}
+                        <div className="bg-white rounded-2xl shadow-sm px-4 py-4">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-3">Comments</h3>
 
-                                {/* Comment input row */}
-                                <form onSubmit={handleAddComment}>
-                                    <div className="flex items-center gap-2">
-                                        {/* Current user avatar placeholder */}
-                                        <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
-                                            U
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
-                                            placeholder="Add a comment..."
-                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
-                                            disabled={postingComment}
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={postingComment || !newComment.trim()}
-                                            className="bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition flex-shrink-0"
-                                        >
-                                            {postingComment ? '...' : 'Post'}
-                                        </button>
+                            {/* Input row */}
+                            <form onSubmit={handleAddComment} className="mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
+                                        U
                                     </div>
-                                </form>
-
-                                {/* Comment list */}
-                                <div className="mt-3">
-                                    {loadingComments ? (
-                                        <p className="text-center text-sm text-gray-400 py-4">Loading comments...</p>
-                                    ) : comments.length > 0 ? (
-                                        renderComments(comments)
-                                    ) : (
-                                        <p className="text-center text-sm text-gray-400 py-4">No comments yet. Be the first!</p>
-                                    )}
+                                    <input
+                                        type="text"
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        placeholder="Add a comment..."
+                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                        disabled={postingComment}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={postingComment || !newComment.trim()}
+                                        className="bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition flex-shrink-0"
+                                    >
+                                        {postingComment ? '...' : 'Post'}
+                                    </button>
                                 </div>
-                            </div>
+                            </form>
+
+                            {/* Comment list */}
+                            {loadingComments ? (
+                                <p className="text-center text-sm text-gray-400 py-3">Loading comments...</p>
+                            ) : comments.length > 0 ? (
+                                renderComments(comments)
+                            ) : (
+                                <p className="text-center text-sm text-gray-400 py-3">No comments yet. Be the first!</p>
+                            )}
                         </div>
 
                     </div>
 
-                    {/* ═══════════════════════════════════════════════
-                        DESKTOP LAYOUT — unchanged
-                    ═══════════════════════════════════════════════ */}
+                    {/* ══════════════════════════════════════
+                        DESKTOP — unchanged
+                    ══════════════════════════════════════ */}
                     <div className="hidden md:block p-6">
-
                         {note.tags?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-6">
                                 {note.tags.map((tag, i) => (
@@ -313,11 +287,9 @@ const NoteModal = ({ note, onClose }) => {
                                 ))}
                             </div>
                         )}
-
                         <div className="mb-6">
                             <p className="text-gray-700 leading-relaxed">{note.text || note.description}</p>
                         </div>
-
                         {note.file_paths?.length > 0 && (
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-4">
@@ -351,7 +323,6 @@ const NoteModal = ({ note, onClose }) => {
                                 </div>
                             </div>
                         )}
-
                         <div className="border-t border-gray-100 pt-6">
                             <h3 className="font-semibold text-gray-900 mb-4">Comments</h3>
                             <form onSubmit={handleAddComment} className="mb-6">
