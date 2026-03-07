@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoPaperclip } from 'react-icons/go';
 import { MdOutlineFileDownload } from 'react-icons/md';
-import { LuEye, LuBookmarkMinus, LuPencil, LuTrash2 } from 'react-icons/lu';
+import { LuEye, LuPencil, LuTrash2 } from 'react-icons/lu';
 import { IoChevronBack, IoHeart, IoHeartOutline } from 'react-icons/io5';
 import { api } from '../../util/api';
 import { CONFIG, getMediaUrl } from '../../config';
@@ -72,31 +72,30 @@ const NoteModal = ({ note, onClose }) => {
 
     const getFileIcon = (filename) => {
         const ext = filename.split('.').pop().toLowerCase();
-        if (ext === 'pdf')                    return { label: 'PDF',  color: 'bg-red-500' };
-        if (ext === 'xlsx' || ext === 'xls')  return { label: 'XLS',  color: 'bg-green-600' };
-        if (ext === 'docx' || ext === 'doc')  return { label: 'DOC',  color: 'bg-blue-600' };
+        if (ext === 'pdf')                   return { label: 'PDF',  color: 'bg-red-500' };
+        if (ext === 'xlsx' || ext === 'xls') return { label: 'XLS',  color: 'bg-green-600' };
+        if (ext === 'docx' || ext === 'doc') return { label: 'DOC',  color: 'bg-blue-600' };
         return { label: 'FILE', color: 'bg-gray-500' };
     };
 
-    const renderComments = (commentList, level = 0) => {
-        return commentList.map((comment) => (
+    const renderComments = (commentList, level = 0) =>
+        commentList.map((comment) => (
             <div key={comment._id} className={`${level > 0 ? 'ml-6 border-l-2 border-gray-100 pl-3' : ''} mt-3`}>
-                <div className="flex items-start gap-2 min-w-0">
+                <div className="flex items-start gap-2">
                     <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
                         {comment.author_username?.[0]?.toUpperCase() || 'U'}
                     </div>
-                    <div className='min-w-0 flex-1 overflow-hidden'>
+                    <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-xs text-gray-800">{comment.author_username || 'Anonymous'}</span>
+                            <span className="font-semibold text-xs text-gray-800 break-all">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-[11px] text-gray-400">recent</span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-0.5 break-words overflow-wrap-anywhere">{comment.text}</p>
+                        <p className="text-sm text-gray-600 mt-0.5 break-words">{comment.text}</p>
                     </div>
                 </div>
                 {comment.replies?.length > 0 && renderComments(comment.replies, level + 1)}
             </div>
         ));
-    };
 
     return (
         <div
@@ -109,10 +108,9 @@ const NoteModal = ({ note, onClose }) => {
                 className="relative z-10 bg-white w-full flex flex-col h-[100dvh] md:h-auto md:rounded-2xl md:shadow-2xl md:max-w-2xl md:max-h-[90vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
-
                 {/* ── MOBILE TOP NAV ── */}
                 <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0 bg-white">
-                    <button onClick={onClose} className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition">
+                    <button onClick={onClose} className="flex items-center gap-1.5 text-gray-600">
                         <IoChevronBack size={20} />
                         <span className="text-sm font-medium">Back</span>
                     </button>
@@ -126,10 +124,10 @@ const NoteModal = ({ note, onClose }) => {
                     </div>
                 </div>
 
-                {/* ── DESKTOP HEADER — original untouched ── */}
+                {/* ── DESKTOP HEADER — untouched ── */}
                 <div className="hidden md:flex items-start justify-between p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-3">{note.title}</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3 break-words">{note.title}</h2>
                         <div className="flex items-center gap-3">
                             {note.author_profile_picture_url ? (
                                 <img src={getMediaUrl(note.author_profile_picture_url)} alt={note.author_username} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
@@ -153,14 +151,14 @@ const NoteModal = ({ note, onClose }) => {
                 {/* ── SCROLLABLE BODY ── */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden">
 
-                    {/* ══ MOBILE LAYOUT ══ */}
-                    <div className="md:hidden bg-[#EEF2E1] flex flex-col gap-3 p-3 pb-24 min-h-full w-full overflow-x-hidden">
+                    {/* ══ MOBILE ══ */}
+                    <div className="md:hidden bg-[#EEF2E1] flex flex-col gap-3 p-3 pb-24">
 
                         {/* CARD 1: Note */}
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden w-full">
+                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-                            {/* Tags + Title + Author */}
-                            <div className="px-4 pt-4 pb-3 w-full overflow-hidden">
+                            {/* Section 1: Tags + Title */}
+                            <div className="px-4 pt-4 pb-3">
                                 {note.tags?.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-2.5">
                                         {note.tags.map((tag, i) => (
@@ -170,34 +168,41 @@ const NoteModal = ({ note, onClose }) => {
                                         ))}
                                     </div>
                                 )}
-
-                                <h2 className="text-xl font-bold text-gray-900 leading-snug mb-3 break-words">
+                                <h2 className="text-xl font-bold text-gray-900 leading-snug break-words">
                                     {note.title}
                                 </h2>
+                            </div>
 
-                                {/* Author row — name only, no action icons */}
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    {note.author_profile_picture_url ? (
-                                        <img src={getMediaUrl(note.author_profile_picture_url)} alt={note.author_username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                                    ) : (
-                                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                            {note.author_username?.[0]?.toUpperCase() || 'U'}
-                                        </div>
-                                    )}
-                                    <div className="min-w-0 overflow-hidden">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span className="text-sm font-semibold text-gray-800 truncate max-w-[180px]">
-                                                {note.author_username || 'Unknown'}
-                                            </span>
-                                            <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
-                                        </div>
-                                        <p className="text-[11px] text-gray-400 mt-0.5">Published recently</p>
+                            <div className="border-t border-gray-100" />
+
+                            {/* Section 2: Author — full width block, NO icons beside it */}
+                            <div className="px-4 py-3 flex items-center gap-3">
+                                {note.author_profile_picture_url ? (
+                                    <img
+                                        src={getMediaUrl(note.author_profile_picture_url)}
+                                        alt={note.author_username}
+                                        className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                        {note.author_username?.[0]?.toUpperCase() || 'U'}
                                     </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-sm font-semibold text-gray-800 break-words">
+                                            {note.author_username || 'Unknown'}
+                                        </span>
+                                        <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                    </div>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">Published recently</p>
                                 </div>
                             </div>
 
-                            {/* Like / Views — own strip BEFORE content */}
-                            <div className="flex items-center gap-4 px-4 py-2.5 bg-gray-50 border-t border-b border-gray-100">
+                            <div className="border-t border-gray-100" />
+
+                            {/* Section 3: Like + Views — their own dedicated row */}
+                            <div className="px-4 py-2.5 flex items-center gap-5 bg-gray-50">
                                 <button
                                     onClick={handleLike}
                                     className={`flex items-center gap-1.5 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
@@ -211,29 +216,32 @@ const NoteModal = ({ note, onClose }) => {
                                 </div>
                             </div>
 
-                            {/* Body + files */}
-                            <div className="px-4 py-3 w-full overflow-hidden">
+                            <div className="border-t border-gray-100" />
+
+                            {/* Section 4: Body content */}
+                            <div className="px-4 py-4">
                                 <p className="text-sm text-gray-600 leading-relaxed break-words">
                                     {note.text || note.description}
                                 </p>
+
                                 {note.file_paths?.length > 0 && (
                                     <div className="mt-3 flex flex-col gap-2">
                                         {note.file_paths.map((file, i) => {
                                             const fileInfo = getFileIcon(file);
                                             const isImage = ['png','jpg','jpeg','webp'].includes(file.split('.').pop().toLowerCase());
                                             return (
-                                                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50 w-full">
+                                                <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
                                                     {isImage && (
-                                                        <img src={getMediaUrl(`/uploads/${file}`)} alt={file} className="w-full max-h-[200px] object-contain bg-gray-50" />
+                                                        <img src={getMediaUrl(`/uploads/${file}`)} alt={file} className="w-full max-h-48 object-contain bg-gray-50" />
                                                     )}
-                                                    <div className="flex items-center justify-between px-3 py-2 min-w-0">
-                                                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                                                            <div className={`${fileInfo.color} text-white px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0`}>{fileInfo.label}</div>
-                                                            <p className="text-xs text-gray-600 truncate">{file}</p>
+                                                    <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+                                                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                            <span className={`${fileInfo.color} text-white px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0`}>{fileInfo.label}</span>
+                                                            <span className="text-xs text-gray-600 truncate">{file}</span>
                                                         </div>
                                                         <div className="flex gap-1 flex-shrink-0 ml-2">
-                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-blue-500" onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}><LuEye size={15} /></button>
-                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-500" onClick={() => { const a = document.createElement('a'); a.href = getMediaUrl(`/uploads/${file}`); a.download = file; a.click(); }}><MdOutlineFileDownload size={15} /></button>
+                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-blue-500" onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}><LuEye size={14} /></button>
+                                                            <button className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-500" onClick={() => { const a = document.createElement('a'); a.href = getMediaUrl(`/uploads/${file}`); a.download = file; a.click(); }}><MdOutlineFileDownload size={14} /></button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -245,10 +253,10 @@ const NoteModal = ({ note, onClose }) => {
                         </div>
 
                         {/* CARD 2: Comments */}
-                        <div className="bg-white rounded-2xl shadow-sm px-4 py-4 w-full overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-sm px-4 py-4">
                             <h3 className="font-bold text-gray-900 text-base mb-3">Comments</h3>
 
-                            <form onSubmit={handleAddComment} className="flex items-center gap-2 mb-4 w-full">
+                            <form onSubmit={handleAddComment} className="flex items-center gap-2 mb-4">
                                 <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
                                     U
                                 </div>
@@ -269,21 +277,19 @@ const NoteModal = ({ note, onClose }) => {
                                 </button>
                             </form>
 
-                            <div className="w-full overflow-hidden">
-                                {loadingComments ? (
-                                    <p className="text-center text-sm text-gray-400 py-4">Loading comments…</p>
-                                ) : comments.length > 0 ? (
-                                    renderComments(comments)
-                                ) : (
-                                    <p className="text-center text-sm text-gray-400 py-6">
-                                        No comments yet. Be the first to join the conversation!
-                                    </p>
-                                )}
-                            </div>
+                            {loadingComments ? (
+                                <p className="text-center text-sm text-gray-400 py-4">Loading comments…</p>
+                            ) : comments.length > 0 ? (
+                                renderComments(comments)
+                            ) : (
+                                <p className="text-center text-sm text-gray-400 py-6">
+                                    No comments yet. Be the first to join the conversation!
+                                </p>
+                            )}
                         </div>
                     </div>
 
-                    {/* ══ DESKTOP — original untouched ══ */}
+                    {/* ══ DESKTOP — untouched ══ */}
                     <div className="hidden md:block p-6">
                         {note.tags?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-6">
@@ -312,12 +318,12 @@ const NoteModal = ({ note, onClose }) => {
                                                         <img src={getMediaUrl(`/uploads/${file}`)} alt={file} className="max-h-[400px] object-contain rounded-lg" />
                                                     </div>
                                                 )}
-                                                <div className="flex items-center justify-between p-4 bg-white min-w-0">
-                                                    <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                                                <div className="flex items-center justify-between p-4 bg-white">
+                                                    <div className="flex items-center gap-3 min-w-0 flex-1">
                                                         <div className={`${fileInfo.color} text-white px-3 py-2 rounded-lg font-bold text-xs flex-shrink-0`}>{fileInfo.label}</div>
                                                         <p className="font-medium text-gray-900 truncate">{file}</p>
                                                     </div>
-                                                    <div className="flex gap-2 flex-shrink-0 ml-2">
+                                                    <div className="flex gap-2 flex-shrink-0 ml-3">
                                                         <button className="p-2 hover:bg-gray-100 rounded-lg transition text-blue-600" onClick={() => window.open(getMediaUrl(`/uploads/${file}`), '_blank')}><LuEye size={20} /></button>
                                                         <button className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600" onClick={() => { const a = document.createElement('a'); a.href = getMediaUrl(`/uploads/${file}`); a.download = file; a.click(); }}><MdOutlineFileDownload size={20} /></button>
                                                     </div>
@@ -347,12 +353,8 @@ const NoteModal = ({ note, onClose }) => {
                             )}
                         </div>
                         <div className="flex items-center gap-5 mt-6 pt-4 border-t border-gray-100">
-                            <button className="text-gray-400 hover:text-gray-600 transition">
-                                <LuPencil size={17} />
-                            </button>
-                            <button className="text-gray-400 hover:text-red-500 transition">
-                                <LuTrash2 size={17} />
-                            </button>
+                            <button className="text-gray-400 hover:text-gray-600 transition"><LuPencil size={17} /></button>
+                            <button className="text-gray-400 hover:text-red-500 transition"><LuTrash2 size={17} /></button>
                             <button onClick={handleLike} className={`flex items-center gap-1 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}>
                                 {isLiked ? <IoHeart size={17} /> : <IoHeartOutline size={17} />}
                                 <span className="text-xs font-medium">{likeCount}</span>
