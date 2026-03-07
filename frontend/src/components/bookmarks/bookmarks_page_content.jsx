@@ -8,6 +8,7 @@ import { useBookmarks } from '../../context/BookmarksContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
+import { TagsChipView } from '../common/TagsChip';
 
 
 const Bookmarks_page_content = ({ sortBy }) => {
@@ -140,14 +141,7 @@ const Bookmarks_page_content = ({ sortBy }) => {
                         )}
 
                         <div className='flex flex-wrap gap-2 mb-4'>
-                            {note.tags && note.tags.map((tag, tagIndex) => (
-                                <span
-                                    key={tagIndex}
-                                    className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium'
-                                >
-                                    #{tag}
-                                </span>
-                            ))}
+                            <TagsChipView tags={note.tags} />
                         </div>
 
                         <div className='border-t border-gray-200 mb-4'></div>

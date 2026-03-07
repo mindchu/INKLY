@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FaTag, FaPlus } from "react-icons/fa6";
 import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
+import { TagsChipAdd, TagsChipCreate } from '../common/TagsChip';
+import { Tag } from 'lucide-react';
 
 const Interests_page = () => {
     const { profileData, loading: profileLoading, updateProfile } = useProfileContext();
@@ -98,24 +100,7 @@ const Interests_page = () => {
                         </h2>
                         <div className='flex flex-wrap gap-2'>
                             {userInterests.length > 0 ? (
-                                userInterests.map((tagName, index) => {
-                                    const tagInfo = allTags.find(t => t.name === tagName) || {};
-                                    return (
-                                        <span
-                                            key={index}
-                                            style={{ backgroundColor: tagInfo.color || '#E8F0E5' }}
-                                            className='inline-flex items-center gap-2 px-4 py-2 text-[#577F4E] rounded-full text-sm font-medium border border-[#C7D9C1] transition-all hover:brightness-95'
-                                        >
-                                            {tagName}
-                                            <button
-                                                onClick={() => handleRemoveTag(tagName)}
-                                                className='hover:text-[#C85A5A] transition-colors font-bold'
-                                            >
-                                                ×
-                                            </button>
-                                        </span>
-                                    );
-                                })
+                                <TagsChipCreate tags={userInterests} handleRemoveTag={handleRemoveTag} />
                             ) : (
                                 <p className='text-[#9AAF94] italic'>You haven't added any interests yet.</p>
                             )}
@@ -146,21 +131,7 @@ const Interests_page = () => {
 
                             {/* Suggestions Dropdown */}
                             {tagInput && filteredSuggestions.length > 0 && (
-                                <div className='absolute z-10 mt-2 w-full max-w-md bg-white border border-[#D4D9C6] rounded-xl shadow-lg overflow-hidden'>
-                                    {filteredSuggestions.slice(0, 5).map((tag, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleAddTag(tag.name)}
-                                            className='w-full text-left px-4 py-3 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0'
-                                        >
-                                            <div className='flex items-center gap-2'>
-                                                <div className='w-3 h-3 rounded-full' style={{ backgroundColor: tag.color }}></div>
-                                                <span>{tag.name}</span>
-                                            </div>
-                                            <FaPlus size={12} className='text-[#9AAF94]' />
-                                        </button>
-                                    ))}
-                                </div>
+                                <TagsChipAdd tags={filteredSuggestions} handleAddTag={handleAddTag} interests={userInterests} />
                             )}
                         </div>
                     </div>
@@ -169,19 +140,7 @@ const Interests_page = () => {
                     <div>
                         <h2 className='text-lg font-semibold text-[#3A5335] mb-4'>Suggested for You</h2>
                         <div className='flex flex-wrap gap-2'>
-                            {allTags
-                                .filter(tag => !userInterests.includes(tag.name))
-                                .slice(0, 15)
-                                .map((tag, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleAddTag(tag.name)}
-                                        style={{ borderColor: tag.color }}
-                                        className='px-4 py-2 bg-[#F5F7EF] text-[#7A8A73] rounded-full text-sm font-medium border hover:brightness-95 transition-all'
-                                    >
-                                        + {tag.name}
-                                    </button>
-                                ))}
+                            <TagsChipAdd tags={allTags} handleAddTag={handleAddTag} interests={userInterests} />
                         </div>
                     </div>
                 </div>

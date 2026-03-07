@@ -2,6 +2,7 @@ import React from 'react'
 import { FaUserCircle } from 'react-icons/fa'
 import { useProfileContext } from '../../context/ProfileContext'
 import { getMediaUrl } from '../../config'
+import { TagsChipView } from '../common/TagsChip'
 
 
 const Profile_page = () => {
@@ -63,25 +64,7 @@ const Profile_page = () => {
               <p className='text-sm text-gray-600'>Following</p>
             </div>
           </div>
-
-          {profileData.interests && profileData.interests.length > 0 && (
-            <>
-              <div className='border-t border-gray-200 my-6'></div>
-              <div>
-                <h3 className='text-lg font-semibold text-gray-700 mb-4'>Interests</h3>
-                <div className='flex flex-wrap gap-3'>
-                  {profileData.interests.map((interest, index) => (
-                    <span
-                      key={index}
-                      className='bg-[#E8FFDF] text-[#124C09] px-4 py-2 rounded-full text-sm font-medium'
-                    >
-                      #{interest}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          <TagsChipView tags={profileData.interested_tags} />
         </div>
       </div>
     </div>

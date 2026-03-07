@@ -11,6 +11,7 @@ import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
 import FollowChip from '../common/FollowChip'
 import { getMediaUrl } from '../../config'
+import { TagsChipView } from '../common/TagsChip';
 
 
 const My_notes_page = () => {
@@ -149,18 +150,7 @@ const My_notes_page = () => {
               )}
 
               {/* Tags */}
-              {note.tags?.length > 0 && (
-                <div className='flex flex-wrap gap-2 mb-4'>
-                  {note.tags.map((tag, tagIndex) => (
-                    <span
-                      key={tagIndex}
-                      className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium whitespace-nowrap'
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <TagsChipView tags={note.tags} />
 
               <div className='border-t border-gray-200 mb-4'></div>
 

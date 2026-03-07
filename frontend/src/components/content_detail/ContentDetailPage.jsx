@@ -11,6 +11,7 @@ import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
 import { getMediaUrl } from '../../config';
 import DeleteButton from '../../components/button/DeleteButton';
+import { TagsChipView } from '../common/TagsChip';
 
 const addReplyToTree = (comments, parentId, newReply) => {
     return comments.map(comment => {
@@ -333,15 +334,8 @@ const ContentDetailPage = () => {
                     <div className="p-5 md:p-8 border-b border-gray-100">
 
                         {/* Tags */}
-                        {content.tags?.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-3">
-                                {content.tags.map((tag, index) => (
-                                    <span key={index} className="text-xs px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium">
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
+                        <TagsChipView tags={content.tags} />
+
 
                         {/* Title */}
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 break-words">

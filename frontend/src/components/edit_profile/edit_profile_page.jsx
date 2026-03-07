@@ -6,6 +6,7 @@ import { useProfileContext } from '../../context/ProfileContext'
 import { api } from '../../util/api'
 import { getMediaUrl } from '../../config'
 import AlertModal from '../common/AlertModal'
+import { TagsChipAdd, TagsChipProfile } from '../common/TagsChip'
 
 
 const Edit_profile_page = () => {
@@ -300,43 +301,14 @@ const Edit_profile_page = () => {
           <div className='mb-6'>
             <h3 className='text-sm font-medium text-gray-700 mb-3'>Selected Tags</h3>
             <div className='flex flex-wrap gap-3'>
-              {interests.map((interest, index) => {
-                const tagInfo = allTags.find(t => t.name === interest) || {};
-                return (
-                  <span
-                    key={index}
-                    style={{ backgroundColor: tagInfo.color || '#E8FFDF' }}
-                    className='flex items-center gap-2 bg-[#E8FFDF] text-[#124C09] px-4 py-2 rounded-full text-sm font-medium'
-                  >
-                    #{interest}
-                    <button
-                      onClick={() => handleRemoveTag(interest)}
-                      className='text-[#124C09] hover:text-red-600 transition'
-                    >
-                      ✕
-                    </button>
-                  </span>
-                );
-              })}
+              <TagsChipProfile tags={interests} allTags={allTags} handleRemoveTag={handleRemoveTag} />
             </div>
           </div>
 
           <div>
             <h3 className='text-sm font-medium text-gray-700 mb-3'>Suggested for You</h3>
             <div className='flex flex-wrap gap-2'>
-              {allTags
-                .filter(tag => !interests.includes(tag.name))
-                .slice(0, 10)
-                .map((tag, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAddTag(tag.name)}
-                    style={{ borderColor: tag.color }}
-                    className='px-3 py-1.5 bg-[#F5F7EF] text-[#7A8A73] rounded-full text-xs font-medium border hover:brightness-95 transition-all'
-                  >
-                    + {tag.name}
-                  </button>
-                ))}
+              <TagsChipAdd tags={allTags} handleAddTag={handleAddTag} interests={interests} />
             </div>
           </div>
         </div>
@@ -351,4 +323,4 @@ const Edit_profile_page = () => {
   )
 }
 
-export default Edit_profile_page
+export default Edit_profile_page;

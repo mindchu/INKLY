@@ -3,6 +3,7 @@ import { FaTag } from "react-icons/fa6";
 import { MdDriveFolderUpload } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../util/api';
+import { TagsChipCreate } from '../common/TagsChip';
 
 const Create_discussion_page = () => {
     const navigate = useNavigate();
@@ -213,20 +214,7 @@ const Create_discussion_page = () => {
                         </label>
                         <div className='relative'>
                             <div className='relative w-full border border-[#D4D9C6] bg-white rounded-md min-h-[42px] flex flex-wrap items-center gap-1.5 px-3 py-1.5 focus-within:ring-2 focus-within:ring-[#6B9D63] focus-within:border-transparent transition-all'>
-                                {tags.map((tag, index) => (
-                                    <span
-                                        key={index}
-                                        className='bg-[#E8F0E5] text-[#577F4E] px-3 py-1 rounded-full text-sm inline-flex items-center gap-2 border border-[#C7D9C1] h-fit whitespace-nowrap'
-                                    >
-                                        {tag}
-                                        <button
-                                            onClick={() => handleRemoveTag(tag)}
-                                            className='hover:text-[#C85A5A] transition-colors focus:outline-none flex items-center justify-center font-bold'
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
+                                <TagsChipCreate tags={tags} handleRemoveTag={handleRemoveTag} />
                                 <input
                                     type='text'
                                     value={tagInput}

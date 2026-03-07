@@ -11,6 +11,7 @@ import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
 import ShareButton from '../button/ShareButton';
+import { TagsChipView } from '../common/TagsChip';
 
 const Note_forum_page = () => {
   const navigate = useNavigate();
@@ -149,18 +150,8 @@ const Note_forum_page = () => {
                   </div>
 
                   {/* ── Tags ────────────────────────────────────── */}
-                  {post.tags?.length > 0 && (
-                    <div className='flex flex-row flex-wrap gap-1.5 mt-2.5'>
-                      {post.tags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className='bg-[#E8FFDF] text-[#124C09]/70 font-["Inter"] text-[11px] md:text-[12px] px-2.5 py-0.5 rounded-full'
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <TagsChipView tags={post.tags} />
+
 
                   {/* ── Actions ─────────────────────────────────── */}
                   <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100'>

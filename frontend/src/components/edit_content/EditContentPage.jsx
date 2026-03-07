@@ -4,6 +4,7 @@ import { FaTag } from "react-icons/fa6";
 import { MdDriveFolderUpload } from "react-icons/md";
 import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
+import { TagsChipCreate } from '../common/TagsChip';
 
 const EditContentPage = () => {
     const { contentId } = useParams();
@@ -283,14 +284,7 @@ const EditContentPage = () => {
                         </label>
                         <div className='relative'>
                             <div className='relative w-full border border-[#D4D9C6] bg-white rounded-md min-h-[42px] flex flex-wrap items-center gap-1.5 px-3 py-1.5 focus-within:ring-2 focus-within:ring-[#6B9D63] focus-within:border-transparent transition-all'>
-                                {tags.map((tag, index) => (
-                                    <span key={index} className='bg-[#E8F0E5] text-[#577F4E] px-3 py-1 rounded-full text-sm inline-flex items-center gap-2 border border-[#C7D9C1] h-fit whitespace-nowrap'>
-                                        {tag}
-                                        <button onClick={() => handleRemoveTag(tag)} className='hover:text-[#C85A5A] transition-colors focus:outline-none flex items-center justify-center font-bold'>
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
+                                <TagsChipCreate tags={tags} handleRemoveTag={handleRemoveTag} />
                                 <input
                                     type='text'
                                     value={tagInput}
@@ -315,7 +309,7 @@ const EditContentPage = () => {
                                             }}
                                             className='w-full text-left px-4 py-2 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0'
                                         >
-                                            <div className='flex items-center gap-2'>
+                                            <div className='flex items-center gap-2 break-all'>
                                                 {suggestion.color && (
                                                     <div className='w-2 h-2 rounded-full' style={{ backgroundColor: suggestion.color }}></div>
                                                 )}

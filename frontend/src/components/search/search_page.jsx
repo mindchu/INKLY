@@ -11,6 +11,8 @@ import { useSearch } from '../../context/SearchContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
+import { Tags } from 'lucide-react';
+import { TagsChipView } from '../common/TagsChip';
 
 
 const Search_page = () => {
@@ -132,15 +134,8 @@ const Search_page = () => {
                                 )}
 
                                 {/* Tags */}
-                                {note.tags && note.tags.length > 0 && (
-                                    <div className='flex flex-row mt-3 items-center gap-2 flex-wrap'>
-                                        {note.tags.map((tag, index) => (
-                                            <p key={index} className='flex h-[26px] w-auto bg-[#E8FFDF] items-center px-[8px] rounded-[12px] text-[#124C09]/70 text-[12px] sm:text-[13px] whitespace-nowrap'>
-                                                #{tag}
-                                            </p>
-                                        ))}
-                                    </div>
-                                )}
+                                <TagsChipView tags={note.tags} />
+
 
                                 <div className='mt-4 w-full border-t border-gray-100'></div>
 

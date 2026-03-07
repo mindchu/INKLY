@@ -370,7 +370,7 @@ const AdminTerminalPage = () => {
                                     <div className="relative">
                                         <div className="min-h-[120px] w-full p-4 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl flex flex-wrap gap-2 content-start focus-within:ring-2 focus-within:ring-[#6B9D63] focus-within:border-transparent transition-all">
                                             {sourceTags.map((tag, index) => (
-                                                <span key={index} className="bg-white text-[#577F4E] px-3 py-1.5 rounded-lg text-sm font-medium inline-flex items-center gap-2 border border-[#E3E8D9] shadow-sm animate-pop-in">
+                                                <span key={index} className="bg-white text-[#577F4E] px-3 py-1.5 rounded-lg text-sm font-medium inline-flex break-all items-center gap-2 border border-[#E3E8D9] shadow-sm animate-pop-in">
                                                     {tag}
                                                     <button
                                                         type="button"
@@ -386,7 +386,7 @@ const AdminTerminalPage = () => {
                                             <input
                                                 type="text"
                                                 placeholder={sourceTags.length === 0 ? "Search tags to merge..." : "Add more..."}
-                                                className="flex-1 min-w-[120px] bg-transparent outline-none border-none py-1 text-sm text-[#2C3E28] placeholder:text-[#9AAF94]"
+                                                className="flex-1 min-w-[120px] bg-transparent break-all outline-none border-none py-1 text-sm text-[#2C3E28] placeholder:text-[#9AAF94]"
                                                 value={tagInput}
                                                 onChange={(e) => setTagInput(e.target.value)}
                                                 onKeyDown={(e) => {
@@ -416,7 +416,7 @@ const AdminTerminalPage = () => {
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: suggestion.color || '#6B9D63' }}></div>
-                                                            <span className="font-medium">{suggestion.name || suggestion}</span>
+                                                            <span className="font-medium break-all">{suggestion.name || suggestion}</span>
                                                         </div>
                                                         <span className="text-xs font-bold text-[#7A8A73] bg-[#EEF2E1] px-2 py-1 rounded-md">{suggestion.use_count || 0} usage</span>
                                                     </button>
@@ -433,7 +433,7 @@ const AdminTerminalPage = () => {
                                             <input
                                                 type="text"
                                                 placeholder="Enter destination tag name..."
-                                                className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
+                                                className="w-full px-4 py-3 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl break-all focus:outline-none focus:ring-2 focus:ring-[#6B9D63] focus:border-transparent text-[#2C3E28] transition-all"
                                                 value={targetTag}
                                                 onChange={(e) => setTargetTag(e.target.value)}
                                                 onFocus={() => targetTag.trim() && targetSuggestions.length > 0 && setShowTargetSuggestions(true)}
@@ -461,7 +461,7 @@ const AdminTerminalPage = () => {
                                     <button
                                         type="submit"
                                         disabled={loading || sourceTags.length === 0}
-                                        className={`w-full py-4 rounded-xl font-bold text-white transition-all transform hover:scale-[1.01] active:scale-[0.98] shadow-lg ${loading || sourceTags.length === 0 ? 'bg-[#9AAF94] cursor-not-allowed shadow-none' : 'bg-[#6B9D63] hover:bg-[#577F4E]'}`}
+                                        className={`w-full py-4 rounded-xl font-bold text-white transition-all break-all transform hover:scale-[1.01] active:scale-[0.98] shadow-lg ${loading || sourceTags.length === 0 ? 'bg-[#9AAF94] cursor-not-allowed shadow-none' : 'bg-[#6B9D63] hover:bg-[#577F4E]'}`}
                                     >
                                         {loading ? 'Merging Data...' : `Merge ${sourceTags.length} Tag${sourceTags.length !== 1 ? 's' : ''}`}
                                     </button>
@@ -476,7 +476,7 @@ const AdminTerminalPage = () => {
                             {[...popularTags].sort((a, b) => (a.name || a).localeCompare(b.name || b)).map((tag, idx) => (
                                 <span
                                     key={idx}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border shadow-sm"
+                                    className="inline-flex break-all items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border shadow-sm"
                                     style={{
                                         backgroundColor: tag.color || '#E8F0E5',
                                         borderColor: tag.color || '#D4D9C6',
