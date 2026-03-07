@@ -6,6 +6,7 @@ import { LuEye } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
 import { LuBookmarkMinus } from "react-icons/lu";
 import { BsBookmarkDashFill } from "react-icons/bs";
+import { GoPaperclip } from "react-icons/go";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
@@ -33,9 +34,7 @@ const Home_page = () => {
     }, [loading, hasMore]);
 
     const formatViews = (views) => {
-        if (views >= 1000) {
-            return (views / 1000).toFixed(1) + 'k';
-        }
+        if (views >= 1000) return (views / 1000).toFixed(1) + 'k';
         return views ? views.toString() : '0';
     };
 
@@ -80,58 +79,86 @@ const Home_page = () => {
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative pb-[76px] md:pb-0'>
 
-            {/* Mobile: no padding/gap so cards are truly full width
-                Desktop: original grid with padding and gaps */}
-            <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:p-8'>
+            {/* Mobile: forum-style list  |  Desktop: original grid */}
+            <div className='flex flex-col gap-3 px-3 py-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:p-8'>
                 {notes.map((note, index) => {
+                    const noteId = note._id || note.id;
                     const isTriggerNote = index === Math.max(0, notes.length - 3);
+                    const thumbFile = note.file_paths?.find(f =>
+                        ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
+                    );
+
                     return (
                         <div
                             ref={isTriggerNote ? lastNoteElementRef : null}
-                            key={note._id || note.id}
-                            /* Mobile: no rounded corners, no margin, full bleed with bottom border
-                               Desktop: original card style */
-                            className='bg-white md:rounded-xl md:shadow-sm md:p-6 p-4 flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99] border-b border-gray-200 md:border-0'
+                            key={noteId}
+                            className='bg-white rounded-[12px] shadow-sm p-3 md:p-6 flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]'
                             onClick={() => handleCardClick(note)}
                         >
-                            <div className="flex justify-between items-start mb-3">
-                                <h3 className='text-base md:text-lg font-semibold text-gray-800 flex-1 pr-2 line-clamp-2'>{note.title}</h3>
-                                {note.type && (
-                                    <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider flex-shrink-0 ${note.type === 'post'
-                                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                        : 'bg-purple-50 text-purple-700 border border-purple-200'
-                                        }`}>
-                                        {note.type === 'post' ? 'Note' : 'Discussion'}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className='flex items-center gap-2 mb-3'>
-                                {note.author_profile_picture_url ? (
-                                    <img
-                                        src={getMediaUrl(note.author_profile_picture_url)}
-                                        alt={note.author_username}
-                                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                                    />
-                                ) : (
-                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white flex-shrink-0'>
-                                        {note.author_username?.[0]?.toUpperCase() || 'U'}
-                                    </div>
-                                )}
-                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0'>
-                                    <span className='truncate'>{note.author_username || 'Unknown'}</span>
-                                    <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
-                                </span>
-                            </div>
-
-                            <div className="flex gap-3 mb-4 flex-grow">
-                                <p className='text-sm text-gray-600 line-clamp-3 flex-1'>
-                                    {note.text}
-                                </p>
-                                {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                            {/* ── Author row ──────────────────────────────── */}
+                            <div className='flex items-center justify-between gap-2'>
+                                <div className='flex items-center gap-2 min-w-0'>
+                                    {note.author_profile_picture_url ? (
                                         <img
-                                            src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
+                                            src={getMediaUrl(note.author_profile_picture_url)}
+                                            alt={note.author_username}
+                                            className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover flex-shrink-0"
+                                        />
+                                    ) : (
+                                        <div className='w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0'>
+                                            {note.author_username?.[0]?.toUpperCase() || 'U'}
+                                        </div>
+                                    )}
+                                    <div className='min-w-0'>
+                                        <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
+                                            <span className='truncate'>{note.author_username || 'Unknown'}</span>
+                                            <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                        </p>
+                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
+                                    </div>
+                                </div>
+
+                                <div className='flex items-center gap-2 flex-shrink-0'>
+                                    {note.type && (
+                                        <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${
+                                            note.type === 'post'
+                                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                                : 'bg-purple-50 text-purple-700 border border-purple-200'
+                                        }`}>
+                                            {note.type === 'post' ? 'Note' : 'Discussion'}
+                                        </span>
+                                    )}
+                                    {note.file_paths?.length > 0 && (
+                                        <button
+                                            className='flex items-center gap-1 px-2.5 h-[26px] bg-[#B3B3B6]/60 text-white rounded-[12px] hover:bg-[#B3B3B6]/80 transition-colors'
+                                            onClick={e => e.stopPropagation()}
+                                        >
+                                            <GoPaperclip size={11} className='text-white' />
+                                            <span className='text-[10px] whitespace-nowrap hidden sm:inline'>
+                                                {note.file_paths.length} Attachment{note.file_paths.length !== 1 ? 's' : ''}
+                                            </span>
+                                            <span className='text-[10px] sm:hidden'>{note.file_paths.length}</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* ── Content ─────────────────────────────────── */}
+                            <div className='mt-3 flex gap-3 flex-grow'>
+                                <div className='flex-1 min-w-0'>
+                                    <p className='font-["Inter"] text-[15px] md:text-[18px] font-semibold text-gray-800 break-words leading-snug line-clamp-2'>
+                                        {note.title}
+                                    </p>
+                                    {note.text && (
+                                        <p className='font-["Inter"] text-[12px] md:text-sm text-gray-500 mt-1.5 break-words line-clamp-2 md:line-clamp-3 whitespace-pre-wrap'>
+                                            {note.text}
+                                        </p>
+                                    )}
+                                </div>
+                                {thumbFile && (
+                                    <div className='w-[64px] h-[56px] md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100'>
+                                        <img
+                                            src={getMediaUrl(`/uploads/${thumbFile}`)}
                                             alt="Thumbnail"
                                             className="w-full h-full object-cover"
                                         />
@@ -139,66 +166,65 @@ const Home_page = () => {
                                 )}
                             </div>
 
-                            {note.file_paths?.length > 0 && (
-                                <div className='mb-4'>
-                                    <span className='text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>
-                                        📎 {note.file_paths.length} Attachment(s)
-                                    </span>
+                            {/* ── Tags ────────────────────────────────────── */}
+                            {note.tags?.length > 0 && (
+                                <div className='flex flex-row flex-wrap gap-1.5 mt-2.5'>
+                                    {note.tags.map((tag, tagIndex) => (
+                                        <span
+                                            key={tagIndex}
+                                            className='bg-[#E8FFDF] text-[#124C09]/70 font-["Inter"] text-[11px] md:text-[12px] px-2.5 py-0.5 rounded-full'
+                                        >
+                                            #{tag}
+                                        </span>
+                                    ))}
                                 </div>
                             )}
 
-                            <div className='flex flex-wrap gap-1.5 mb-4'>
-                                {note.tags?.map((tag, tagIndex) => (
-                                    <span
-                                        key={tagIndex}
-                                        className='text-xs text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full font-medium'
-                                    >
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className='border-t border-gray-200 mb-3'></div>
-
-                            <div className='flex items-center justify-between text-sm text-gray-600'>
-                                <div className='flex items-center gap-3'>
+                            {/* ── Actions ─────────────────────────────────── */}
+                            <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100'>
+                                <div className='flex items-center gap-3 md:gap-4'>
+                                    {/* Like */}
                                     <button
-                                        onClick={(e) => handleLike(note._id || note.id, e)}
-                                        className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
+                                        onClick={(e) => handleLike(noteId, e)}
+                                        className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                     >
-                                        {note.is_liked ? (
-                                            <IoHeart size={16} className='text-red-500' />
-                                        ) : (
-                                            <IoHeartOutline size={16} />
-                                        )}
-                                        <span className={note.is_liked ? 'text-red-500' : ''}>
+                                        {note.is_liked
+                                            ? <IoHeart size={14} className='text-red-500' />
+                                            : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                        }
+                                        <span className={`font-["Inter"] text-[12px] select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                             {note.like_count || 0}
                                         </span>
                                     </button>
+
+                                    {/* Comments */}
                                     <div className='flex items-center gap-1'>
-                                        <PiChatText size={16} />
-                                        <span>{note.comments_count || 0}</span>
+                                        <PiChatText size={14} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{note.comments_count || 0}</span>
                                     </div>
+
+                                    {/* Views */}
                                     <div className='flex items-center gap-1'>
-                                        <LuEye size={16} />
-                                        <span>{formatViews(note.views)}</span>
+                                        <LuEye size={14} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{formatViews(note.views)}</span>
                                     </div>
-                                </div>
-                                <div className='flex items-center gap-2'>
+
+                                    {/* Share */}
                                     <ShareButton
-                                        targetId={note._id || note.id}
+                                        targetId={noteId}
                                         title={note.title}
-                                        text={note.text?.substring(0, 100) || 'Check out this discussion'}
+                                        text={note.text?.substring(0, 100) || 'Check out this post'}
                                     />
+
+                                    {/* Bookmark */}
                                     <button
                                         onClick={(e) => handleBookmark(note, e)}
-                                        className='hover:text-yellow-500 transition cursor-pointer'
+                                        className='flex items-center hover:text-yellow-500 transition-colors'
                                     >
-                                        {isBookmarked(note._id || note.id) ? (
-                                            <BsBookmarkDashFill size={16} className='text-yellow-400' />
-                                        ) : (
-                                            <LuBookmarkMinus size={16} />
-                                        )}
+                                        {isBookmarked(noteId)
+                                            ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
+                                            : <LuBookmarkMinus size={14} className='text-[#292D32]' />
+                                        }
                                     </button>
                                 </div>
                             </div>
@@ -218,7 +244,7 @@ const Home_page = () => {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 export default Home_page
