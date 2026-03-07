@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
 import { IoArrowForward } from "react-icons/io5"; // Removed IoHeart imports
 import { api } from '../../util/api';
-import FollowChip from '../common/FollowChip';
+import { useProfileContext } from '../../context/ProfileContext';
 
 // Import reusable components
 import LikeButton from '../../components/button/LikeButton';
@@ -14,6 +14,7 @@ import DeleteButton from '../../components/button/DeleteButton';
 const CommentThreadPage = () => {
     const { contentId, commentId } = useParams();
     const navigate = useNavigate();
+    const { profileData } = useProfileContext();
     const [anchorComment, setAnchorComment] = useState(null);
     const [replies, setReplies] = useState([]);
     const [contentTitle, setContentTitle] = useState('');
@@ -96,7 +97,7 @@ const CommentThreadPage = () => {
         const updateFn = (c) => ({
             ...c,
             is_liked: isLiked,
-            likes_count: isLiked ? (c.likes_count || 0) + 1 : Math.max(0, (c.likes_count || 1) - 1)
+            like_count: isLiked ? (c.like_count || 0) + 1 : Math.max(0, (c.like_count || 1) - 1)
         });
 
         // Update anchor comment if it's the target
@@ -138,14 +139,6 @@ const CommentThreadPage = () => {
                         <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
 
                         <div className="flex items-center gap-4 mt-2">
-                            
-                            <LikeButton 
-                                targetId={comment._id}
-                                initialIsLiked={comment.is_liked}
-                                initialLikesCount={comment.likes_count || 0}
-                                onLikeSuccess={handleLikeSuccess}
-                            />
-
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
                                 className="text-xs text-green-600 font-medium hover:underline"
@@ -153,11 +146,29 @@ const CommentThreadPage = () => {
                                 {replyingTo === comment._id ? 'Cancel' : 'Reply'}
                             </button>
 
-                            <DeleteButton 
+                            <LikeButton 
                                 targetId={comment._id}
-                                itemName="Comment"
-                                onDeleteSuccess={handleDeleteSuccess}
+                                initialIsLiked={comment.is_liked}
+                                initialLikesCount={comment.like_count || 0}
+                                endpointUrl={`/comment/${comment._id}/like`}
+                                onLikeSuccess={handleLikeSuccess}
                             />
+
+                            {profileData && (profileData.google_id === comment.author_id || profileData.is_admin) && (
+                                <DeleteButton 
+                                    targetId={comment._id}
+                                    itemName="Comment"
+                                    // This logic ensures admins use the admin route and users use the regular one
+                                    endpointUrl={
+                                        profileData.is_admin 
+                                            ? `/admin/content/${contentId}/comment/${comment._id}` 
+                                            : `/comment/${comment._id}`
+                                    }
+                                    onDeleteSuccess={(id) => {
+                                        setComments(prev => prev.filter(c => c._id !== id));
+                                    }}
+                                />
+                            )}
 
                         </div>
 
@@ -251,14 +262,6 @@ const CommentThreadPage = () => {
                                     </p>
 
                                     <div className="flex items-center gap-4 mt-3">
-                                        
-                                        <LikeButton 
-                                            targetId={anchorComment._id}
-                                            initialIsLiked={anchorComment.is_liked}
-                                            initialLikesCount={anchorComment.likes_count || 0}
-                                            onLikeSuccess={handleLikeSuccess}
-                                        />
-
                                         <button
                                             onClick={() => setReplyingTo(replyingTo === anchorComment._id ? null : anchorComment._id)}
                                             className="text-sm text-green-600 font-semibold hover:underline"
@@ -266,12 +269,28 @@ const CommentThreadPage = () => {
                                             {replyingTo === anchorComment._id ? 'Cancel' : 'Reply to this thread'}
                                         </button>
 
-                                        <DeleteButton 
+                                        <LikeButton 
                                             targetId={anchorComment._id}
-                                            itemName="Comment"
-                                            onDeleteSuccess={handleDeleteSuccess}
+                                            initialIsLiked={anchorComment.is_liked}
+                                            initialLikesCount={anchorComment.like_count || 0}
+                                            endpointUrl={`/comment/${anchorComment._id}/like`}
+                                            onLikeSuccess={handleLikeSuccess}
                                         />
 
+                                        {profileData && (profileData.google_id === anchorComment.author_id || profileData.is_admin) && (
+                                            <DeleteButton 
+                                                targetId={anchorComment._id}
+                                                itemName="Comment"
+                                                endpointUrl={
+                                                    profileData.is_admin 
+                                                        ? `/admin/content/${contentId}/comment/${anchorComment._id}` 
+                                                        : `/comment/${anchorComment._id}`
+                                                }
+                                                onDeleteSuccess={() => {
+                                                    navigate(`/content/${contentId}`, { replace: true });
+                                                }}
+                                            />
+                                        )}
                                     </div>
 
                                     {replyingTo === anchorComment._id && (

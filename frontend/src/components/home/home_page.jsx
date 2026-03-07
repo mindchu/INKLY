@@ -52,7 +52,7 @@ const Home_page = () => {
                         return {
                             ...note,
                             is_liked: response.is_liked,
-                            likes_count: response.is_liked ? (note.likes_count || 0) + 1 : (note.likes_count || 1) - 1
+                            like_count: response.is_liked ? (note.like_count || 0) + 1 : (note.like_count || 1) - 1
                         };
                     }
                     return note;
@@ -180,7 +180,7 @@ const Home_page = () => {
                                             <IoHeartOutline size={16} />
                                         )}
                                         <span className={note.is_liked ? 'text-red-500' : ''}>
-                                            {note.likes_count || 0}
+                                            {note.like_count || 0}
                                         </span>
                                     </button>
                                     <div className='flex items-center gap-1'>

@@ -89,11 +89,10 @@ async def get_recommended(request: Request, sort: str = 'likes', tags: Optional[
 async def get_content_detail(content_id: str, request: Request):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    
     item = content_util.get_content_by_id(content_id, user_id=user_id)
     if not item:
         raise HTTPException(status_code=404, detail="Content not found")
-    comments = content_util.get_comment_tree(content_id)
+    comments = content_util.get_comment_tree(content_id, user_id=user_id) 
     return {"data": item, "comments": comments}
 
 @router.get("/bookmarks")
@@ -177,8 +176,8 @@ async def update_content_route(content_id: str, content_data: dict, request: Req
     
     return {"success": True}
 
-@router.delete("/content/{content_id}/comment/{comment_id}")
-async def delete_comment(content_id: str, comment_id: str, request: Request):
+@router.delete("/comment/{comment_id}")
+async def delete_comment(comment_id: str, request: Request):
     user = require_auth(request)
     result = content_util.delete_comment(comment_id, user['google_id'])
     if not result:
@@ -193,10 +192,10 @@ async def toggle_bookmark_route(content_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Content or User not found")
     return {"success": True, "is_bookmarked": result}
 
-@router.post("/content/{content_id}/comment/{comment_id}/like")
-async def toggle_comment_like(content_id: str, comment_id: str, request: Request):
+@router.post("/comment/{comment_id}/like")
+async def toggle_comment_like(comment_id: str, request: Request):
     user = require_auth(request)
-    result = content_util.toggle_like(comment_id, user['google_id'])
+    result = content_util.toggle_comment_like(comment_id, user['google_id'])
     if result is None:
         raise HTTPException(status_code=404, detail="Comment not found")
     return {"success": True, "is_liked": result}
@@ -205,26 +204,31 @@ async def toggle_comment_like(content_id: str, comment_id: str, request: Request
 async def get_comment_thread(content_id: str, comment_id: str, request: Request):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    
-    # 1. Fetch the anchor comment
     comment = db.comments.find_one({"_id": comment_id})
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    
     comment['_id'] = str(comment['_id'])
-    # 2. Add metadata (likes, author info)
-    liked_by = comment.get('liked_by_user_ids', [])
-    comment['likes_count'] = len(liked_by)
-    comment['is_liked'] = user_id in liked_by if user_id else False
+    comment['like_count'] = comment.get('like_count', 0)
+    if user_id:
+        user_like = db.likes.find_one({
+            "target_id": comment_id, 
+            "user_id": user_id, 
+            "type": "comment"
+        })
+        comment['is_liked'] = bool(user_like)
+    else:
+        comment['is_liked'] = False
     
     author = db.users.find_one({"google_id": comment.get('author_id')}, {"username": 1, "profile_picture_url": 1})
     comment['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
-    comment['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
+    comment['author_profile_picture_url'] = author.get('profile_picture_url') if author else None  
     
-    # 3. Fetch its subtree
-    replies = content_util.get_comment_tree(comment_id)
-    
-    # 4. Fetch the parent content title
+    comment.pop('liked_by_user_ids', None)
+    comment.pop('comment_ids', None)
+    comment.pop('reply_ids', None)
+    if 'author_id' in comment:
+        comment['author_id'] = str(comment['author_id'])
+    replies = content_util.get_comment_tree(comment_id, user_id)
     content_doc = db.posts.find_one({"_id": content_id}, {"title": 1})
     if not content_doc:
         content_doc = db.discussions.find_one({"_id": content_id}, {"title": 1})

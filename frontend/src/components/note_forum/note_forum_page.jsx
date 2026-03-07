@@ -46,7 +46,7 @@ const Note_forum_page = () => {
                         return {
                             ...post,
                             is_liked: response.is_liked,
-                            likes_count: response.is_liked ? (post.likes_count || 0) + 1 : (post.likes_count || 1) - 1
+                            like_count: response.is_liked ? (post.like_count || 0) + 1 : (post.like_count || 1) - 1
                         };
                     }
                     return post;
@@ -151,7 +151,7 @@ const Note_forum_page = () => {
                                                 <IoHeartOutline size={14} className='text-[#292D32]' />
                                             )}
                                             <p className={`font-["Inter"] text-[12px] ${post.is_liked ? 'text-red-500' : 'text-gray-500'}`}>
-                                                {post.likes_count || 0}
+                                                {post.like_count || 0}
                                             </p>
                                         </button>
                                         <button className='cursor-pointer gap-[6px] items-center flex flex-row group'>
