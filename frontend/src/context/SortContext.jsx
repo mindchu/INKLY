@@ -12,7 +12,7 @@ export const useSortContext = () => {
 };
 
 export const SortProvider = ({ children, contentType }) => {
-    const [sortBy, setSortBy] = useState('date');
+    const [sortBy, setSortBy] = useState('recommended');
     const [includeTags, setIncludeTags] = useState([]);
     const [excludeTags, setExcludeTags] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -24,7 +24,6 @@ export const SortProvider = ({ children, contentType }) => {
     const limit = 5;
     const lastFetchedSearch = useRef(null);
 
-    // FIX: Accept current values as params to avoid stale closure
     const fetchRecommended = async (pageNum = 0, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
         setLoading(true);
         try {
@@ -33,6 +32,7 @@ export const SortProvider = ({ children, contentType }) => {
             const sortParam = currentSortBy === 'views' ? 'views'
                 : currentSortBy === 'likes' ? 'likes'
                 : currentSortBy === 'comments' ? 'comments'
+                : currentSortBy === 'recommended' ? 'recommended'
                 : 'recent';
             params.append('sort', sortParam);
             params.append('skip', pageNum * limit);
@@ -42,7 +42,6 @@ export const SortProvider = ({ children, contentType }) => {
                 params.append('type', contentType);
             }
 
-            // Send tags as-is, backend handles case-insensitive matching
             if (currentIncludeTags.length > 0) {
                 currentIncludeTags.forEach(tag => params.append('tags', tag));
             }
@@ -83,6 +82,7 @@ export const SortProvider = ({ children, contentType }) => {
             const sortParam = currentSortBy === 'views' ? 'views'
                 : currentSortBy === 'likes' ? 'likes'
                 : currentSortBy === 'comments' ? 'comments'
+                : currentSortBy === 'recommended' ? 'recommended'
                 : 'recent';
             params.append('sort_by', sortParam);
             params.append('scope', 'all');
@@ -116,7 +116,6 @@ export const SortProvider = ({ children, contentType }) => {
         }
     };
 
-    // FIX: Pass current state values directly into fetch functions
     useEffect(() => {
         setPage(0);
         setHasMore(true);

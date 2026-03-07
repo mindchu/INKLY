@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
-import { IoHeartOutline, IoClose } from "react-icons/io5";
+import { IoHeartOutline, IoClose, IoSparkles } from "react-icons/io5";
 import { BiCommentDetail } from "react-icons/bi";
 import { FiMenu } from "react-icons/fi";
 import { useSortContext } from '../../context/SortContext';
@@ -56,6 +56,13 @@ const Home_Top_bar = () => {
           <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Sort by:</p>
           <div className='flex flex-row gap-2'>
             <button
+              onClick={() => setSortBy('recommended')}
+              className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'recommended' ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              <IoSparkles size={16} />
+              <span className='font-["Inter"] text-[14px] font-medium'>Recommended</span>
+            </button>
+            <button
               onClick={() => setSortBy('views')}
               className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === 'views' ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
@@ -86,7 +93,7 @@ const Home_Top_bar = () => {
           </div>
         </div>
 
-        {/* Filter By Section — horizontal layout */}
+        {/* Filter By Section */}
         <div className='mt-3 ml-5 flex flex-row items-center gap-6 pb-2 pr-8 flex-wrap'>
           <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Filter by:</p>
 
@@ -111,7 +118,6 @@ const Home_Top_bar = () => {
             />
           </div>
 
-          {/* Divider */}
           <div className='w-px bg-gray-200 self-stretch' />
 
           {/* Exclude Tags */}

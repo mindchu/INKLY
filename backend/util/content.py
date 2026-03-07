@@ -148,24 +148,34 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
         content.sort(key=lambda x: x.get('views', 0), reverse=True)
     elif sort_by == 'comments':
         content.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
-    else:  # date / recent
+    else:  # date / recent / recommended — base sort by date, boost will reorder
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
-    # Boost: if user has interests or following, float matching content to top
-    # while preserving the relative sort order within each group
-    if user_id and (interested_tags or following_ids):
+    # Boost: only apply when sort is 'recommended'
+    # Score each doc by number of matching interest tags + following
+    # Higher score = more relevant to user, floats to top
+    # Score 0 = no match, still shown but after boosted content
+    if sort_by == 'recommended' and user_id and (interested_tags or following_ids):
         interested_tags_lower = [t.lower() for t in interested_tags]
 
-        def is_boosted(doc):
+        def boost_score(doc):
+            score = 0
+            # Following gets a strong flat boost
             if doc.get('author_id') in following_ids:
-                return True
+                score += 100
+            # Each matching interest tag adds 1 point
             doc_tags_lower = [t.lower() for t in doc.get('tags', [])]
-            if any(t in doc_tags_lower for t in interested_tags_lower):
-                return True
-            return False
+            score += sum(1 for t in interested_tags_lower if t in doc_tags_lower)
+            return score
 
-        boosted = [doc for doc in content if is_boosted(doc)]
-        rest = [doc for doc in content if not is_boosted(doc)]
+        # Stable sort: items with score > 0 float up, ordered by score desc
+        # Items with score 0 stay at the bottom in their original sort order
+        boosted = sorted(
+            [doc for doc in content if boost_score(doc) > 0],
+            key=boost_score,
+            reverse=True
+        )
+        rest = [doc for doc in content if boost_score(doc) == 0]
         content = boosted + rest
 
     final_content = content[skip:skip + limit]
