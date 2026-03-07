@@ -114,8 +114,16 @@ const Create_note_page = () => {
   };
 
   const handlePublish = async () => {
-    if (!noteTitle.trim() || !content.trim()) {
-      showModal('Missing Information', 'Please fill in both the title and content fields.', 'error');
+    if (!noteTitle.trim()) {
+      showModal('Missing Information', 'Please fill in title field.', 'error');
+      return;
+    }
+    if (!content.trim()){
+      showModal('Missing Information', 'Please fill in content field.', 'error');
+      return;
+    }
+    if (attachments.length === 0) {
+      showModal('No Attachments', 'Note must have at least one file, If you have no files, create discussion instead.', 'error');
       return;
     }
     if (attachments.length > 0 && !licenseAgreement) {

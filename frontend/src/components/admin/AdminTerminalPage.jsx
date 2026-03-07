@@ -45,30 +45,24 @@ const AdminTerminalPage = () => {
     const [deleteSuggestions, setDeleteSuggestions] = useState([]);
     const [showDeleteSuggestions, setShowDeleteSuggestions] = useState(false);
 
-    const hasFetched = React.useRef(false);
+    const fetchTagsData = React.useCallback(async () => {
+        try {
+            const [allTagsRes, profileRes] = await Promise.all([
+                api.get('/tags/all'),
+                api.get('/users/me')
+            ]);
+            setPopularTags(allTagsRes.tags || []);
+            setUserInterests(profileRes.interested_tags || []);
+        } catch (error) {
+            console.error('Error fetching tags:', error);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchTagsData = async () => {
-            if (hasFetched.current) return;
-            hasFetched.current = true;
-            try {
-                const [allTagsRes, profileRes] = await Promise.all([
-                    api.get('/tags/all'),
-                    api.get('/users/me')
-                ]);
-                setPopularTags(allTagsRes.tags || []);
-                setUserInterests(profileRes.interested_tags || []);
-            } catch (error) {
-                console.error('Error fetching tags:', error);
-                hasFetched.current = false;
-            }
-        };
         if (profileData?.is_admin) {
             fetchTagsData();
-        } else {
-            hasFetched.current = false;
         }
-    }, [profileData]);
+    }, [profileData, fetchTagsData]);
 
     useEffect(() => {
         if (tagInput.trim()) {
@@ -165,6 +159,7 @@ const AdminTerminalPage = () => {
             setMessage(response.message || 'Tags merged successfully!');
             setSourceTags([]);
             setTargetTag('');
+            fetchTagsData();
         } catch (err) {
             setError(err.message || 'An error occurred while merging tags.');
         } finally {
@@ -205,6 +200,7 @@ const AdminTerminalPage = () => {
             });
             setCreateTagMessage(response.message || 'Tag created successfully!');
             setCreateTagName('');
+            fetchTagsData();
         } catch (err) {
             setCreateTagError(err.message || 'An error occurred while creating the tag.');
         } finally {
@@ -229,6 +225,7 @@ const AdminTerminalPage = () => {
             const response = await api.delete(`/tags/${encodedTagName}`);
             setDeleteTagMessage(response.message || 'Tag deleted successfully!');
             setDeleteTagName('');
+            fetchTagsData();
         } catch (err) {
             setDeleteTagError(err.message || 'An error occurred while deleting the tag.');
         } finally {
@@ -470,6 +467,26 @@ const AdminTerminalPage = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] lg:col-span-2 mt-8">
+                        <h3 className="text-xl font-bold mb-2 text-[#3A5335]">All Tags</h3>
+                        <p className="text-sm text-[#7A8A73] mb-6">All tags in the system sorted alphabetically.</p>
+                        <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-scroll">
+                            {[...popularTags].sort((a, b) => (a.name || a).localeCompare(b.name || b)).map((tag, idx) => (
+                                <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border shadow-sm"
+                                    style={{
+                                        backgroundColor: tag.color || '#E8F0E5',
+                                        borderColor: tag.color || '#D4D9C6',
+                                        color: '#2C3E28'
+                                    }}
+                                >
+                                    {tag.name || tag}
+                                    <span className="text-xs font-bold opacity-70">{tag.use_count || 0}</span>
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </section>

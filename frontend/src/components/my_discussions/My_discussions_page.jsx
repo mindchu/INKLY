@@ -102,7 +102,7 @@ const My_discussions_page = () => {
                             onClick={() => handleCardClick(disc)}
                         >
                             {/* Title */}
-                            <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-words line-clamp-2'>{disc.title}</h3>
+                            <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-all line-clamp-2'>{disc.title}</h3>
 
                             {/* Author */}
                             <div className='flex items-center gap-2 mb-3 min-w-0'>
@@ -125,7 +125,7 @@ const My_discussions_page = () => {
 
                             {/* Body + thumbnail */}
                             <div className="flex gap-3 mb-4 flex-grow">
-                                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-words'>
+                                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
                                     {disc.text}
                                 </p>
                                 {disc.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (

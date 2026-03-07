@@ -57,15 +57,15 @@ const Note_forum_page = () => {
     toggleBookmark(post);
   };
 
-    const handleFollowChange = (authorId, isNowFollowing) => {
-        setNotes(prevNotes => 
-            prevNotes.map(note => 
-                note.author_id === authorId 
-                    ? { ...note, is_following: isNowFollowing } 
-                    : note
-            )
-        );
-    };
+  const handleFollowChange = (authorId, isNowFollowing) => {
+    setNotes(prevNotes =>
+      prevNotes.map(note =>
+        note.author_id === authorId
+          ? { ...note, is_following: isNowFollowing }
+          : note
+      )
+    );
+  };
 
   if (loading && posts.length === 0) {
     return (
@@ -128,11 +128,11 @@ const Note_forum_page = () => {
                   {/* ── Content ─────────────────────────────────── */}
                   <div className='mt-3 flex gap-3'>
                     <div className='flex-1 min-w-0'>
-                      <p className='font-["Inter"] text-[15px] md:text-[17px] font-semibold text-gray-800 break-words leading-snug'>
+                      <p className='font-["Inter"] text-[15px] md:text-[17px] font-semibold text-gray-800 break-all leading-snug'>
                         {post.title}
                       </p>
                       {post.text && (
-                        <p className='font-["Inter"] text-[12px] md:text-[13px] text-gray-500 mt-1.5 break-words line-clamp-2 md:line-clamp-3 whitespace-pre-wrap'>
+                        <p className='font-["Inter"] text-[12px] md:text-[13px] text-gray-500 mt-1.5 line-clamp-2 md:line-clamp-3 break-all'>
                           {post.text}
                         </p>
                       )}

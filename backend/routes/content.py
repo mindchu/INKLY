@@ -28,7 +28,8 @@ async def create_new_content(
     text: str = Form(...),
     type: str = Form(...),
     tags: List[str] = Form([]),
-    files: List[UploadFile] = File(None)
+    files: List[UploadFile] = File(None),
+    license_agreement: bool = Form(default=False)
 ):
     require_auth(request)
     form_data = {
@@ -38,6 +39,11 @@ async def create_new_content(
         "tags": tags
     }
     validated_content = validate(form_data, ContentCreate)
+    if form_data["type"] == "post" and not files:
+        raise HTTPException(status_code=400, detail="Note must include at least one file.")
+
+    if files and not license_agreement:
+        raise HTTPException(status_code=400, detail="License agreement must be accepted.")
     
     user = request.session.get('user')
     content_id = str(uuid.uuid4())

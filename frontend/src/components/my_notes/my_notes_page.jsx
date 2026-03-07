@@ -102,7 +102,7 @@ const My_notes_page = () => {
               onClick={() => handleCardClick(note)}
             >
               {/* Title */}
-              <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-words line-clamp-2'>{note.title}</h3>
+              <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-all line-clamp-2'>{note.title}</h3>
 
               {/* Author */}
               <div className='flex items-center gap-2 mb-3 min-w-0'>
@@ -124,8 +124,8 @@ const My_notes_page = () => {
               </div>
 
               {/* Body + thumbnail */}
-              <div className="flex gap-3 mb-4 flex-grow">
-                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-words'>
+              <div className="flex gap-3 mb-4">
+                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
                   {note.text}
                 </p>
                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
