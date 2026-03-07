@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { api } from '../util/api';
 import { useProfileContext } from './ProfileContext';
 
@@ -14,65 +14,69 @@ export const useMyNotesContext = () => {
 
 export const MyNotesProvider = ({ children }) => {
   const { profileData } = useProfileContext();
-  const [searchQuery, setSearchQuery] = useState(''); // Query sent to backend
-  const [localSearch, setLocalSearch] = useState(''); // Query typed in input
-  const [sortBy, setSortBy] = useState('date_created');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearch, setLocalSearch] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [includeTags, setIncludeTags] = useState([]);
+  const [excludeTags, setExcludeTags] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [discussions, setDiscussions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const lastFetchedSort = React.useRef(null);
-  const lastFetchedSearch = React.useRef(null);
+  const lastFetchedSearch = useRef(null);
 
-  const fetchRecommended = async (force = false) => {
+  const buildParams = (currentSortBy, currentIncludeTags, currentExcludeTags, query = null) => {
+    const params = new URLSearchParams();
+
+    const sortParam = currentSortBy === 'views' ? 'views'
+      : currentSortBy === 'likes' ? 'likes'
+      : currentSortBy === 'comments' ? 'comments'
+      : 'recent'; // 'date' -> 'recent'
+
+    params.append('sort_by', sortParam);
+    params.append('scope', 'owned');
+
+    if (query) params.append('q', query);
+
+    if (currentIncludeTags.length > 0) {
+      currentIncludeTags.forEach(tag => params.append('tags', tag));
+    }
+    if (currentExcludeTags.length > 0) {
+      currentExcludeTags.forEach(tag => params.append('exclude_tags', tag));
+    }
+
+    return params;
+  };
+
+  const fetchRecommended = async (currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
     if (!profileData) return;
-    if (!force && lastFetchedSort.current === sortBy && lastFetchedSearch.current === null) return;
-
-    lastFetchedSort.current = sortBy;
-    lastFetchedSearch.current = null;
     setLoading(true);
     try {
-      // Maps to SortContext equivalents, though backend might use 'recent' by default
-      // Here we just fetch user's documents; sorting is handled locally or we can modify the backend to accept sort for /users/...
-      // Better yet, we just use the /search?scope=owned endpoint for both!
-
-      const params = new URLSearchParams();
-      params.append('sort_by', sortBy === 'most_recent' ? 'recent' : (sortBy === 'title_az' || sortBy === 'title_za' ? 'recent' : 'recent'));
-      params.append('scope', 'owned');
-
+      const params = buildParams(currentSortBy, currentIncludeTags, currentExcludeTags);
       const response = await api.get(`/search?${params.toString()}`);
-
-      // Separate posts and discussions
       const data = response.data || [];
       setDocuments(data.filter(item => item.type === 'post'));
       setDiscussions(data.filter(item => item.type === 'discussion'));
-
     } catch (error) {
       console.error('Failed to fetch user content:', error);
-      lastFetchedSort.current = null;
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchSearch = async (query) => {
+  const fetchSearch = async (query, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
     if (!profileData) return;
     if (!query.trim()) {
       setSearchQuery('');
-      return fetchRecommended(true);
+      lastFetchedSearch.current = null;
+      return fetchRecommended(currentSortBy, currentIncludeTags, currentExcludeTags);
     }
 
     lastFetchedSearch.current = query;
-    lastFetchedSort.current = sortBy;
-    setLoading(true);
     setSearchQuery(query);
+    setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.append('q', query);
-      params.append('sort_by', sortBy === 'most_recent' ? 'recent' : 'recent');
-      params.append('scope', 'owned');
-
+      const params = buildParams(currentSortBy, currentIncludeTags, currentExcludeTags, query);
       const response = await api.get(`/search?${params.toString()}`);
-
       const data = response.data || [];
       setDocuments(data.filter(item => item.type === 'post'));
       setDiscussions(data.filter(item => item.type === 'discussion'));
@@ -83,48 +87,23 @@ export const MyNotesProvider = ({ children }) => {
     }
   };
 
+  // Re-fetch whenever sort or tags change
   useEffect(() => {
+    if (!profileData) return;
     if (lastFetchedSearch.current) {
-      fetchSearch(lastFetchedSearch.current);
+      fetchSearch(lastFetchedSearch.current, sortBy, includeTags, excludeTags);
     } else {
-      fetchRecommended();
+      fetchRecommended(sortBy, includeTags, excludeTags);
     }
-  }, [sortBy, profileData]);
-
-  // Handle initialization on page load
-  useEffect(() => {
-    if (profileData) {
-      fetchRecommended(true);
-    }
-  }, [profileData]);
-
-  // Apply sorting locally if it's title based, as backend may not support title_az sort natively
-  const sortedDocuments = React.useMemo(() => {
-    let sorted = [...documents];
-    if (sortBy === 'title_az') {
-      sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    } else if (sortBy === 'title_za') {
-      sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
-    }
-    return sorted;
-  }, [documents, sortBy]);
-
-  const sortedDiscussions = React.useMemo(() => {
-    let sorted = [...discussions];
-    if (sortBy === 'title_az') {
-      sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    } else if (sortBy === 'title_za') {
-      sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
-    }
-    return sorted;
-  }, [discussions, sortBy]);
-
+  }, [sortBy, includeTags, excludeTags, profileData]);
 
   return (
     <MyNotesContext.Provider value={{
       searchQuery, localSearch, setLocalSearch, fetchSearch,
       sortBy, setSortBy,
-      documents: sortedDocuments, discussions: sortedDiscussions,
+      includeTags, setIncludeTags,
+      excludeTags, setExcludeTags,
+      documents, discussions,
       loading
     }}>
       {children}
