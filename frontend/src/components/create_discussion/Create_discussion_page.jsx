@@ -132,9 +132,13 @@ const Create_discussion_page = () => {
     };
 
     const handlePublish = async () => {
-        if (!discussionTitle.trim() || !content.trim()) {
-            showModal('Missing Information', 'Please fill in both the title and content fields.', 'error');
-            return;
+        if (!discussionTitle.trim()) {
+        showModal('Missing Information', 'Please fill in title field.', 'error');
+        return;
+        }
+        if (!content.trim()){
+        showModal('Missing Information', 'Please fill in content field.', 'error');
+        return;
         }
         if (attachments.length > 0 && !licenseAgreement) {
             showModal('License Agreement', 'Please confirm you have the right to upload these files by checking the license agreement.', 'error');
