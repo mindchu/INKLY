@@ -183,7 +183,7 @@ const NoteModal = ({ note, onClose }) => {
                             <div className="border-t border-gray-100" />
 
                             {/* Content + files */}
-                            <div className="px-4 py-3">
+                            <div className="px-4 pt-3 pb-4">
                                 <p className="text-sm text-gray-600 leading-relaxed">
                                     {note.text || note.description}
                                 </p>
@@ -217,7 +217,7 @@ const NoteModal = ({ note, onClose }) => {
                             {/* Divider */}
                             <div className="border-t border-gray-100" />
 
-                            {/* Action bar: edit · delete · like · views */}
+                            {/* Action bar — clearly below all content */}
                             <div className="flex items-center gap-5 px-4 py-3">
                                 <button className="text-gray-400 hover:text-gray-600 transition">
                                     <LuPencil size={17} />
