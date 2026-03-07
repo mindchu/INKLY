@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { GiPlainCircle } from "react-icons/gi";
 import { GoPaperclip } from "react-icons/go";
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { GoComment } from "react-icons/go";
@@ -12,7 +11,7 @@ import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
-
+import ShareButton from '../button/ShareButton';
 
 const Note_forum_page = () => {
     const navigate = useNavigate();
@@ -174,9 +173,11 @@ const Note_forum_page = () => {
                                                 <LuBookmarkMinus size={16} className='text-[#292D32]' />
                                             )}
                                         </button>
-                                        <button className='hover:text-green-600'>
-                                            <MdOutlineFileDownload size={16} className='text-[#292D32]' />
-                                        </button>
+                                        <ShareButton 
+                                            targetId={post._id || post.id} 
+                                            title={post.title} 
+                                            text={post.text?.substring(0, 100) || 'Check out this discussion'} 
+                                        />
                                     </div>
                                 </div>
                             </div>

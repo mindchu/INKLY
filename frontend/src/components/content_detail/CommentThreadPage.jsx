@@ -6,6 +6,7 @@ import { MdArrowBack } from 'react-icons/md';
 import { IoArrowForward } from "react-icons/io5"; // Removed IoHeart imports
 import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
+import { getMediaUrl } from '../../config';
 
 // Import reusable components
 import LikeButton from '../../components/button/LikeButton';
@@ -126,17 +127,25 @@ const CommentThreadPage = () => {
 
     const renderComments = (commentList, level = 0) => {
         return commentList.map((comment) => (
-            <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
+                <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-8 border-l-2 border-gray-100 pl-4' : ''}`}>
                 <div className="flex items-start gap-2">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold">
-                        {comment.author_username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+                    {comment.author_profile_picture_url ? (
+                        <img
+                            src={getMediaUrl(comment.author_profile_picture_url)}
+                            alt={comment.author_username}
+                            className="w-8 h-8 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold">
+                            {comment.author_username?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                    )}
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-xs text-gray-400">recent</span>
                         </div>
-                        <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                        <p className="text-sm text-gray-700 mt-1 break-all">{comment.text}</p>
 
                         <div className="flex items-center gap-4 mt-2">
                             <button
@@ -249,15 +258,23 @@ const CommentThreadPage = () => {
                         {/* Anchor Comment */}
                         <div className="mb-8">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-semibold">
-                                    {anchorComment.author_username?.[0]?.toUpperCase() || 'U'}
-                                </div>
+                                {anchorComment.author_profile_picture_url ? (
+                                    <img
+                                        src={getMediaUrl(anchorComment.author_profile_picture_url)}
+                                        alt={anchorComment.author_username}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-semibold">
+                                        {anchorComment.author_username?.[0]?.toUpperCase() || 'U'}
+                                    </div>
+                                )}
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3">
                                         <span className="font-bold text-gray-900">{anchorComment.author_username || 'Anonymous'}</span>
                                         <span className="text-xs text-gray-400">original comment</span>
                                     </div>
-                                    <p className="text-lg text-gray-800 mt-2 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100">
+<p className="text-lg text-gray-800 mt-2 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 break-all">
                                         {anchorComment.text}
                                     </p>
 

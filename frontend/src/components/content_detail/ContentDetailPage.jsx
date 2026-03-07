@@ -87,8 +87,10 @@ const ContentDetailPage = () => {
     const [newComment, setNewComment] = useState('');
     const [replyText, setReplyText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
+    const [notificationMessage, setNotificationMessage] = useState("");
 
     const lastFetchedId = useRef(null);
+    const MAX_COMMENT_LENGTH = 1000;
 
     // --- Effects ---
     useEffect(() => {
@@ -146,6 +148,16 @@ const ContentDetailPage = () => {
 
     const handleAddComment = async (e) => {
         e.preventDefault();
+        if (newComment.length > MAX_COMMENT_LENGTH) {
+            setNotificationMessage("Comment is too long. Maximum {MAX_COMMENT_LENGTH} characters allowed.");
+            setTimeout(() => setNotificationMessage(""), 5000);
+            return;
+        }
+        if (newComment.length > MAX_COMMENT_LENGTH) {
+            setNotificationMessage(`Comment is too long. Maximum ${MAX_COMMENT_LENGTH} characters allowed.`);
+            setTimeout(() => setNotificationMessage(""), 5000);
+            return;
+        }
         if (!newComment.trim()) return;
 
         setPostingComment(true);
@@ -163,6 +175,11 @@ const ContentDetailPage = () => {
     };
 
     const handleReply = async (parentId) => {
+        if (replyText.length > MAX_COMMENT_LENGTH) {
+            setNotificationMessage(`Comment is too long. Maximum ${MAX_COMMENT_LENGTH} characters allowed.`);
+            setTimeout(() => setNotificationMessage(""), 5000);
+            return;
+        }
         if (!replyText.trim()) return;
 
         setPostingReply(true);
@@ -216,7 +233,7 @@ const ContentDetailPage = () => {
                             <span className="font-semibold text-sm">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-xs text-gray-400">recent</span>
                         </div>
-                        <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                        <p className="text-sm text-gray-700 mt-1 break-all">{comment.text}</p>
 
                         {/* --- NEW: Like, Reply, and Delete Action Bar --- */}
                         <div className="flex items-center gap-4 mt-2">
@@ -266,7 +283,7 @@ const ContentDetailPage = () => {
                                 />
                                 <button
                                     onClick={() => handleReply(comment._id)}
-                                    disabled={postingReply || !replyText.trim()}
+                                    disabled={postingReply || !replyText.trim() || replyText.length > MAX_COMMENT_LENGTH}
                                     className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                 >
                                     Reply
@@ -334,6 +351,11 @@ const ContentDetailPage = () => {
                     <MdArrowBack size={20} />
                     <span>Back</span>
                 </button>
+            {notificationMessage && (
+                <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                    {notificationMessage}
+                </div>
+            )}
 
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
 
@@ -438,13 +460,12 @@ const ContentDetailPage = () => {
                                                         >
                                                             <LuEye size={20} />
                                                         </button>
-                                                        <a
-                                                            href={fileUrl}
-                                                            download={file}
+                                                        <button
+                                                            onClick={() => window.open(fileUrl, '_blank')}
                                                             className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600 flex items-center justify-center"
                                                         >
                                                             <MdOutlineFileDownload size={20} />
-                                                        </a>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -474,17 +495,24 @@ const ContentDetailPage = () => {
                                     </div>
                                 )}
                                 <div className="flex-1 flex gap-2">
-                                    <input
-                                        type="text"
+                                                                        <textarea
                                         value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setNewComment(value);
+                                            if (value.length > MAX_COMMENT_LENGTH) {
+                                                setNotificationMessage(`Comment is too long: ${value.length}/${MAX_COMMENT_LENGTH} characters`);
+                                                setTimeout(() => setNotificationMessage(""), 3000);
+                                            }
+                                        }}
                                         placeholder="Add a comment..."
-                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
                                         disabled={postingComment}
+                                        rows="2"
                                     />
                                     <button
                                         type="submit"
-                                        disabled={postingComment || !newComment.trim()}
+                                        disabled={postingComment || !newComment.trim() || newComment.length > MAX_COMMENT_LENGTH}
                                         className="bg-green-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                     >
                                         Post

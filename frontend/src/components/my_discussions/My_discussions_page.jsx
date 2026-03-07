@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Eye } from 'lucide-react'
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
+import LikeButton from '../button/LikeButton'
+import DeleteButton from '../button/DeleteButton'
 
-// Import your reusable components
-import LikeButton from '../../components/button/LikeButton';
-import DeleteButton from '../../components/button/DeleteButton';
-
-import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
 import FollowChip from '../common/FollowChip'

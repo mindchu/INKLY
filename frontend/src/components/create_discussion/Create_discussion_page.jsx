@@ -17,6 +17,7 @@ const Create_discussion_page = () => {
     const [userInterests, setUserInterests] = useState([]);
     const [popularTags, setPopularTags] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [licenseAgreement, setLicenseAgreement] = useState(false);
     const hasFetched = React.useRef(false);
 
     useEffect(() => {
@@ -125,12 +126,18 @@ const Create_discussion_page = () => {
             return;
         }
 
+        if (attachments.length > 0 && !licenseAgreement) {
+            alert('Please confirm you have the right to upload these files by checking the license agreement.');
+            return;
+        }
+
         setPublishing(true);
         try {
             const formData = new FormData();
             formData.append('title', discussionTitle);
             formData.append('text', content);
             formData.append('type', 'discussion');
+            formData.append('license_agreement', licenseAgreement);
 
             // Handle tags - backend expects a list
             tags.forEach(tag => formData.append('tags', tag));
@@ -174,7 +181,7 @@ const Create_discussion_page = () => {
             delete window.handlePublishNote;
             delete window.handleCancelNote;
         };
-    }, [discussionTitle, content, tags, attachments]);
+    }, [discussionTitle, content, tags, attachments, licenseAgreement]);
 
     return (
         <div className='w-full min-h-screen bg-[#EEF2E1] overflow-auto font-["Inter"]'>
@@ -349,6 +356,23 @@ const Create_discussion_page = () => {
                             </div>
                         )}
                     </div>
+
+                    {/* License Agreement Checkbox - shown when attachments exist */}
+                    {attachments.length > 0 && (
+                        <div className='mt-6 p-4 bg-[#F5F7EF] rounded-md border border-[#E3E8D9]'>
+                            <label className='flex items-start gap-3 cursor-pointer'>
+                                <input
+                                    type='checkbox'
+                                    checked={licenseAgreement}
+                                    onChange={(e) => setLicenseAgreement(e.target.checked)}
+                                    className='mt-1 w-4 h-4 accent-[#6B9D63] cursor-pointer'
+                                />
+                                <span className='text-sm text-[#2C3E28]'>
+                                    I confirm that I have the right to upload these files and grant the platform permission to store and display them.
+                                </span>
+                            </label>
+                        </div>
+                    )}
 
                 </div>
             </div>

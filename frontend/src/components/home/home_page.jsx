@@ -15,6 +15,8 @@ import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
 
+import ShareButton from '../button/ShareButton';
+
 
 const Home_page = () => {
     const navigate = useNavigate();
@@ -193,15 +195,11 @@ const Home_page = () => {
                                     </div>
                                 </div>
                                 <div className='flex items-center gap-2'>
-                                    <button
-                                        className='hover:text-gray-800 transition'
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (note.file_paths?.[0]) window.open(getMediaUrl(`/uploads/${note.file_paths[0]}`), '_blank');
-                                        }}
-                                    >
-                                        <MdOutlineFileDownload size={16} />
-                                    </button>
+                                    <ShareButton 
+                                        targetId={note._id || note.id} 
+                                        title={note.title} 
+                                        text={note.text?.substring(0, 100) || 'Check out this discussion'} 
+                                    />
                                     <button
                                         onClick={(e) => handleBookmark(note, e)}
                                         className='hover:text-yellow-500 transition cursor-pointer'

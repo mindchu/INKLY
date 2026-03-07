@@ -7,6 +7,7 @@ import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
 // Import your new reusable components (Adjust the path if needed based on your folder structure)
 import LikeButton from '../../components/button/LikeButton';
 import DeleteButton from '../../components/button/DeleteButton';
+import ShareButton from '../../components/button/ShareButton';
 
 import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
@@ -212,6 +213,12 @@ const My_notes_page = () => {
                     onDeleteSuccess={(deletedId) => {
                       setLocalNotes(prev => prev.filter(n => (n._id || n.id) !== deletedId));
                     }}
+                  />
+
+                  <ShareButton
+                    targetId={note._id || note.id}
+                    title={note.title}
+                    text={note.text?.substring(0, 100) || 'Check out this note'}
                   />
 
                   <button

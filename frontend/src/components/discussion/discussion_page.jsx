@@ -6,7 +6,7 @@ import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { GoComment } from "react-icons/go";
 import { LuEye, LuBookmarkMinus } from "react-icons/lu";
 import { BsBookmarkDashFill } from "react-icons/bs";
-import { FaShare } from "react-icons/fa";
+import ShareButton from "../button/ShareButton";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { api } from '../../util/api';
 import { useSortContext } from '../../context/SortContext';
@@ -174,9 +174,11 @@ const Discussion_page = () => {
                                                     <LuBookmarkMinus size={14} className='text-[#292D32]' />
                                                 )}
                                             </button>
-                                            <button className='cursor-pointer flex flex-row hover:text-green-600 transition-colors'>
-                                                <FaShare size={14} className='text-[#292D32]' />
-                                            </button>
+                                            <ShareButton 
+                                                targetId={post._id || post.id} 
+                                                title={post.title} 
+                                                text={post.text?.substring(0, 100) || 'Check out this discussion'} 
+                                            />
                                         </div>
                                     </div>
                                 </div>

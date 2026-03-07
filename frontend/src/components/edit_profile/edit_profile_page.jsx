@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useProfileContext } from '../../context/ProfileContext'
 import { api } from '../../util/api'
 import { getMediaUrl } from '../../config'
+import AlertModal from '../common/AlertModal'
 
 
 const Edit_profile_page = () => {
@@ -24,6 +25,8 @@ const Edit_profile_page = () => {
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState('')
+  const [modal, setModal] = useState({ isOpen: false, title: '', message: '' })
+  const [imageError, setImageError] = useState(false)
   const hasFetchedTags = useRef(false)
 
   useEffect(() => {
@@ -84,7 +87,11 @@ const Edit_profile_page = () => {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file.')
+      setModal({
+        isOpen: true,
+        title: 'Invalid File Type',
+        message: 'Please select a valid image file (JPEG, PNG, etc.).'
+      })
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -98,6 +105,7 @@ const Edit_profile_page = () => {
     try {
       const response = await api.post('/users/me/avatar', formData, true)
       if (response.success) {
+        setImageError(false)
         setProfileData(prev => ({
           ...prev,
           profile_picture_url: response.profile_picture_url
@@ -168,21 +176,30 @@ const Edit_profile_page = () => {
                 className="hidden"
                 accept="image/*"
               />
-              {profileData.profile_picture_url ? (
-                <div
-                  className={`w-28 h-28 rounded-full bg-cover bg-center border-2 border-green-100 ${uploading ? 'opacity-50' : ''}`}
-                  style={{ backgroundImage: `url(${getMediaUrl(profileData.profile_picture_url)})` }}
-                />
+              {profileData.profile_picture_url && !imageError ? (
+                <div className={`w-28 h-28 rounded-full border-2 border-green-100 overflow-hidden ${uploading ? 'opacity-50' : ''}`}>
+                  <img
+                    src={getMediaUrl(profileData.profile_picture_url)}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={() => {
+                      console.error('Failed to load image:', getMediaUrl(profileData.profile_picture_url))
+                      setImageError(true)
+                    }}
+                  />
+                  <button className="absolute inset-0 w-full h-full" />
+                </div>
               ) : (
                 <div className={`w-28 h-28 rounded-full flex items-center justify-center bg-green-50 ${uploading ? 'opacity-50' : ''}`}>
                   <FaUserCircle size={70} className='text-green-600 opacity-70' />
+                  <button className="absolute inset-0 w-full h-full" />
                 </div>
               )}
-              <div className='absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-100'>
+              <div className='absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md border border-gray-100 pointer-events-none'>
                 <MdPhotoCamera size={20} className='text-[#7CBF6E]' />
               </div>
               {uploading && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
@@ -324,6 +341,12 @@ const Edit_profile_page = () => {
           </div>
         </div>
       </div>
+      <AlertModal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        message={modal.message}
+      />
     </div>
   )
 }
