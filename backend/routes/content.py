@@ -41,8 +41,8 @@ async def create_new_content(
     validated_content = validate(form_data, ContentCreate)
     if form_data["type"] == "post" and not files:
         raise HTTPException(status_code=400, detail="Note must include at least one file.")
-    print(license_agreement)
-    if not license_agreement:
+
+    if files and not license_agreement:
         raise HTTPException(status_code=400, detail="License agreement must be accepted.")
     
     user = request.session.get('user')
