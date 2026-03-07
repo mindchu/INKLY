@@ -8,14 +8,12 @@ import { IoSparklesOutline } from "react-icons/io5";
 import { BiTrendingUp } from "react-icons/bi";
 import { useSearch } from '../../context/SearchContext';
 import { useSidebar } from '../../context/SidebarContext';
-import { useProfileContext } from '../../context/ProfileContext';
 
 const Search_top_bar = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
     const { query, setQuery, performSearch, filters, setFilters, allTags } = useSearch();
     const { toggleSidebar } = useSidebar();
-    const { profileData } = useProfileContext();
 
     const [filterTagInput, setFilterTagInput] = useState('');
     const [excludeTagInput, setExcludeTagInput] = useState('');
@@ -50,11 +48,6 @@ const Search_top_bar = () => {
                     <RiSearch2Line size={32} className='opacity-70' />
                     <p className='font-["Julius Sans One"] text-[32px] text-[#3E4A34] font-thin select-none'>SEARCH</p>
                 </div>
-                {profileData && (
-                    <div className='text-[#3E4A34] font-["Inter"] text-[16px]'>
-                        Welcome, {profileData.is_admin ? 'Admin' : 'User'}:{profileData.username}
-                    </div>
-                )}
             </div>
             <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 w- items-center border-2 rounded-2xl p-1.5 pl-4 '>
                 <button className='cursor-pointer'>

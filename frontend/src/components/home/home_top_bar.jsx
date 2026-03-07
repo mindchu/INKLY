@@ -6,12 +6,10 @@ import { BiTrendingUp } from "react-icons/bi";
 import { FiMenu } from "react-icons/fi";
 import { useSortContext } from '../../context/SortContext';
 import { useSidebar } from '../../context/SidebarContext';
-import { useProfileContext } from '../../context/ProfileContext';
 
 const Home_Top_bar = () => {
   const { sortBy, setSortBy } = useSortContext();
   const { toggleSidebar } = useSidebar();
-  const { profileData } = useProfileContext();
 
   return (
     <div className='w-full bg-white shadow-md py-3'>
@@ -24,11 +22,6 @@ const Home_Top_bar = () => {
             <PiBookOpenTextLight size={38} className='opacity-70' />
             <p className='font-["Julius Sans One"] text-[32px] text-[#3E4A34] font-thin select-none'>HOME</p>
           </div>
-          {profileData && (
-            <div className='text-[#3E4A34] font-["Inter"] text-[16px]'>
-              Welcome, {profileData.is_admin ? 'Admin' : 'User'}:{profileData.username}
-            </div>
-          )}
         </div>
         <div className='mt-1 ml-5 flex flex-row items-center gap-3'>
           <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Sorted by:</p>

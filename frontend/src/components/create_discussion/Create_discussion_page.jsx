@@ -163,23 +163,11 @@ const Create_discussion_page = () => {
         }
     };
 
-    const handleCancel = () => {
-        if (window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-            setDiscussionTitle('');
-            setContent('');
-            setTags([]);
-            setAttachments([]);
-            navigate('/discussion');
-        }
-    };
-
     // Expose handlers to window for top bar access
     useEffect(() => {
         window.handlePublishNote = handlePublish;
-        window.handleCancelNote = handleCancel;
         return () => {
             delete window.handlePublishNote;
-            delete window.handleCancelNote;
         };
     }, [discussionTitle, content, tags, attachments, licenseAgreement]);
 

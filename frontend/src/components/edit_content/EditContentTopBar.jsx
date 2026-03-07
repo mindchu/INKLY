@@ -1,9 +1,7 @@
 import React from 'react'
 import { MdEditDocument } from "react-icons/md";
-import { useProfileContext } from '../../context/ProfileContext';
 
 const EditContentTopBar = () => {
-    const { profileData } = useProfileContext();
 
     return (
         <div className='w-full bg-white shadow-md py-3'>
@@ -13,11 +11,6 @@ const EditContentTopBar = () => {
                     <p className='font-["Inter"] text-[32px] text-[#3E4A34] font-thin select-none uppercase'>EDIT CONTENT</p>
                 </div>
                 <div className='flex gap-6 ml-auto mr-5 items-center'>
-                    {profileData && (
-                        <div className='text-[#3E4A34] font-["Inter"] text-[16px] mr-4'>
-                            Welcome, {profileData.is_admin ? 'Admin' : 'User'}:{profileData.username}
-                        </div>
-                    )}
                     <button
                         onClick={() => window.handleCancelEdit?.()}
                         className='w-[150px] h-[40px] rounded-md border border-[#838181] opacity-60 font-["Inter"] text-[16px] cursor-pointer hover:bg-gray-100 hover:opacity-100 hover:border-[#5a5a5a] transition-all duration-200'

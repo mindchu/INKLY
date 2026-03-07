@@ -163,23 +163,11 @@ const Create_note_page = () => {
     }
   };
 
-  const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-      setNoteTitle('');
-      setContent('');
-      setTags([]);
-      setAttachments([]);
-      navigate('/home');
-    }
-  };
-
   // Expose handlers to window for top bar access
   useEffect(() => {
     window.handlePublishNote = handlePublish;
-    window.handleCancelNote = handleCancel;
     return () => {
       delete window.handlePublishNote;
-      delete window.handleCancelNote;
     };
   }, [noteTitle, content, tags, attachments, licenseAgreement]);
 
@@ -356,7 +344,6 @@ const Create_note_page = () => {
               </div>
             )}
           </div>
-
           {/* License Agreement Checkbox - shown when attachments exist */}
           {attachments.length > 0 && (
             <div className='mt-6 p-4 bg-[#F5F7EF] rounded-md border border-[#E3E8D9]'>
@@ -373,7 +360,6 @@ const Create_note_page = () => {
               </label>
             </div>
           )}
-
         </div>
       </div>
     </div>

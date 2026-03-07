@@ -5,11 +5,9 @@ import { MdOutlineDateRange } from "react-icons/md";
 import { IoTimeOutline } from "react-icons/io5";
 import { BiSortAZ, BiSortZA } from "react-icons/bi";
 import { useMyNotesContext } from '../../context/MyNotesContext';
-import { useProfileContext } from '../../context/ProfileContext';
 
 const My_notes_top_bar = () => {
     const { searchQuery, localSearch, setLocalSearch, fetchSearch, sortBy, setSortBy } = useMyNotesContext();
-    const { profileData } = useProfileContext();
 
     const handleSearchSubmit = () => {
         fetchSearch(localSearch);
@@ -28,11 +26,6 @@ const My_notes_top_bar = () => {
                     <LuNotepadText size={32} className='opacity-70' />
                     <p className='font-["Julius Sans One"] text-[32px] text-[#3E4A34] font-thin select-none'>MY NOTES</p>
                 </div>
-                {profileData && (
-                    <div className='text-[#3E4A34] font-["Inter"] text-[16px]'>
-                        Welcome, {profileData.is_admin ? 'Admin' : 'User'}:{profileData.username}
-                    </div>
-                )}
             </div>
             <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 w- items-center border-2 rounded-2xl p-1.5 pl-4 '>
                 <button className='cursor-pointer' onClick={handleSearchSubmit}>

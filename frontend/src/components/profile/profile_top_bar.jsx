@@ -1,12 +1,10 @@
 import React from 'react'
 import { TiUserOutline } from "react-icons/ti";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useProfileContext } from '../../context/ProfileContext';
 
 const Profile_top_bar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { profileData } = useProfileContext();
 
     // Check if we're on edit profile page
     const isEditPage = location.pathname === '/edit_profile';
@@ -31,11 +29,6 @@ const Profile_top_bar = () => {
                     </p>
                 </div>
                 <div className='flex gap-6 ml-auto mr-5 items-center'>
-                    {profileData && (
-                        <div className='text-[#3E4A34] font-["Inter"] text-[16px] mr-4'>
-                            Welcome, {profileData.is_admin ? 'Admin' : 'User'}:{profileData.username}
-                        </div>
-                    )}
                     {isEditPage ? (
                         // Edit profile buttons
                         <>
