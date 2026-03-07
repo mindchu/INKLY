@@ -274,7 +274,7 @@ const CommentThreadPage = () => {
                                         <span className="font-bold text-gray-900">{anchorComment.author_username || 'Anonymous'}</span>
                                         <span className="text-xs text-gray-400">original comment</span>
                                     </div>
-<p className="text-lg text-gray-800 mt-2 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 break-all">
+                                    <p className="text-lg text-gray-800 mt-2 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 break-all">
                                         {anchorComment.text}
                                     </p>
 

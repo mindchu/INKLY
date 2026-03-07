@@ -41,18 +41,18 @@ const Side_bar = () => {
             section: 'Explore', items: [
                 { label: 'Home', icon: <AiOutlineHome size={20} />, path: '/home' },
                 { label: 'Discussion', icon: <BiChat size={20} />, path: '/discussion' },
-                { label: 'Note Forum', icon: <BiChat size={20} />, path: '/note_forum' },
+                { label: 'Note', icon: <CgNotes size={20} />, path: '/note_forum' },
                 { label: 'Search', icon: <RiSearch2Line size={20} />, path: '/search' },
                 { label: 'Following', icon: <HiOutlineUsers size={20} />, path: '/following' },
             ]
         },
         {
             section: 'My content', items: [
-                { label: 'My Notes', icon: <CgNotes size={20} />, path: '/my_notes' },
-                { label: 'My Discussions', icon: <BiChat size={20} />, path: '/my_discussions' },
+                { label: 'My Note', icon: <CgNotes size={20} />, path: '/my_notes' },
+                { label: 'My Discussion', icon: <BiChat size={20} />, path: '/my_discussions' },
                 { label: 'Create Note', icon: <IoCreateOutline size={20} />, path: '/create_note' },
                 { label: 'Create Discussion', icon: <BiChat size={20} />, path: '/create_discussion' },
-                { label: 'Bookmarks', icon: <CiBookmarkMinus size={20} />, path: '/bookmarks' },
+                { label: 'Bookmark', icon: <CiBookmarkMinus size={20} />, path: '/bookmarks' },
             ]
         },
         {
