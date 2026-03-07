@@ -122,45 +122,62 @@ const Create_note_page = () => {
 
   const handlePublish = async () => {
     if (!noteTitle.trim() || !content.trim()) {
-      alert('Please fill in both title and content fields.');
-      return;
+        showModal('Missing Information', 'Please fill in both the title and content fields.', 'error');
+        return;
     }
 
     if (attachments.length > 0 && !licenseAgreement) {
-      alert('Please confirm you have the right to upload these files by checking the license agreement.');
-      return;
+        showModal('License Agreement', 'Please confirm you have the right to upload these files by checking the license agreement.', 'error');
+        return;
     }
 
     setPublishing(true);
     try {
-      const formData = new FormData();
-      formData.append('title', noteTitle);
-      formData.append('text', content);
-      formData.append('type', 'post');
-      formData.append('license_agreement', licenseAgreement);
+        const formData = new FormData();
+        formData.append('title', noteTitle);
+        formData.append('text', content);
+        formData.append('type', 'post');
+        formData.append('license_agreement', licenseAgreement);
 
-      // Handle tags - backend expects a list
-      tags.forEach(tag => formData.append('tags', tag));
+        tags.forEach(tag => formData.append('tags', tag));
 
-      // Handle file uploads
-      attachments.forEach(file => {
-        formData.append('files', file);
-      });
+        attachments.forEach(file => {
+            formData.append('files', file);
+        });
 
-      const response = await api.post('/content', formData, true);
+        const response = await api.post('/content', formData, true);
 
-      if (response.success) {
-        alert('Note published successfully!');
-        navigate('/note_forum');
-      } else {
-        alert('Failed to publish note: ' + (response.detail || 'Unknown error'));
-      }
+        if (response.success) {
+            showModal('Success!', 'Note published successfully.', 'success', () => {
+                navigate('/note_forum');
+            });
+        } else {
+            showModal('Publish Failed', 'Failed to publish note: ' + (response.detail || 'Unknown error'), 'error');
+        }
     } catch (error) {
-      console.error('Publishing error:', error);
-      alert('Error publishing note. Please try again.');
+        console.error('Publishing error:', error);
+        showModal('Error', 'An error occurred while publishing. Please try again.', 'error');
     } finally {
-      setPublishing(false);
+        setPublishing(false);
     }
+  };
+
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+    onAction: null
+  });
+
+  const showModal = (title, message, type = 'error', onAction = null) => {
+      setModalConfig({ isOpen: true, title, message, type, onAction });
+  };
+
+  const handleModalClose = () => {
+      const { onAction } = modalConfig;
+      setModalConfig(prev => ({ ...prev, isOpen: false }));
+      if (onAction) onAction(); // If there's a navigation action, run it now!
   };
 
   // Expose handlers to window for top bar access
@@ -362,6 +379,34 @@ const Create_note_page = () => {
           )}
         </div>
       </div>
+      {/* --- Floating Modal Card --- */}
+      {modalConfig.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+              <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 transform transition-all">
+                  <h3 className={`text-xl font-bold mb-2 ${modalConfig.type === 'success' ? 'text-[#577F4E]' : 'text-[#C85A5A]'}`}>
+                      {modalConfig.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-6 font-medium">
+                      {modalConfig.message}
+                  </p>
+                  
+                  <div className="flex justify-end">
+                      <button
+                          onClick={handleModalClose}
+                          className={`px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-sm ${
+                              modalConfig.type === 'success' 
+                              ? 'bg-[#6B9D63] hover:bg-[#577F4E]' 
+                              : 'bg-[#C85A5A] hover:bg-[#A84848]'
+                          }`}
+                      >
+                          {modalConfig.type === 'success' ? 'Awesome' : 'Got it'}
+                      </button>
+                  </div>
+              </div>
+              
+          </div>
+      )}
     </div>
   );
 };

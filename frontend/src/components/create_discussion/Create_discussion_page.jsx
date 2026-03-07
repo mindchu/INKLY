@@ -20,6 +20,24 @@ const Create_discussion_page = () => {
     const [licenseAgreement, setLicenseAgreement] = useState(false);
     const hasFetched = React.useRef(false);
 
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'error',
+        onAction: null
+    });
+
+    const showModal = (title, message, type = 'error', onAction = null) => {
+        setModalConfig({ isOpen: true, title, message, type, onAction });
+    };
+
+    const handleModalClose = () => {
+        const { onAction } = modalConfig;
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
+        if (onAction) onAction();
+    };
+
     useEffect(() => {
         const fetchTags = async () => {
             if (hasFetched.current) return;
@@ -122,12 +140,12 @@ const Create_discussion_page = () => {
 
     const handlePublish = async () => {
         if (!discussionTitle.trim() || !content.trim()) {
-            alert('Please fill in both title and content fields.');
+            showModal('Missing Information', 'Please fill in both the title and content fields.', 'error');
             return;
         }
 
         if (attachments.length > 0 && !licenseAgreement) {
-            alert('Please confirm you have the right to upload these files by checking the license agreement.');
+            showModal('License Agreement', 'Please confirm you have the right to upload these files by checking the license agreement.', 'error');
             return;
         }
 
@@ -139,10 +157,8 @@ const Create_discussion_page = () => {
             formData.append('type', 'discussion');
             formData.append('license_agreement', licenseAgreement);
 
-            // Handle tags - backend expects a list
             tags.forEach(tag => formData.append('tags', tag));
 
-            // Handle file uploads
             attachments.forEach(file => {
                 formData.append('files', file);
             });
@@ -150,14 +166,15 @@ const Create_discussion_page = () => {
             const response = await api.post('/content', formData, true);
 
             if (response.success) {
-                alert('Discussion published successfully!');
-                navigate('/discussion');
+                showModal('Success!', 'Discussion published successfully.', 'success', () => {
+                    navigate('/discussion');
+                });
             } else {
-                alert('Failed to publish discussion: ' + (response.detail || 'Unknown error'));
+                showModal('Publish Failed', 'Failed to publish discussion: ' + (response.detail || 'Unknown error'), 'error');
             }
         } catch (error) {
             console.error('Publishing error:', error);
-            alert('Error publishing discussion. Please try again.');
+            showModal('Error', 'An error occurred while publishing. Please try again.', 'error');
         } finally {
             setPublishing(false);
         }
@@ -364,6 +381,34 @@ const Create_discussion_page = () => {
 
                 </div>
             </div>
+            {/* --- Floating Modal Card --- */}
+            {modalConfig.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-gray-200 transform transition-all">
+                        <h3 className={`text-xl font-bold mb-2 ${modalConfig.type === 'success' ? 'text-[#577F4E]' : 'text-[#C85A5A]'}`}>
+                            {modalConfig.title}
+                        </h3>
+                        
+                        <p className="text-gray-600 mb-6 font-medium">
+                            {modalConfig.message}
+                        </p>
+                        
+                        <div className="flex justify-end">
+                            <button
+                                onClick={handleModalClose}
+                                className={`px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-sm ${
+                                    modalConfig.type === 'success' 
+                                    ? 'bg-[#6B9D63] hover:bg-[#577F4E]' 
+                                    : 'bg-[#C85A5A] hover:bg-[#A84848]'
+                                }`}
+                            >
+                                {modalConfig.type === 'success' ? 'Awesome' : 'Got it'}
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+            )}
         </div>
     );
 };
