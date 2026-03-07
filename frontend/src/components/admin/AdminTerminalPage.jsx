@@ -45,30 +45,24 @@ const AdminTerminalPage = () => {
     const [deleteSuggestions, setDeleteSuggestions] = useState([]);
     const [showDeleteSuggestions, setShowDeleteSuggestions] = useState(false);
 
-    const hasFetched = React.useRef(false);
+    const fetchTagsData = React.useCallback(async () => {
+        try {
+            const [allTagsRes, profileRes] = await Promise.all([
+                api.get('/tags/all'),
+                api.get('/users/me')
+            ]);
+            setPopularTags(allTagsRes.tags || []);
+            setUserInterests(profileRes.interested_tags || []);
+        } catch (error) {
+            console.error('Error fetching tags:', error);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchTagsData = async () => {
-            if (hasFetched.current) return;
-            hasFetched.current = true;
-            try {
-                const [allTagsRes, profileRes] = await Promise.all([
-                    api.get('/tags/all'),
-                    api.get('/users/me')
-                ]);
-                setPopularTags(allTagsRes.tags || []);
-                setUserInterests(profileRes.interested_tags || []);
-            } catch (error) {
-                console.error('Error fetching tags:', error);
-                hasFetched.current = false;
-            }
-        };
         if (profileData?.is_admin) {
             fetchTagsData();
-        } else {
-            hasFetched.current = false;
         }
-    }, [profileData]);
+    }, [profileData, fetchTagsData]);
 
     useEffect(() => {
         if (tagInput.trim()) {
@@ -165,6 +159,7 @@ const AdminTerminalPage = () => {
             setMessage(response.message || 'Tags merged successfully!');
             setSourceTags([]);
             setTargetTag('');
+            fetchTagsData();
         } catch (err) {
             setError(err.message || 'An error occurred while merging tags.');
         } finally {
@@ -205,6 +200,7 @@ const AdminTerminalPage = () => {
             });
             setCreateTagMessage(response.message || 'Tag created successfully!');
             setCreateTagName('');
+            fetchTagsData();
         } catch (err) {
             setCreateTagError(err.message || 'An error occurred while creating the tag.');
         } finally {
@@ -229,6 +225,7 @@ const AdminTerminalPage = () => {
             const response = await api.delete(`/tags/${encodedTagName}`);
             setDeleteTagMessage(response.message || 'Tag deleted successfully!');
             setDeleteTagName('');
+            fetchTagsData();
         } catch (err) {
             setDeleteTagError(err.message || 'An error occurred while deleting the tag.');
         } finally {
