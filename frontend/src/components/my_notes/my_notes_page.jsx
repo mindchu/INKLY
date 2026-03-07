@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MessageCircle, Eye } from 'lucide-react'
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
@@ -8,8 +8,6 @@ import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
 import LikeButton from '../../components/button/LikeButton';
 import DeleteButton from '../../components/button/DeleteButton';
 import ShareButton from '../../components/button/ShareButton';
-
-import NoteModal from '../home/NoteModal'
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
 import FollowChip from '../common/FollowChip'
@@ -18,13 +16,12 @@ import { getMediaUrl } from '../../config'
 
 const My_notes_page = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { searchQuery, sortBy, documents, discussions, loading } = useMyNotesContext();
   const { toggleBookmark, isBookmarked } = useBookmarks();
 
   const [selectedNote, setSelectedNote] = useState(null);
   const [localNotes, setLocalNotes] = useState([]);
-
-  // Look at that! All the state for the delete modal is gone.
 
   useEffect(() => {
     setLocalNotes([...documents]);
@@ -71,12 +68,7 @@ const My_notes_page = () => {
   };
 
   const handleCardClick = (note) => {
-    // setSelectedNote(note);
-    navigate(`/content/${note._id || note.id}`);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedNote(null);
+    navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
   };
 
   if (loading && localNotes.length === 0) {

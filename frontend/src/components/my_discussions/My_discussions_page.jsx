@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MessageCircle, Eye } from 'lucide-react'
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
@@ -15,6 +15,7 @@ import { getMediaUrl } from '../../config'
 
 const My_discussions_page = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { searchQuery, sortBy, discussions, loading } = useMyNotesContext();
     const { toggleBookmark, isBookmarked } = useBookmarks();
 
@@ -66,8 +67,7 @@ const My_discussions_page = () => {
     };
 
     const handleCardClick = (disc) => {
-        // setSelectedNote(disc);
-        navigate(`/content/${disc._id || disc.id}`);
+        navigate(`/content/${disc._id || disc.id}`, { state: { from: location.pathname } });
     };
 
     const handleCloseModal = () => {

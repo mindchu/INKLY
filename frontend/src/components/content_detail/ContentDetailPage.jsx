@@ -1,7 +1,7 @@
 // frontend/src/components/content_detail/ContentDetailPage.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { GoPaperclip } from 'react-icons/go';
 import { MdOutlineFileDownload, MdArrowBack, MdDelete, MdEdit } from 'react-icons/md';
 import { LuEye } from 'react-icons/lu';
@@ -11,8 +11,6 @@ import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
 import { getMediaUrl } from '../../config';
 import DeleteButton from '../../components/button/DeleteButton';
-
-
 
 // Recursive function to update the comment tree locally without refetching the whole page
 const addReplyToTree = (comments, parentId, newReply) => {
@@ -70,6 +68,7 @@ const ContentDetailPage = () => {
     const { profileData } = useProfileContext();
     const { contentId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Core State
     const [content, setContent] = useState(null);
@@ -88,7 +87,6 @@ const ContentDetailPage = () => {
     const [replyText, setReplyText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
     const [notificationMessage, setNotificationMessage] = useState("");
-
     const lastFetchedId = useRef(null);
     const MAX_COMMENT_LENGTH = 1000;
 
@@ -301,6 +299,7 @@ const ContentDetailPage = () => {
                         <div className="mt-4 ml-8">
                             <Link
                                 to={`/content/${contentId}/comment/${comment._id}`}
+                                state={location.state}
                                 className="flex items-center gap-2 text-xs font-semibold text-green-700 hover:text-green-800 transition-colors bg-green-50 px-3 py-2 rounded-lg w-fit"
                             >
                                 <span>View more replies</span>
@@ -335,22 +334,24 @@ const ContentDetailPage = () => {
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
             <div className="max-w-4xl mx-auto px-4 py-8">
 
-                {/* Back Button */}
-                <button
-                    onClick={() => {
-                        if (content.type === 'discussion') {
-                            navigate('/discussion');
-                        } else if (content.type === 'post') {
-                            navigate('/note_forum');
-                        } else {
-                            navigate(-1);
-                        }
-                    }}
-                    className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-6 transition-colors font-medium"
-                >
-                    <MdArrowBack size={20} />
-                    <span>Back</span>
-                </button>
+            {/* Back Button */}
+            <button
+                onClick={() => {
+                    if (location.state && location.state.from) {
+                        navigate(location.state.from);
+                    } 
+                    else if (content.type === 'discussion') {
+                        navigate('/discussion');
+                    } else {
+                        navigate('/note_forum');
+                    }
+                }}
+                className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-6 transition-colors font-medium"
+            >
+                <MdArrowBack size={20} />
+                <span>Back</span>
+            </button>
+
             {notificationMessage && (
                 <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
                     {notificationMessage}

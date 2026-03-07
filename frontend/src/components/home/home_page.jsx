@@ -1,7 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom';
-import { GiPlainCircle } from "react-icons/gi";
-import { GoPaperclip } from "react-icons/go";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { PiChatText } from "react-icons/pi";
 import { LuEye } from "react-icons/lu";
@@ -20,6 +18,7 @@ import ShareButton from '../button/ShareButton';
 
 const Home_page = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { toggleBookmark, isBookmarked } = useBookmarks();
     const { sortBy, content: notes, loading, setContent: setNotes, page, setPage, hasMore } = useSortContext();
 
@@ -34,8 +33,6 @@ const Home_page = () => {
         });
         if (node) observer.current.observe(node);
     }, [loading, hasMore]);
-
-    // Removed local fetchNotes logic as it's now handled by SortContext
 
     const formatViews = (views) => {
         if (views >= 1000) {
@@ -71,12 +68,7 @@ const Home_page = () => {
     };
 
     const handleCardClick = (note) => {
-        // setSelectedNote(note);
-        navigate(`/content/${note._id || note.id}`);
-    };
-
-    const handleCloseModal = () => {
-        // setSelectedNote(null);
+        navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
     };
 
     if (loading && notes.length === 0) {

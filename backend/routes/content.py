@@ -5,7 +5,8 @@ from middleware.auth import require_auth
 from middleware.validate import validate
 from validation_schema.content_schema import ContentCreate, CommentRequest, ContentUpdate
 from util import content as content_util, files as file_util, tags as tags_util
-from util.dbconn import db
+from util.dbconn import db, fs
+from fastapi.responses import StreamingResponse
 
 router = APIRouter(tags=["content"])
 
@@ -63,9 +64,6 @@ async def create_new_content(
 
 @router.get("/uploads/{filename}")
 async def get_uploaded_file(filename: str):
-    from fastapi.responses import StreamingResponse
-    from util.dbconn import fs
-    
     grid_out = fs.find_one({"filename": filename})
     if not grid_out:
         raise HTTPException(status_code=404, detail="File not found")
@@ -160,10 +158,17 @@ async def delete_content(content_id: str, request: Request):
     return {"success": True}
 
 @router.put("/content/{content_id}")
-async def update_content_route(content_id: str, content_data: dict, request: Request):
+async def update_content_route(
+    content_id: str, 
+    request: Request,
+    title: str = Form(...),
+    text: str = Form(...),
+    type: str = Form(None),
+    license_agreement: str = Form(None),
+    tags: List[str] = Form(default=[]),
+    files: List[UploadFile] = File(default=[])
+):
     user = require_auth(request)
-    update_req = validate(content_data, ContentUpdate)
-    
     doc = db.posts.find_one({"_id": content_id})
     collection = db.posts
     if not doc:
@@ -175,16 +180,37 @@ async def update_content_route(content_id: str, content_data: dict, request: Req
         
     if doc.get('author_id') != user['google_id']:
         raise HTTPException(status_code=403, detail="Not authorized to edit this content")
-        
-    update_data = {"title": update_req.title, "text": update_req.text}
-    
-    if doc.get('title') != update_req.title:
+
+    update_data = {
+        "title": title, 
+        "text": text,
+        "tags": tags
+    }
+
+    if doc.get('title') != title:
         from util.embeddings import embedding_manager
-        update_data['title_embedding'] = embedding_manager.generate_embedding(update_req.title)
-    
-    db.posts.update_one({"_id": content_id}, {"$set": update_data})
-    db.discussions.update_one({"_id": content_id}, {"$set": update_data})
-    
+        update_data['title_embedding'] = embedding_manager.generate_embedding(title)
+
+    if files and len(files) > 0 and files[0].filename != "":
+        new_file_metadata = []
+        
+        for file in files:
+            unique_filename = f"{uuid.uuid4()}_{file.filename}"
+            file_id = fs.put(
+                file.file, 
+                filename=unique_filename, 
+                metadata={"content_type": file.content_type}
+            )
+            new_file_metadata.append({
+                "id": str(file_id),
+                "filename": unique_filename,
+                "original_name": file.filename,
+                "content_type": file.content_type,
+                "url": f"/api/uploads/{unique_filename}" 
+            })
+        existing_files = doc.get("files", [])
+        update_data["files"] = existing_files + new_file_metadata
+    collection.update_one({"_id": content_id}, {"$set": update_data})
     return {"success": True}
 
 @router.delete("/comment/{comment_id}")

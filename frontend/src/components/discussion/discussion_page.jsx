@@ -34,8 +34,6 @@ const Discussion_page = () => {
     // Filter content to only show discussions
     const posts = React.useMemo(() => content.filter(item => item.type === 'discussion'), [content]);
 
-    // Removed local fetchDiscussions logic as it's now handled by SortContext
-
     const handleLike = async (postId, e) => {
         e.stopPropagation();
         try {

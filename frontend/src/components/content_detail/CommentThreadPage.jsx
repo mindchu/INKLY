@@ -1,9 +1,9 @@
 // frontend/src/components/content_detail/CommentThreadPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useParams, useNavigate, Link } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
-import { IoArrowForward } from "react-icons/io5"; // Removed IoHeart imports
+import { IoArrowForward } from "react-icons/io5";
 import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
 import { getMediaUrl } from '../../config';
@@ -15,6 +15,7 @@ import DeleteButton from '../../components/button/DeleteButton';
 const CommentThreadPage = () => {
     const { contentId, commentId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { profileData } = useProfileContext();
     const [anchorComment, setAnchorComment] = useState(null);
     const [replies, setReplies] = useState([]);
@@ -243,6 +244,7 @@ const CommentThreadPage = () => {
                 {/* Back Link to Content Detail */}
                 <Link
                     to={`/content/${contentId}`}
+                    state={location.state}
                     className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-6 transition-colors font-medium w-fit"
                 >
                     <MdArrowBack size={20} />
