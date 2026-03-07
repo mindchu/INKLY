@@ -97,6 +97,30 @@ const NoteModal = ({ note, onClose }) => {
             </div>
         ));
 
+    /* ── Shared action bar (used in both mobile and desktop) ── */
+    const ActionBar = () => (
+        <div className="flex items-center gap-5 px-4 py-3 border-t border-b border-gray-100 bg-gray-50">
+            <button className="text-gray-400 hover:text-blue-500 transition p-1 rounded-lg hover:bg-blue-50">
+                <LuPencil size={17} />
+            </button>
+            <button className="text-gray-400 hover:text-red-500 transition p-1 rounded-lg hover:bg-red-50">
+                <LuTrash2 size={17} />
+            </button>
+            <div className="w-px h-4 bg-gray-200" />
+            <button
+                onClick={handleLike}
+                className={`flex items-center gap-1.5 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+            >
+                {isLiked ? <IoHeart size={17} /> : <IoHeartOutline size={17} />}
+                <span className="text-xs font-medium">{likeCount}</span>
+            </button>
+            <div className="flex items-center gap-1.5 text-gray-400">
+                <LuEye size={17} />
+                <span className="text-xs font-medium">{note.views || 0}</span>
+            </div>
+        </div>
+    );
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-4"
@@ -115,17 +139,9 @@ const NoteModal = ({ note, onClose }) => {
                         <IoChevronBack size={20} />
                         <span className="text-sm font-medium">Back</span>
                     </button>
-                    <div className="flex items-center gap-1">
-                        <button className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition">
-                            <LuPencil size={16} />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
-                            <LuTrash2 size={16} />
-                        </button>
-                    </div>
                 </div>
 
-                {/* ── DESKTOP HEADER — untouched ── */}
+                {/* ── DESKTOP HEADER ── */}
                 <div className="hidden md:flex items-start justify-between p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex-1 min-w-0">
                         <h2 className="text-2xl font-bold text-gray-900 mb-3 break-words">{note.title}</h2>
@@ -158,7 +174,7 @@ const NoteModal = ({ note, onClose }) => {
                         {/* CARD 1: Note */}
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-                            {/* Row 1: Tags + Title */}
+                            {/* Tags + Title */}
                             <div className="px-4 pt-4 pb-3">
                                 {note.tags?.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -176,7 +192,7 @@ const NoteModal = ({ note, onClose }) => {
 
                             <div className="border-t border-gray-100" />
 
-                            {/* Row 2: Author only — NO icons here */}
+                            {/* Author */}
                             <div className="px-4 py-3 flex items-center gap-3">
                                 {note.author_profile_picture_url ? (
                                     <img
@@ -202,24 +218,7 @@ const NoteModal = ({ note, onClose }) => {
 
                             <div className="border-t border-gray-100" />
 
-                            {/* Row 3: Like + Views — completely separate row */}
-                            <div className="px-4 py-2.5 flex items-center gap-5 bg-gray-50">
-                                <button
-                                    onClick={handleLike}
-                                    className={`flex items-center gap-1.5 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
-                                >
-                                    {isLiked ? <IoHeart size={16} /> : <IoHeartOutline size={16} />}
-                                    <span className="text-xs font-medium">{likeCount}</span>
-                                </button>
-                                <div className="flex items-center gap-1.5 text-gray-400">
-                                    <LuEye size={16} />
-                                    <span className="text-xs font-medium">{note.views || 0}</span>
-                                </div>
-                            </div>
-
-                            <div className="border-t border-gray-100" />
-
-                            {/* Row 4: Body content */}
+                            {/* Body content */}
                             <div className="px-4 py-4">
                                 <p className="text-sm text-gray-600 leading-relaxed break-words">
                                     {note.text || note.description}
@@ -250,6 +249,9 @@ const NoteModal = ({ note, onClose }) => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* ── ACTION BAR — between content and comments ── */}
+                            <ActionBar />
                         </div>
 
                         {/* CARD 2: Comments */}
@@ -289,7 +291,7 @@ const NoteModal = ({ note, onClose }) => {
                         </div>
                     </div>
 
-                    {/* ══ DESKTOP — untouched ══ */}
+                    {/* ══ DESKTOP ══ */}
                     <div className="hidden md:block p-6">
                         {note.tags?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-6">
@@ -334,7 +336,12 @@ const NoteModal = ({ note, onClose }) => {
                                 </div>
                             </div>
                         )}
-                        <div className="border-t border-gray-100 pt-6">
+
+                        {/* ── ACTION BAR — between content and comments ── */}
+                        <ActionBar />
+
+                        {/* Comments */}
+                        <div className="pt-6">
                             <h3 className="font-semibold text-gray-900 mb-4">Comments</h3>
                             <form onSubmit={handleAddComment} className="mb-6">
                                 <div className="flex gap-2">
@@ -351,18 +358,6 @@ const NoteModal = ({ note, onClose }) => {
                                     {comments.length > 0 ? renderComments(comments) : <div className="text-center py-8 text-gray-400 text-sm">No comments yet. Be the first to share your thoughts!</div>}
                                 </div>
                             )}
-                        </div>
-                        <div className="flex items-center gap-5 mt-6 pt-4 border-t border-gray-100">
-                            <button className="text-gray-400 hover:text-gray-600 transition"><LuPencil size={17} /></button>
-                            <button className="text-gray-400 hover:text-red-500 transition"><LuTrash2 size={17} /></button>
-                            <button onClick={handleLike} className={`flex items-center gap-1 transition ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}>
-                                {isLiked ? <IoHeart size={17} /> : <IoHeartOutline size={17} />}
-                                <span className="text-xs font-medium">{likeCount}</span>
-                            </button>
-                            <div className="flex items-center gap-1 text-gray-400">
-                                <LuEye size={17} />
-                                <span className="text-xs font-medium">{note.views || 0}</span>
-                            </div>
                         </div>
                     </div>
 
