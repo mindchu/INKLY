@@ -87,8 +87,8 @@ const Home_Top_bar = () => {
         </div>
 
         {/* Filter By Section — horizontal layout */}
-        <div className='mt-3 ml-5 flex flex-row items-start gap-6 pb-2 pr-8 flex-wrap'>
-          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none pt-1'>Filter by:</p>
+        <div className='mt-3 ml-5 flex flex-row items-center gap-6 pb-2 pr-8 flex-wrap'>
+          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Filter by:</p>
 
           {/* Include Tags */}
           <div className='flex flex-row items-center gap-2 flex-wrap'>
