@@ -166,7 +166,11 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
     else: # recent
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
-    return content[skip:skip+limit]
+    final_content = content[skip:skip+limit]
+    for doc in final_content:
+        doc.pop('title_embedding', None)
+        
+    return final_content
 
 
 def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
