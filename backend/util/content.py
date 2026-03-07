@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Any, Optional, List
 from obj.post_discussion_comment import Post, Discussion, Comment
 from util.dbconn import db
@@ -60,6 +61,10 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         
     return None
 
+def _make_case_insensitive_tag_query(tags: List[str]) -> List[re.Pattern]:
+    """Convert a list of tag strings to case-insensitive regex patterns."""
+    return [re.compile(f'^{re.escape(tag)}$', re.IGNORECASE) for tag in tags]
+
 def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', limit: int = 10, skip: int = 0, filter_tags: Optional[List[str]] = None, exclude_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
     interested_tags = []
     following_ids = []
@@ -121,27 +126,23 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
             
         return all_content
 
-    # Build query
+    # Build query with case-insensitive tag matching
     query = {}
 
-    # Include tags filter
     if filter_tags:
-        query["tags"] = {"$in": filter_tags}
+        # Case-insensitive include tags
+        query["tags"] = {"$in": _make_case_insensitive_tag_query(filter_tags)}
     elif interested_tags or following_ids:
         or_conditions = []
         if interested_tags:
-            or_conditions.append({"tags": {"$in": interested_tags}})
+            or_conditions.append({"tags": {"$in": _make_case_insensitive_tag_query(interested_tags)}})
         if following_ids:
             or_conditions.append({"author_id": {"$in": following_ids}})
         query["$or"] = or_conditions
 
-    # Exclude tags filter
     if exclude_tags:
-        query["tags"] = query.get("tags", {})
-        if isinstance(query["tags"], dict):
-            query["tags"]["$nin"] = exclude_tags
-        else:
-            query["tags"] = {"$nin": exclude_tags}
+        # Case-insensitive exclude tags
+        query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
     content = fetch_and_format(query)
 
@@ -149,7 +150,7 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
     if not content:
         fallback_query = {}
         if exclude_tags:
-            fallback_query["tags"] = {"$nin": exclude_tags}
+            fallback_query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
         content = fetch_and_format(fallback_query)
 
     # Sorting
@@ -254,13 +255,13 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         query["author_id"] = {"$in": following_ids}
 
     if tags_filter:
-        query["tags"] = {"$all": tags_filter}
+        query["tags"] = {"$all": _make_case_insensitive_tag_query(tags_filter)}
 
     if exclude_tags:
         if "tags" in query:
-            query["tags"]["$nin"] = exclude_tags
+            query["tags"]["$nin"] = _make_case_insensitive_tag_query(exclude_tags)
         else:
-            query["tags"] = {"$nin": exclude_tags}
+            query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
     def fetch_with_query(q_obj):
         posts = list(db.posts.find(q_obj))

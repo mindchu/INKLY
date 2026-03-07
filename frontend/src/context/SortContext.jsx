@@ -12,9 +12,9 @@ export const useSortContext = () => {
 };
 
 export const SortProvider = ({ children, contentType }) => {
-    const [sortBy, setSortBy] = useState('date');           // views | comments | likes | date
-    const [includeTags, setIncludeTags] = useState([]);     // tags to include
-    const [excludeTags, setExcludeTags] = useState([]);     // tags to exclude
+    const [sortBy, setSortBy] = useState('date');
+    const [includeTags, setIncludeTags] = useState([]);
+    const [excludeTags, setExcludeTags] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [localSearch, setLocalSearch] = useState('');
     const [rawContent, setRawContent] = useState([]);
@@ -22,23 +22,18 @@ export const SortProvider = ({ children, contentType }) => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const limit = 5;
-    const lastFetchedSort = useRef(null);
     const lastFetchedSearch = useRef(null);
 
-    const fetchRecommended = async (force = false, pageNum = 0) => {
-        if (!force && lastFetchedSort.current === sortBy && lastFetchedSearch.current === null && pageNum === 0) return;
-
-        lastFetchedSort.current = sortBy;
-        lastFetchedSearch.current = null;
+    // FIX: Accept current values as params to avoid stale closure
+    const fetchRecommended = async (pageNum = 0, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
 
-            // Map sortBy to backend sort param
-            const sortParam = sortBy === 'views' ? 'views'
-                : sortBy === 'likes' ? 'likes'
-                : sortBy === 'comments' ? 'comments'
-                : 'recent'; // date
+            const sortParam = currentSortBy === 'views' ? 'views'
+                : currentSortBy === 'likes' ? 'likes'
+                : currentSortBy === 'comments' ? 'comments'
+                : 'recent';
             params.append('sort', sortParam);
             params.append('skip', pageNum * limit);
             params.append('limit', limit);
@@ -47,24 +42,18 @@ export const SortProvider = ({ children, contentType }) => {
                 params.append('type', contentType);
             }
 
-            // Include tags filter
-            if (includeTags.length > 0) {
-                includeTags.forEach(tag => params.append('tags', tag));
+            // Send tags as-is, backend handles case-insensitive matching
+            if (currentIncludeTags.length > 0) {
+                currentIncludeTags.forEach(tag => params.append('tags', tag));
             }
-
-            // Exclude tags filter — passed as separate param
-            if (excludeTags.length > 0) {
-                excludeTags.forEach(tag => params.append('exclude_tags', tag));
+            if (currentExcludeTags.length > 0) {
+                currentExcludeTags.forEach(tag => params.append('exclude_tags', tag));
             }
 
             const data = await api.get(`/content/recommended?${params.toString()}`);
             const fetchedItems = data.data || [];
 
-            if (fetchedItems.length < limit) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
+            setHasMore(fetchedItems.length >= limit);
 
             if (pageNum === 0) {
                 setRawContent(fetchedItems);
@@ -73,29 +62,27 @@ export const SortProvider = ({ children, contentType }) => {
             }
         } catch (error) {
             console.error('Failed to fetch recommended content:', error);
-            if (pageNum === 0) lastFetchedSort.current = null;
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchSearch = async (query, pageNum = 0) => {
+    const fetchSearch = async (query, pageNum = 0, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
         if (!query.trim()) {
             setSearchQuery('');
-            return fetchRecommended(true, 0);
+            return fetchRecommended(0, currentSortBy, currentIncludeTags, currentExcludeTags);
         }
 
         lastFetchedSearch.current = query;
-        lastFetchedSort.current = sortBy;
         setLoading(true);
         setSearchQuery(query);
         try {
             const params = new URLSearchParams();
             params.append('q', query);
 
-            const sortParam = sortBy === 'views' ? 'views'
-                : sortBy === 'likes' ? 'likes'
-                : sortBy === 'comments' ? 'comments'
+            const sortParam = currentSortBy === 'views' ? 'views'
+                : currentSortBy === 'likes' ? 'likes'
+                : currentSortBy === 'comments' ? 'comments'
                 : 'recent';
             params.append('sort_by', sortParam);
             params.append('scope', 'all');
@@ -105,21 +92,17 @@ export const SortProvider = ({ children, contentType }) => {
             if (contentType) {
                 params.append('type', contentType);
             }
-            if (includeTags.length > 0) {
-                includeTags.forEach(tag => params.append('tags', tag));
+            if (currentIncludeTags.length > 0) {
+                currentIncludeTags.forEach(tag => params.append('tags', tag));
             }
-            if (excludeTags.length > 0) {
-                excludeTags.forEach(tag => params.append('exclude_tags', tag));
+            if (currentExcludeTags.length > 0) {
+                currentExcludeTags.forEach(tag => params.append('exclude_tags', tag));
             }
 
             const response = await api.get(`/search?${params.toString()}`);
             const fetchedItems = response.data || [];
 
-            if (fetchedItems.length < limit) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
+            setHasMore(fetchedItems.length >= limit);
 
             if (pageNum === 0) {
                 setRawContent(fetchedItems);
@@ -133,29 +116,29 @@ export const SortProvider = ({ children, contentType }) => {
         }
     };
 
-    // Re-fetch when sortBy, includeTags, or excludeTags change
+    // FIX: Pass current state values directly into fetch functions
     useEffect(() => {
         setPage(0);
         setHasMore(true);
         if (lastFetchedSearch.current) {
-            fetchSearch(lastFetchedSearch.current, 0);
+            fetchSearch(lastFetchedSearch.current, 0, sortBy, includeTags, excludeTags);
         } else {
-            fetchRecommended(true, 0);
+            fetchRecommended(0, sortBy, includeTags, excludeTags);
         }
     }, [sortBy, includeTags, excludeTags]);
 
     useEffect(() => {
         setPage(0);
         setHasMore(true);
-        fetchRecommended(true, 0);
+        fetchRecommended(0, sortBy, includeTags, excludeTags);
     }, [contentType]);
 
     useEffect(() => {
         if (page > 0) {
             if (searchQuery) {
-                fetchSearch(searchQuery, page);
+                fetchSearch(searchQuery, page, sortBy, includeTags, excludeTags);
             } else {
-                fetchRecommended(true, page);
+                fetchRecommended(page, sortBy, includeTags, excludeTags);
             }
         }
     }, [page]);
