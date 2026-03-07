@@ -78,18 +78,20 @@ const Home_page = () => {
     }
 
     return (
-        // pb-[76px] on mobile so content won't hide behind the fixed tab bar
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative pb-[76px] md:pb-0'>
 
-            {/* 1 col on mobile, 2 on sm, 3 on lg */}
-            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-8`}>
+            {/* Mobile: no padding/gap so cards are truly full width
+                Desktop: original grid with padding and gaps */}
+            <div className='flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:p-8'>
                 {notes.map((note, index) => {
                     const isTriggerNote = index === Math.max(0, notes.length - 3);
                     return (
                         <div
                             ref={isTriggerNote ? lastNoteElementRef : null}
                             key={note._id || note.id}
-                            className='bg-white rounded-xl p-4 md:p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]'
+                            /* Mobile: no rounded corners, no margin, full bleed with bottom border
+                               Desktop: original card style */
+                            className='bg-white md:rounded-xl md:shadow-sm md:p-6 p-4 flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99] border-b border-gray-200 md:border-0'
                             onClick={() => handleCardClick(note)}
                         >
                             <div className="flex justify-between items-start mb-3">
