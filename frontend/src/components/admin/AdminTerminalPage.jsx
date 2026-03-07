@@ -472,6 +472,26 @@ const AdminTerminalPage = () => {
                             </form>
                         </div>
                     </div>
+                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] lg:col-span-2 mt-8">
+                        <h3 className="text-xl font-bold mb-2 text-[#3A5335]">All Tags</h3>
+                        <p className="text-sm text-[#7A8A73] mb-6">All tags in the system sorted alphabetically.</p>
+                        <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-scroll">
+                            {[...popularTags].sort((a, b) => (a.name || a).localeCompare(b.name || b)).map((tag, idx) => (
+                                <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border shadow-sm"
+                                    style={{
+                                        backgroundColor: tag.color || '#E8F0E5',
+                                        borderColor: tag.color || '#D4D9C6',
+                                        color: '#2C3E28'
+                                    }}
+                                >
+                                    {tag.name || tag}
+                                    <span className="text-xs font-bold opacity-70">{tag.use_count || 0}</span>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
                 </section>
 
                 {/* Content Moderation Section */}
