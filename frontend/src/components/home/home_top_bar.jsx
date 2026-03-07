@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
-import { IoHeartOutline, IoClose, IoSparkles, IoFilter } from "react-icons/io5";
+import { IoHeartOutline, IoClose, IoSparkles } from "react-icons/io5";
 import { BiCommentDetail } from "react-icons/bi";
-import { FiMenu, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FiMenu } from "react-icons/fi";
 import { useSortContext } from '../../context/SortContext';
 import { useSidebar } from '../../context/SidebarContext';
 
 const SORT_OPTIONS = [
-  { key: 'recommended', icon: <IoSparkles size={13} />,           label: 'Recommended' },
-  { key: 'views',       icon: <MdOutlineRemoveRedEye size={13} />, label: 'Views' },
-  { key: 'comments',    icon: <BiCommentDetail size={13} />,       label: 'Comments' },
-  { key: 'likes',       icon: <IoHeartOutline size={13} />,        label: 'Likes' },
-  { key: 'date',        icon: <MdOutlineDateRange size={13} />,    label: 'Date' },
+  { key: 'recommended', icon: <IoSparkles size={12} />,           label: 'Recommended' },
+  { key: 'views',       icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
+  { key: 'comments',    icon: <BiCommentDetail size={12} />,       label: 'Comments' },
+  { key: 'likes',       icon: <IoHeartOutline size={12} />,        label: 'Likes' },
+  { key: 'date',        icon: <MdOutlineDateRange size={12} />,    label: 'Date' },
 ];
 
 const Home_Top_bar = () => {
@@ -21,7 +21,6 @@ const Home_Top_bar = () => {
 
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
-  const [filterOpen, setFilterOpen] = useState(false);
 
   const handleIncludeKeyDown = (e) => {
     if (e.key === 'Enter' && includeInput.trim()) {
@@ -41,110 +40,144 @@ const Home_Top_bar = () => {
 
   const removeIncludeTag = (tag) => setIncludeTags(prev => prev.filter(t => t !== tag));
   const removeExcludeTag = (tag) => setExcludeTags(prev => prev.filter(t => t !== tag));
-  const activeFilterCount = includeTags.length + excludeTags.length;
 
   return (
-    <div className='w-full bg-white border-b border-gray-100 shadow-sm'>
+    <div className='w-full bg-white shadow-md py-3'>
 
-      {/* ── Header row ─────────────────────────────────────── */}
-      <div className='flex items-center justify-between px-4 md:px-6 pt-3 pb-2'>
-        <div className='flex items-center gap-2.5'>
-          <button onClick={toggleSidebar} className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg">
-            <FiMenu size={22} className="text-[#3E4A34]" />
+      {/* ── Header row ─────────────────────────────────────────── */}
+      <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
+        <div className='flex flex-row items-center gap-3'>
+          <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
+            <FiMenu size={24} className="text-[#3E4A34]" />
           </button>
-          <PiBookOpenTextLight size={28} className='opacity-60 hidden sm:block' />
-          <p className='font-["Julius_Sans_One"] text-[24px] md:text-[30px] text-[#3E4A34] font-thin select-none tracking-wide'>
-            HOME
-          </p>
-        </div>
-
-        {/* Mobile filter toggle */}
-        <button
-          onClick={() => setFilterOpen(v => !v)}
-          className="md:hidden relative flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition text-[12px] font-medium"
-        >
-          <IoFilter size={13} />
-          Filter
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#3E4A34] text-white text-[9px] rounded-full flex items-center justify-center font-bold">
-              {activeFilterCount}
-            </span>
-          )}
-          {filterOpen ? <FiChevronUp size={12} /> : <FiChevronDown size={12} />}
-        </button>
-      </div>
-
-      {/* ── Sort row ─────────────────────────────────────────── */}
-      <div className='px-4 md:px-6 pb-2'>
-        <div className='flex items-center gap-2 overflow-x-auto scrollbar-hide'>
-          <span className='text-[#124C09] text-[13px] md:text-[15px] font-medium select-none whitespace-nowrap flex-shrink-0 mr-1'>
-            Sort:
-          </span>
-          {SORT_OPTIONS.map(({ key, icon, label }) => (
-            <button
-              key={key}
-              onClick={() => setSortBy(key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex-shrink-0 text-[12px] md:text-[13px] font-medium ${
-                sortBy === key
-                  ? 'bg-[#3E4A34] text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {icon}
-              {label}
-            </button>
-          ))}
+          <PiBookOpenTextLight size={38} className='opacity-70' />
+          <p className='font-["Julius Sans One"] text-[28px] md:text-[32px] text-[#3E4A34] font-thin select-none'>HOME</p>
         </div>
       </div>
 
-      {/* ── Filter panel — mobile toggleable, desktop always visible ── */}
-      <div className={`overflow-hidden transition-all duration-300 ${filterOpen ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'} md:max-h-none md:opacity-100`}>
-        <div className='px-4 md:px-6 pb-3 pt-1 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 flex-wrap border-t border-gray-50 md:border-0'>
-          <span className='text-[#124C09] text-[15px] font-medium select-none hidden md:block'>Filter by:</span>
+      {/* ── Sort row ───────────────────────────────────────────── */}
+      <div className='mt-2 ml-4 md:ml-5 pr-4 md:pr-8'>
+        {/* Desktop — unchanged */}
+        <div className='hidden md:flex flex-row items-center gap-3'>
+          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Sort by:</p>
+          <div className='flex flex-row gap-2'>
+            {SORT_OPTIONS.map(({ key, icon, label }) => (
+              <button
+                key={key}
+                onClick={() => setSortBy(key)}
+                className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                  sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {icon}
+                <span className='font-["Inter"] text-[14px] font-medium'>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* Include */}
-          <div className='flex items-center gap-2 flex-wrap'>
-            <span className='text-gray-400 text-[12px] select-none'>Include:</span>
+        {/* Mobile — wraps into 2 rows */}
+        <div className='md:hidden'>
+          <p className='text-[#124C09] font-["Inter"] text-[13px] font-medium mb-1.5 select-none'>Sort by:</p>
+          <div className='flex flex-row flex-wrap gap-1.5'>
+            {SORT_OPTIONS.map(({ key, icon, label }) => (
+              <button
+                key={key}
+                onClick={() => setSortBy(key)}
+                className={`flex flex-row items-center gap-1 px-3 py-1.5 rounded-full transition-all text-[12px] font-medium ${
+                  sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {icon}
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Filter row ─────────────────────────────────────────── */}
+      {/* Desktop — unchanged */}
+      <div className='hidden md:block'>
+        <div className='mt-3 ml-5 flex flex-row items-center gap-6 pb-2 pr-8 flex-wrap'>
+          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Filter by:</p>
+
+          <div className='flex flex-row items-center gap-2 flex-wrap'>
+            <span className='text-gray-500 font-["Inter"] text-[13px] select-none'>Include:</span>
             {includeTags.map(tag => (
-              <span key={tag} className='flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 text-[11px] px-2.5 py-0.5 rounded-full font-medium'>
+              <span key={tag} className='flex items-center gap-1 bg-green-100 text-green-700 text-[12px] px-3 py-1 rounded-full font-medium'>
                 #{tag}
-                <button onClick={() => removeIncludeTag(tag)} className='hover:text-green-900 ml-0.5'>
-                  <IoClose size={11} />
-                </button>
+                <button onClick={() => removeIncludeTag(tag)} className='hover:text-green-900'><IoClose size={13} /></button>
               </span>
             ))}
             <input
-              type='text'
-              value={includeInput}
+              type='text' value={includeInput}
               onChange={e => setIncludeInput(e.target.value)}
               onKeyDown={handleIncludeKeyDown}
-              placeholder='Add tag + Enter'
-              className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-28 md:w-32 bg-gray-50'
+              placeholder='Type a tag + Enter'
+              className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-36'
             />
           </div>
 
-          <div className='hidden md:block w-px h-5 bg-gray-200' />
+          <div className='w-px bg-gray-200 self-stretch' />
 
-          {/* Exclude */}
-          <div className='flex items-center gap-2 flex-wrap'>
-            <span className='text-gray-400 text-[12px] select-none'>Exclude:</span>
+          <div className='flex flex-row items-center gap-2 flex-wrap'>
+            <span className='text-gray-500 font-["Inter"] text-[13px] select-none'>Exclude:</span>
             {excludeTags.map(tag => (
-              <span key={tag} className='flex items-center gap-1 bg-red-50 text-red-500 border border-red-200 text-[11px] px-2.5 py-0.5 rounded-full font-medium'>
+              <span key={tag} className='flex items-center gap-1 bg-red-100 text-red-600 text-[12px] px-3 py-1 rounded-full font-medium'>
                 #{tag}
-                <button onClick={() => removeExcludeTag(tag)} className='hover:text-red-700 ml-0.5'>
-                  <IoClose size={11} />
-                </button>
+                <button onClick={() => removeExcludeTag(tag)} className='hover:text-red-800'><IoClose size={13} /></button>
               </span>
             ))}
             <input
-              type='text'
-              value={excludeInput}
+              type='text' value={excludeInput}
               onChange={e => setExcludeInput(e.target.value)}
               onKeyDown={handleExcludeKeyDown}
-              placeholder='Add tag + Enter'
-              className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-28 md:w-32 bg-gray-50'
+              placeholder='Type a tag + Enter'
+              className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-36'
             />
           </div>
+        </div>
+      </div>
+
+      {/* Mobile — always visible, stacked */}
+      <div className='md:hidden mt-3 ml-4 pr-4 pb-1 flex flex-col gap-2'>
+        <p className='text-[#124C09] font-["Inter"] text-[13px] font-medium select-none'>Filter by:</p>
+
+        {/* Include */}
+        <div className='flex flex-row items-center gap-2 flex-wrap'>
+          <span className='text-gray-500 text-[12px] select-none'>Include:</span>
+          {includeTags.map(tag => (
+            <span key={tag} className='flex items-center gap-1 bg-green-100 text-green-700 text-[11px] px-2.5 py-0.5 rounded-full font-medium'>
+              #{tag}
+              <button onClick={() => removeIncludeTag(tag)} className='hover:text-green-900'><IoClose size={11} /></button>
+            </span>
+          ))}
+          <input
+            type='text' value={includeInput}
+            onChange={e => setIncludeInput(e.target.value)}
+            onKeyDown={handleIncludeKeyDown}
+            placeholder='Tag + Enter'
+            className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-28'
+          />
+        </div>
+
+        {/* Exclude */}
+        <div className='flex flex-row items-center gap-2 flex-wrap'>
+          <span className='text-gray-500 text-[12px] select-none'>Exclude:</span>
+          {excludeTags.map(tag => (
+            <span key={tag} className='flex items-center gap-1 bg-red-100 text-red-600 text-[11px] px-2.5 py-0.5 rounded-full font-medium'>
+              #{tag}
+              <button onClick={() => removeExcludeTag(tag)} className='hover:text-red-800'><IoClose size={11} /></button>
+            </span>
+          ))}
+          <input
+            type='text' value={excludeInput}
+            onChange={e => setExcludeInput(e.target.value)}
+            onKeyDown={handleExcludeKeyDown}
+            placeholder='Tag + Enter'
+            className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-28'
+          />
         </div>
       </div>
 
