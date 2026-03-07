@@ -15,7 +15,6 @@ async def get_popular_tags():
 
 @router.get("/tags/all")
 async def get_all_tags():
-    # Fetch all tags from the tags collection with full metadata
     all_tags = list(db.tags.find().sort("name", 1))
     for t in all_tags:
         t["_id"] = str(t["_id"])
@@ -31,7 +30,6 @@ async def create_new_content(
     files: List[UploadFile] = File(None)
 ):
     require_auth(request)
-    # Validate form data using the dictionary approach
     form_data = {
         "title": title,
         "text": text,
@@ -79,10 +77,26 @@ async def get_uploaded_file(filename: str):
     return StreamingResponse(iterfile(), media_type=content_type)
 
 @router.get("/content/recommended")
-async def get_recommended(request: Request, sort: str = 'likes', tags: Optional[List[str]] = Query(None), type: Optional[str] = Query(None), skip: int = Query(0), limit: int = Query(10)):
+async def get_recommended(
+    request: Request,
+    sort: str = 'recent',
+    tags: Optional[List[str]] = Query(None),
+    exclude_tags: Optional[List[str]] = Query(None),  # NEW
+    type: Optional[str] = Query(None),
+    skip: int = Query(0),
+    limit: int = Query(10)
+):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    recommended = content_util.get_recommended_content(user_id, sort_by=sort, filter_tags=tags, content_type=type, skip=skip, limit=limit)
+    recommended = content_util.get_recommended_content(
+        user_id,
+        sort_by=sort,
+        filter_tags=tags,
+        exclude_tags=exclude_tags,  # NEW
+        content_type=type,
+        skip=skip,
+        limit=limit
+    )
     return {"data": recommended}
 
 @router.get("/content/{content_id}")
@@ -107,7 +121,7 @@ async def search_content(
     q: str = Query("", description="Search text"),
     tags: List[str] = Query(None, description="Filter by tags"),
     exclude_tags: List[str] = Query(None, description="Exclude tags"),
-    sort_by: str = Query("recent", description="recent or popular"),
+    sort_by: str = Query("recent", description="recent, views, likes, or comments"),
     scope: str = Query("all", description="search scope: all, bookmarks, following, or owned"),
     skip: int = Query(0, description="Number of items to skip"),
     limit: int = Query(10, description="Max number of items to return")
@@ -122,7 +136,6 @@ async def search_content(
 async def add_comment(content_id: str, comment_data: dict, request: Request):
     user = require_auth(request)
     comment_req = validate(comment_data, CommentRequest)
-    # Use parent_id from request if provided, otherwise default to content_id
     parent_id = comment_req.parent_id if comment_req.parent_id else content_id
     result = content_util.create_comment(parent_id, user['google_id'], comment_req.text)
     if result:
@@ -151,7 +164,6 @@ async def update_content_route(content_id: str, content_data: dict, request: Req
     user = require_auth(request)
     update_req = validate(content_data, ContentUpdate)
     
-    # Check ownership
     doc = db.posts.find_one({"_id": content_id})
     collection = db.posts
     if not doc:
@@ -166,7 +178,6 @@ async def update_content_route(content_id: str, content_data: dict, request: Req
         
     update_data = {"title": update_req.title, "text": update_req.text}
     
-    # Regenerate embedding if title changed
     if doc.get('title') != update_req.title:
         from util.embeddings import embedding_manager
         update_data['title_embedding'] = embedding_manager.generate_embedding(update_req.title)

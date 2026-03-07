@@ -5,9 +5,6 @@ from util import embeddings
 from datetime import datetime, timezone
 
 def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """
-    Creates a Post or Discussion based on the 'type' field in content_data.
-    """
     content_type = content_data.get('type')
     title = content_data.get('title')
     text = content_data.get('text')
@@ -39,8 +36,6 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         return None
         
     data = content.to_dict(include_secrets=True)
-    
-    # Generate title embedding for semantic search
     data['title_embedding'] = embeddings.embedding_manager.generate_embedding(title)
     
     result = collection.insert_one(data)
@@ -49,7 +44,6 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         from util import tags
         tags.ensure_tags_exist(content_data.get('tags', []), created_by=user_id)
         
-        # Track content ID in user profile
         if content_type == 'post':
             db.users.update_one(
                 {"google_id": user_id},
@@ -66,24 +60,15 @@ def create_content(content_data: Dict[str, Any], user_id: str, _id: Optional[str
         
     return None
 
-def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limit: int = 10, skip: int = 0, filter_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
-    """
-    Fetches content (posts and discussions).
-    If filter_tags is provided, it filters by those specific tags.
-    Otherwise, if user_id is provided and they have interested_tags, it filters by those tags.
-    If content_type is provided ('post' or 'discussion'), it only returns that type.
-    Fallbacks to showing all content if no specific filters apply or no matches found.
-    """
+def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', limit: int = 10, skip: int = 0, filter_tags: Optional[List[str]] = None, exclude_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
     interested_tags = []
     following_ids = []
-    user_bookmarks = []
     
     if user_id:
         user_doc = db.users.find_one({"google_id": user_id})
         if user_doc:
             interested_tags = user_doc.get('interested_tags', [])
             following_ids = user_doc.get('following_ids', [])
-            user_bookmarks = user_doc.get('bookmark_ids', [])
 
     def fetch_and_format(query):
         posts = []
@@ -107,7 +92,6 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
 
         all_content = posts + discussions
         
-        # --- BULK LIKE CHECKING TO PREVENT N+1 PROBLEM ---
         content_ids = [str(doc['_id']) for doc in all_content]
         user_liked_set = set()
         
@@ -117,22 +101,16 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
                 "content_id": {"$in": content_ids}
             })
             user_liked_set = {ld["content_id"] for ld in liked_docs}
-        # --------------------------------------------------
 
         for doc in all_content:
             doc_id_str = str(doc['_id'])
             doc['_id'] = doc_id_str
-            liked_by = doc.get('liked_by_user_ids', [])
-            comment_ids = doc.get('comment_ids', [])
-            
             doc['like_count'] = doc.get('like_count', 0)
             doc['comments_count'] = len(doc.get('comment_ids', []))
             doc['is_liked'] = doc_id_str in user_liked_set
             doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
             doc['is_following'] = doc.get('author_id') in following_ids if user_id else False
-            
-            # Clean up old field if it exists to keep payload small
-            doc.pop('liked_by_user_ids', None) 
+            doc.pop('liked_by_user_ids', None)
             
             if 'tags' not in doc:
                 doc['tags'] = []
@@ -143,27 +121,45 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
             
         return all_content
 
-    # 2. Fetch content
-    content = []
-    if filter_tags:
-        content = fetch_and_format({"tags": {"$in": filter_tags}})
-    elif interested_tags or following_ids:
-        query = {"$or": []}
-        if interested_tags:
-            query["$or"].append({"tags": {"$in": interested_tags}})
-        if following_ids:
-            query["$or"].append({"author_id": {"$in": following_ids}})
-        content = fetch_and_format(query)
+    # Build query
+    query = {}
 
+    # Include tags filter
+    if filter_tags:
+        query["tags"] = {"$in": filter_tags}
+    elif interested_tags or following_ids:
+        or_conditions = []
+        if interested_tags:
+            or_conditions.append({"tags": {"$in": interested_tags}})
+        if following_ids:
+            or_conditions.append({"author_id": {"$in": following_ids}})
+        query["$or"] = or_conditions
+
+    # Exclude tags filter
+    if exclude_tags:
+        query["tags"] = query.get("tags", {})
+        if isinstance(query["tags"], dict):
+            query["tags"]["$nin"] = exclude_tags
+        else:
+            query["tags"] = {"$nin": exclude_tags}
+
+    content = fetch_and_format(query)
+
+    # Fallback to all content if nothing found
     if not content:
-        content = fetch_and_format({})
+        fallback_query = {}
+        if exclude_tags:
+            fallback_query["tags"] = {"$nin": exclude_tags}
+        content = fetch_and_format(fallback_query)
 
     # Sorting
     if sort_by == 'likes':
-        content.sort(key=lambda x: x.get('like_coun', 0), reverse=True)
+        content.sort(key=lambda x: x.get('like_count', 0), reverse=True)
     elif sort_by == 'views':
         content.sort(key=lambda x: x.get('views', 0), reverse=True)
-    else: # recent
+    elif sort_by == 'comments':
+        content.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
+    else:  # recent / date
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
     final_content = content[skip:skip+limit]
@@ -174,11 +170,9 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
 
 
 def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    # 1. Update views
     db.posts.update_one({"_id": content_id}, {"$inc": {"views": 1}})
     db.discussions.update_one({"_id": content_id}, {"$inc": {"views": 1}})
 
-    # 2. Fetch doc
     doc = db.posts.find_one({"_id": content_id})
     if not doc:
         doc = db.discussions.find_one({"_id": content_id})
@@ -188,12 +182,11 @@ def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optiona
         liked_by = doc.get('liked_by_user_ids', [])
         comment_ids = doc.get('comment_ids', [])
         
-        doc['like_coun'] = len(liked_by)
+        doc['like_count'] = doc.get('like_count', 0)
         doc['comments_count'] = len(comment_ids)
         doc['is_liked'] = user_id in liked_by if user_id else False
         
         if user_id:
-            # Check the likes collection
             has_liked = db.likes.find_one({"content_id": content_id, "user_id": user_id})
             doc['is_liked'] = has_liked is not None
             
@@ -224,7 +217,6 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
     discussions = list(db.discussions.find({"_id": {"$in": bookmark_ids}}))
     all_content = posts + discussions
     
-    # Bulk check likes
     user_liked_set = set()
     if all_content:
         content_ids = [str(doc['_id']) for doc in all_content]
@@ -234,7 +226,7 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
     for doc in all_content:
         doc_id_str = str(doc['_id'])
         doc['_id'] = doc_id_str
-        doc['like_coun'] = doc.get('like_count', 0)
+        doc['like_count'] = doc.get('like_count', 0)
         doc['comments_count'] = len(doc.get('comment_ids', []))
         doc['is_liked'] = doc_id_str in user_liked_set
         doc['is_bookmarked'] = True
@@ -250,7 +242,6 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
 def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all", skip: int = 0, limit: int = 10) -> List[Dict[str, Any]]:
     query: Dict[str, Any] = {}
     
-    # 1. Scope Filtering
     if scope == "owned" and user_id:
         query["author_id"] = user_id
     elif scope == "bookmarks" and user_id:
@@ -262,9 +253,6 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         following_ids = user_doc.get('following_ids', []) if user_doc else []
         query["author_id"] = {"$in": following_ids}
 
-    # 2. Text Search (Optional if q is provided, we use semantic search primarily)
-    # We remove the hard regex filter so we can do semantic search on ALL matching scope documents
-    
     if tags_filter:
         query["tags"] = {"$all": tags_filter}
 
@@ -288,7 +276,6 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
 
         all_content = posts + discussions
         
-        # Bulk Check Likes
         content_ids = [str(doc['_id']) for doc in all_content]
         user_liked_set = set()
         if user_id and content_ids:
@@ -320,8 +307,6 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         for doc in results:
             doc_embedding = doc.get('title_embedding')
             title = doc.get('title', '')
-            
-            # Exact/partial text match gets a massive boost
             text_match_bonus = 1.0 if lower_q in title.lower() else 0.0
             
             if doc_embedding:
@@ -332,20 +317,19 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
             final_score = semantic_score + text_match_bonus
             doc['search_score'] = final_score
             
-            # Only keep results that are either somewhat semantically similar or have a text match
             if final_score > 0.3 or text_match_bonus > 0:
                 filtered_results.append(doc)
                 
         results = filtered_results
-        
-        # Sort by search score primarily if a query is provided
         results.sort(key=lambda x: x.get('search_score', 0), reverse=True)
     else:
-        if sort_by in ["popular", "top", "likes"]:
+        if sort_by == 'likes':
             results.sort(key=lambda x: x.get('like_count', 0), reverse=True)
-        elif sort_by in ["hot", "views"]:
+        elif sort_by == 'views':
             results.sort(key=lambda x: x.get('views', 0), reverse=True)
-        else: # recent / new
+        elif sort_by == 'comments':
+            results.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
+        else:
             results.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
     final_results = results[skip:skip+limit]
@@ -384,10 +368,6 @@ def create_comment(parent_id: str, author_id: str, text: str) -> Optional[Dict[s
     return data
 
 def get_comment_tree(parent_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
-    """
-    Recursively builds a tree of comments.
-    Updated to safely strip ObjectIds so FastAPI doesn't crash.
-    """
     parent = db.posts.find_one({"_id": parent_id})
     if not parent: parent = db.discussions.find_one({"_id": parent_id})
     if not parent: parent = db.comments.find_one({"_id": parent_id})
@@ -454,31 +434,14 @@ def toggle_like(content_id: str, user_id: str) -> Optional[bool]:
         return True
     
 def toggle_comment_like(comment_id: str, user_id: str):
-    # Check if the user already liked this comment
-    existing_like = db.likes.find_one({
-        "target_id": comment_id, 
-        "user_id": user_id,
-        "type": "comment"
-    })
+    existing_like = db.likes.find_one({"target_id": comment_id, "user_id": user_id, "type": "comment"})
     if existing_like:
         db.likes.delete_one({"_id": existing_like["_id"]})
-        db.comments.update_one(
-            # FIX: Just use comment_id directly!
-            {"_id": comment_id}, 
-            {"$inc": {"like_count": -1}}
-        )
+        db.comments.update_one({"_id": comment_id}, {"$inc": {"like_count": -1}})
         return False
     else:
-        db.likes.insert_one({
-            "target_id": comment_id,
-            "user_id": user_id,
-            "type": "comment"
-        })
-        db.comments.update_one(
-            # FIX: Just use comment_id directly!
-            {"_id": comment_id}, 
-            {"$inc": {"like_count": 1}}
-        )
+        db.likes.insert_one({"target_id": comment_id, "user_id": user_id, "type": "comment"})
+        db.comments.update_one({"_id": comment_id}, {"$inc": {"like_count": 1}})
         return True
 
 def toggle_bookmark(user_id: str, content_id: str) -> Optional[bool]:
@@ -517,14 +480,11 @@ def delete_content(content_id: str, user_id: str) -> bool:
     result = collection.delete_one({"_id": content_id})
     
     if result.deleted_count > 0:
-        # CLEANUP: Remove orphaned likes
         db.likes.delete_many({"content_id": content_id})
-        
         if content_type == 'post':
             db.users.update_one({"google_id": user_id}, {"$pull": {"uploaded_doc_ids": content_id}})
         elif content_type == 'discussion':
             db.users.update_one({"google_id": user_id}, {"$pull": {"discussion_ids": content_id}})
-        
         db.users.update_many({}, {"$pull": {"bookmark_ids": content_id}})
         return True
     return False
@@ -550,19 +510,15 @@ def admin_delete_content(content_id: str) -> bool:
     result = collection.delete_one({"_id": content_id})
     
     if result.deleted_count > 0:
-        # CLEANUP: Remove orphaned likes
         db.likes.delete_many({"content_id": content_id})
-        
         if author_id:
             if content_type == 'post':
                 db.users.update_one({"google_id": author_id}, {"$pull": {"uploaded_doc_ids": content_id}})
             elif content_type == 'discussion':
                 db.users.update_one({"google_id": author_id}, {"$pull": {"discussion_ids": content_id}})
-        
         db.users.update_many({}, {"$pull": {"bookmark_ids": content_id}})
         return True
     return False
-
 
 def delete_comment(comment_id: str, user_id: str) -> bool:
     comment = db.comments.find_one({"_id": comment_id})
@@ -577,9 +533,7 @@ def delete_comment(comment_id: str, user_id: str) -> bool:
     result = db.comments.delete_one({"_id": comment_id})
     
     if result.deleted_count > 0:
-        # CLEANUP: Remove orphaned likes
         db.likes.delete_many({"content_id": comment_id})
-        
         db.posts.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.discussions.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.comments.update_one({"_id": parent_id}, {"$pull": {"reply_ids": comment_id}})
@@ -599,9 +553,7 @@ def admin_delete_comment(comment_id: str) -> bool:
     result = db.comments.delete_one({"_id": comment_id})
     
     if result.deleted_count > 0:
-        # CLEANUP: Remove orphaned likes
         db.likes.delete_many({"content_id": comment_id})
-        
         db.posts.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.discussions.update_one({"_id": parent_id}, {"$pull": {"comment_ids": comment_id}})
         db.comments.update_one({"_id": parent_id}, {"$pull": {"reply_ids": comment_id}})
@@ -616,6 +568,5 @@ def _delete_comment_recursive(comment_id: str) -> None:
     for reply_id in reply_ids:
         _delete_comment_recursive(reply_id)
     
-    # CLEANUP: Delete the comment AND its associated likes
     db.comments.delete_one({"_id": comment_id})
     db.likes.delete_many({"content_id": comment_id})
