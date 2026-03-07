@@ -586,3 +586,18 @@ def _delete_comment_recursive(comment_id: str) -> None:
     
     db.comments.delete_one({"_id": comment_id})
     db.likes.delete_many({"content_id": comment_id})
+
+def update_content_in_db(content_id: str, updated_data: dict) -> bool:
+    """
+    Updates the document in either the posts or discussions collection.
+    """
+    result = db.posts.update_one(
+        {"_id": content_id}, 
+        {"$set": updated_data}
+    )
+    if result.matched_count == 0:
+        result = db.discussions.update_one(
+            {"_id": content_id}, 
+            {"$set": updated_data}
+        )
+    return result.matched_count > 0

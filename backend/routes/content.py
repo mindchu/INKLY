@@ -158,60 +158,50 @@ async def delete_content(content_id: str, request: Request):
     return {"success": True}
 
 @router.put("/content/{content_id}")
-async def update_content_route(
-    content_id: str, 
+async def update_content(
+    content_id: str,
     request: Request,
     title: str = Form(...),
     text: str = Form(...),
-    type: str = Form(None),
-    license_agreement: str = Form(None),
+    type: str = Form(...),
     tags: List[str] = Form(default=[]),
-    files: List[UploadFile] = File(default=[])
+    existing_file_paths: List[str] = Form(default=[]), 
+    license_agreement: bool = Form(default=False), # ADD THIS LINE!
+    files: Optional[List[UploadFile]] = File(default=None)
 ):
-    user = require_auth(request)
-    doc = db.posts.find_one({"_id": content_id})
-    collection = db.posts
-    if not doc:
-        doc = db.discussions.find_one({"_id": content_id})
-        collection = db.discussions
-    
-    if not doc:
-        raise HTTPException(status_code=404, detail="Content not found")
+    user = request.session.get('user')
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
         
-    if doc.get('author_id') != user['google_id']:
+    user_id = user['google_id']
+    uploader_name = user.get('name', 'Unknown_User')
+
+    original_post = content_util.get_content_by_id(content_id)
+    if not original_post or original_post.get('author_id') != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to edit this content")
 
-    update_data = {
-        "title": title, 
-        "text": text,
-        "tags": tags
-    }
-
-    if doc.get('title') != title:
-        from util.embeddings import embedding_manager
-        update_data['title_embedding'] = embedding_manager.generate_embedding(title)
-
-    if files and len(files) > 0 and files[0].filename != "":
-        new_file_metadata = []
-        
+    new_file_paths = []
+    if files:
         for file in files:
-            unique_filename = f"{uuid.uuid4()}_{file.filename}"
-            file_id = fs.put(
-                file.file, 
-                filename=unique_filename, 
-                metadata={"content_type": file.content_type}
-            )
-            new_file_metadata.append({
-                "id": str(file_id),
-                "filename": unique_filename,
-                "original_name": file.filename,
-                "content_type": file.content_type,
-                "url": f"/api/uploads/{unique_filename}" 
-            })
-        existing_files = doc.get("files", [])
-        update_data["files"] = existing_files + new_file_metadata
-    collection.update_one({"_id": content_id}, {"$set": update_data})
-    return {"success": True}
+            if file.filename != "": 
+                saved_filename = file_util.save_upload(file, uploader_name)
+                new_file_paths.append(saved_filename)
+
+    final_file_paths = existing_file_paths + new_file_paths
+    updated_data = {
+        "title": title,
+        "text": text,
+        "type": type,
+        "tags": tags,
+        "file_paths": final_file_paths
+    }
+    
+    success = content_util.update_content_in_db(content_id, updated_data)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update database")
+
+    return {"success": True, "message": "Content updated successfully!", "file_paths": final_file_paths}
 
 @router.delete("/comment/{comment_id}")
 async def delete_comment(comment_id: str, request: Request):
@@ -273,3 +263,4 @@ async def get_comment_thread(content_id: str, comment_id: str, request: Request)
     content_title = content_doc.get('title', 'Unknown Content') if content_doc else 'Unknown Content'
     
     return {"data": comment, "replies": replies, "content_title": content_title}
+

@@ -70,9 +70,8 @@ const EditContentPage = () => {
                     if (response.data.tags) {
                         setTags(response.data.tags.map(t => typeof t === 'string' ? t : t.name));
                     }
-                    // If your API returns existing files, handle them here
-                    if (response.data.files) {
-                        setExistingAttachments(response.data.files);
+                    if (response.data.file_paths) {
+                        setExistingAttachments(response.data.file_paths);
                     }
                 }
             } catch (error) {
@@ -168,13 +167,10 @@ const EditContentPage = () => {
         setAttachments(attachments.filter((_, i) => i !== index));
     };
 
-    // Note: To remove an *existing* file, you usually need to track it in an array 
-    // and send a request to the server, or send the remaining files on Save.
-    const handleRemoveExistingAttachment = (fileId) => {
-        setExistingAttachments(existingAttachments.filter(f => f.id !== fileId));
+    const handleRemoveExistingAttachment = (pathToRemove) => {
+        setExistingAttachments(existingAttachments.filter(path => path !== pathToRemove));
     };
 
-    // 6. Save Handler (Updated to use FormData)
     const handleSave = async () => {
         if (!noteTitle.trim() || !content.trim()) {
             alert('Please fill in both title and content fields.');
@@ -191,7 +187,7 @@ const EditContentPage = () => {
             const formData = new FormData();
             formData.append('title', noteTitle);
             formData.append('text', content);
-            formData.append('type', 'post'); // Keep type consistent
+            formData.append('type', 'post');
             formData.append('license_agreement', licenseAgreement);
 
             // Send updated tags
@@ -202,10 +198,9 @@ const EditContentPage = () => {
                 formData.append('files', file);
             });
 
-            // If your API needs to know which existing files to KEEP, you might need to send them:
-            // existingAttachments.forEach(file => formData.append('existing_files', file.id));
-
-            // Note: Since we are using FormData, we pass `true` as the third argument to your api helper
+            existingAttachments.forEach(filePath => {
+                formData.append('existing_file_paths', filePath);
+            });
             const response = await api.put(`/content/${contentId}`, formData, true);
 
             if (response.success) {
@@ -379,12 +374,14 @@ const EditContentPage = () => {
                         {existingAttachments.length > 0 && (
                             <div className='mt-4 space-y-2'>
                                 <p className="text-sm font-medium text-[#577F4E]">Current Files:</p>
-                                {existingAttachments.map((file, index) => (
+                                {existingAttachments.map((filePath, index) => (
                                     <div key={`existing-${index}`} className='flex items-center justify-between p-3 bg-[#E8F0E5] rounded-md border border-[#C7D9C1]'>
                                         <div className='flex items-center gap-3'>
-                                            <p className='text-sm font-medium text-[#2C3E28]'>{file.name || file.filename}</p>
+                                            {/* Display the string directly */}
+                                            <p className='text-sm font-medium text-[#2C3E28]'>{filePath.split('/').pop()}</p>
                                         </div>
-                                        <button onClick={() => handleRemoveExistingAttachment(file.id)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors'>
+                                        {/* Pass the string to the remove handler */}
+                                        <button onClick={() => handleRemoveExistingAttachment(filePath)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors'>
                                             Remove
                                         </button>
                                     </div>
