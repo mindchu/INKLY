@@ -1,10 +1,8 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import React, { useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { PiChatText } from "react-icons/pi";
-import { LuEye } from "react-icons/lu";
-import { MdOutlineFileDownload } from "react-icons/md";
-import { LuBookmarkMinus } from "react-icons/lu";
+import { LuEye, LuBookmarkMinus } from "react-icons/lu";
 import { BsBookmarkDashFill } from "react-icons/bs";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { useSortContext } from '../../context/SortContext';
@@ -14,11 +12,40 @@ import { getMediaUrl } from '../../config';
 import ShareButton from '../button/ShareButton';
 
 
+const formatViews = (views) => {
+    if (!views) return '0';
+    if (views >= 1000) return (views / 1000).toFixed(1) + 'k';
+    return views.toString();
+};
+
+// Skeleton card for loading state
+const SkeletonCard = () => (
+    <div className='bg-white rounded-2xl p-4 shadow-sm flex flex-col gap-3 animate-pulse'>
+        <div className='flex justify-between items-start'>
+            <div className='h-4 bg-gray-200 rounded-full w-2/3' />
+            <div className='h-5 bg-gray-100 rounded-full w-16' />
+        </div>
+        <div className='flex items-center gap-2'>
+            <div className='w-6 h-6 bg-gray-200 rounded-full' />
+            <div className='h-3 bg-gray-200 rounded-full w-24' />
+        </div>
+        <div className='space-y-1.5'>
+            <div className='h-3 bg-gray-100 rounded-full w-full' />
+            <div className='h-3 bg-gray-100 rounded-full w-4/5' />
+        </div>
+        <div className='flex gap-1.5 mt-1'>
+            <div className='h-5 bg-green-50 rounded-full w-14' />
+            <div className='h-5 bg-green-50 rounded-full w-12' />
+        </div>
+    </div>
+);
+
+
 const Home_page = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { toggleBookmark, isBookmarked } = useBookmarks();
-    const { sortBy, content: notes, loading, setContent: setNotes, page, setPage, hasMore } = useSortContext();
+    const { content: notes, loading, setContent: setNotes, setPage, hasMore } = useSortContext();
 
     const observer = useRef();
     const lastNoteElementRef = useCallback(node => {
@@ -26,18 +53,11 @@ const Home_page = () => {
         if (observer.current) observer.current.disconnect();
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && Array.isArray(notes) && notes.length > 0 && hasMore) {
-                setPage(prevPage => prevPage + 1);
+                setPage(prev => prev + 1);
             }
         });
         if (node) observer.current.observe(node);
     }, [loading, hasMore]);
-
-    const formatViews = (views) => {
-        if (views >= 1000) {
-            return (views / 1000).toFixed(1) + 'k';
-        }
-        return views ? views.toString() : '0';
-    };
 
     const handleLike = async (noteId, e) => {
         e.stopPropagation();
@@ -49,7 +69,9 @@ const Home_page = () => {
                         return {
                             ...note,
                             is_liked: response.is_liked,
-                            like_count: response.is_liked ? (note.like_count || 0) + 1 : (note.like_count || 1) - 1
+                            like_count: response.is_liked
+                                ? (note.like_count || 0) + 1
+                                : Math.max((note.like_count || 1) - 1, 0),
                         };
                     }
                     return note;
@@ -69,154 +91,190 @@ const Home_page = () => {
         navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
     };
 
+    // Initial loading — show skeletons
     if (loading && notes.length === 0) {
         return (
-            <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
-                <div className='text-lg font-medium text-gray-600 animate-pulse'>Loading notes...</div>
+            <div className='w-full h-full bg-[#EEF2E1] overflow-auto pb-[76px] md:pb-0'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 p-3 md:p-6'>
+                    {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
             </div>
         );
     }
 
     return (
-        // pb-[76px] on mobile so content won't hide behind the fixed tab bar
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative pb-[76px] md:pb-0'>
 
-            {/* 1 col on mobile, 2 on sm, 3 on lg */}
-            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-8`}>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 p-3 md:p-6'>
                 {notes.map((note, index) => {
                     const isTriggerNote = index === Math.max(0, notes.length - 3);
+                    const noteId = note._id || note.id;
+                    const hasImage = note.file_paths?.some(f =>
+                        ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
+                    );
+                    const thumbFile = hasImage && note.file_paths.find(f =>
+                        ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
+                    );
+
                     return (
                         <div
                             ref={isTriggerNote ? lastNoteElementRef : null}
-                            key={note._id || note.id}
-                            className='bg-white rounded-xl p-4 md:p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]'
+                            key={noteId}
                             onClick={() => handleCardClick(note)}
+                            className='bg-white rounded-2xl shadow-sm flex flex-col cursor-pointer hover:shadow-md active:scale-[0.99] transition-all duration-200 overflow-hidden border border-gray-50'
                         >
-                            <div className="flex justify-between items-start mb-3">
-                                <h3 className='text-base md:text-lg font-semibold text-gray-800 flex-1 pr-2 line-clamp-2'>{note.title}</h3>
-                                {note.type && (
-                                    <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider flex-shrink-0 ${note.type === 'post'
-                                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                        : 'bg-purple-50 text-purple-700 border border-purple-200'
-                                        }`}>
-                                        {note.type === 'post' ? 'Note' : 'Discussion'}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className='flex items-center gap-2 mb-3'>
-                                {note.author_profile_picture_url ? (
+                            {/* Thumbnail image — full width at top if exists */}
+                            {thumbFile && (
+                                <div className="w-full h-36 md:h-44 overflow-hidden bg-gray-100 flex-shrink-0">
                                     <img
-                                        src={getMediaUrl(note.author_profile_picture_url)}
-                                        alt={note.author_username}
-                                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                                        src={getMediaUrl(`/uploads/${thumbFile}`)}
+                                        alt="Thumbnail"
+                                        className="w-full h-full object-cover"
                                     />
-                                ) : (
-                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white flex-shrink-0'>
-                                        {note.author_username?.[0]?.toUpperCase() || 'U'}
-                                    </div>
-                                )}
-                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0'>
-                                    <span className='truncate'>{note.author_username || 'Unknown'}</span>
-                                    <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
-                                </span>
-                            </div>
-
-                            <div className="flex gap-3 mb-4 flex-grow">
-                                <p className='text-sm text-gray-600 line-clamp-3 flex-1'>
-                                    {note.text}
-                                </p>
-                                {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                                        <img
-                                            src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
-                                            alt="Thumbnail"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            {note.file_paths?.length > 0 && (
-                                <div className='mb-4'>
-                                    <span className='text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>
-                                        📎 {note.file_paths.length} Attachment(s)
-                                    </span>
                                 </div>
                             )}
 
-                            <div className='flex flex-wrap gap-1.5 mb-4'>
-                                {note.tags?.map((tag, tagIndex) => (
-                                    <span
-                                        key={tagIndex}
-                                        className='text-xs text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full font-medium'
-                                    >
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
+                            <div className='p-4 flex flex-col flex-grow'>
 
-                            <div className='border-t border-gray-200 mb-3'></div>
-
-                            <div className='flex items-center justify-between text-sm text-gray-600'>
-                                <div className='flex items-center gap-3'>
-                                    <button
-                                        onClick={(e) => handleLike(note._id || note.id, e)}
-                                        className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
-                                    >
-                                        {note.is_liked ? (
-                                            <IoHeart size={16} className='text-red-500' />
-                                        ) : (
-                                            <IoHeartOutline size={16} />
-                                        )}
-                                        <span className={note.is_liked ? 'text-red-500' : ''}>
-                                            {note.like_count || 0}
+                                {/* Title + type badge */}
+                                <div className="flex justify-between items-start gap-2 mb-2.5">
+                                    <h3 className='text-[15px] md:text-base font-semibold text-gray-900 flex-1 line-clamp-2 leading-snug'>
+                                        {note.title}
+                                    </h3>
+                                    {note.type && (
+                                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex-shrink-0 mt-0.5 ${
+                                            note.type === 'post'
+                                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                                : 'bg-purple-50 text-purple-600 border border-purple-100'
+                                        }`}>
+                                            {note.type === 'post' ? 'Note' : 'Disc.'}
                                         </span>
-                                    </button>
-                                    <div className='flex items-center gap-1'>
-                                        <PiChatText size={16} />
-                                        <span>{note.comments_count || 0}</span>
-                                    </div>
-                                    <div className='flex items-center gap-1'>
-                                        <LuEye size={16} />
-                                        <span>{formatViews(note.views)}</span>
-                                    </div>
+                                    )}
                                 </div>
-                                <div className='flex items-center gap-2'>
-                                    <ShareButton
-                                        targetId={note._id || note.id}
-                                        title={note.title}
-                                        text={note.text?.substring(0, 100) || 'Check out this discussion'}
-                                    />
-                                    <button
-                                        onClick={(e) => handleBookmark(note, e)}
-                                        className='hover:text-yellow-500 transition cursor-pointer'
-                                    >
-                                        {isBookmarked(note._id || note.id) ? (
-                                            <BsBookmarkDashFill size={16} className='text-yellow-400' />
-                                        ) : (
-                                            <LuBookmarkMinus size={16} />
+
+                                {/* Author */}
+                                <div className='flex items-center gap-2 mb-2.5'>
+                                    {note.author_profile_picture_url ? (
+                                        <img
+                                            src={getMediaUrl(note.author_profile_picture_url)}
+                                            alt={note.author_username}
+                                            className="w-5 h-5 rounded-full object-cover flex-shrink-0 ring-1 ring-gray-200"
+                                        />
+                                    ) : (
+                                        <div className='w-5 h-5 bg-[#3E4A34] rounded-full flex items-center justify-center text-[9px] text-white font-bold flex-shrink-0'>
+                                            {note.author_username?.[0]?.toUpperCase() || 'U'}
+                                        </div>
+                                    )}
+                                    <span className='text-[12px] font-medium text-gray-600 truncate flex items-center gap-1.5'>
+                                        {note.author_username || 'Unknown'}
+                                        <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                    </span>
+                                </div>
+
+                                {/* Body text */}
+                                <p className='text-[13px] text-gray-500 line-clamp-2 leading-relaxed mb-3 flex-grow'>
+                                    {note.text}
+                                </p>
+
+                                {/* Attachment badge */}
+                                {note.file_paths?.length > 0 && !thumbFile && (
+                                    <div className='mb-3'>
+                                        <span className='text-[11px] text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full'>
+                                            📎 {note.file_paths.length} file{note.file_paths.length > 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Tags */}
+                                {note.tags?.length > 0 && (
+                                    <div className='flex flex-wrap gap-1 mb-3'>
+                                        {note.tags.slice(0, 3).map((tag, tagIndex) => (
+                                            <span
+                                                key={tagIndex}
+                                                className='text-[11px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full font-medium'
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                        {note.tags.length > 3 && (
+                                            <span className='text-[11px] text-gray-400 px-2 py-0.5'>
+                                                +{note.tags.length - 3}
+                                            </span>
                                         )}
-                                    </button>
+                                    </div>
+                                )}
+
+                                {/* Divider + actions */}
+                                <div className='border-t border-gray-100 pt-2.5 mt-auto'>
+                                    <div className='flex items-center justify-between'>
+                                        {/* Stats */}
+                                        <div className='flex items-center gap-3 text-gray-400'>
+                                            <button
+                                                onClick={(e) => handleLike(noteId, e)}
+                                                className={`flex items-center gap-1 transition-colors ${
+                                                    note.is_liked ? 'text-red-500' : 'hover:text-red-400'
+                                                }`}
+                                            >
+                                                {note.is_liked
+                                                    ? <IoHeart size={15} />
+                                                    : <IoHeartOutline size={15} />
+                                                }
+                                                <span className='text-[12px] font-medium'>{note.like_count || 0}</span>
+                                            </button>
+
+                                            <div className='flex items-center gap-1'>
+                                                <PiChatText size={15} />
+                                                <span className='text-[12px] font-medium'>{note.comments_count || 0}</span>
+                                            </div>
+
+                                            <div className='flex items-center gap-1'>
+                                                <LuEye size={15} />
+                                                <span className='text-[12px] font-medium'>{formatViews(note.views)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Bookmark + share */}
+                                        <div className='flex items-center gap-2 text-gray-400'>
+                                            <ShareButton
+                                                targetId={noteId}
+                                                title={note.title}
+                                                text={note.text?.substring(0, 100) || ''}
+                                            />
+                                            <button
+                                                onClick={(e) => handleBookmark(note, e)}
+                                                className='hover:text-yellow-500 transition-colors'
+                                            >
+                                                {isBookmarked(noteId)
+                                                    ? <BsBookmarkDashFill size={15} className='text-yellow-400' />
+                                                    : <LuBookmarkMinus size={15} />
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                     );
                 })}
             </div>
 
+            {/* Load more indicator */}
             {loading && notes.length > 0 && (
-                <div className="w-full flex justify-center pb-8">
-                    <p className="text-gray-500 font-['Inter'] animate-pulse">Loading more...</p>
+                <div className="w-full flex justify-center py-6">
+                    <div className='flex items-center gap-2 text-gray-400 text-sm'>
+                        <div className='w-4 h-4 border-2 border-gray-300 border-t-[#3E4A34] rounded-full animate-spin' />
+                        Loading more...
+                    </div>
                 </div>
             )}
             {!hasMore && notes.length > 0 && (
-                <div className="w-full flex justify-center pb-8">
-                    <p className="text-gray-400 font-['Inter'] text-sm">You've reached the end!</p>
+                <div className="w-full flex justify-center py-6">
+                    <p className="text-gray-400 text-[13px]">You've reached the end!</p>
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 export default Home_page
