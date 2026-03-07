@@ -87,7 +87,7 @@ const NoteModal = ({ note, onClose }) => {
                     </div>
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-xs text-gray-800 break-all">{comment.author_username || 'Anonymous'}</span>
+                            <span className="font-semibold text-xs text-gray-800">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-[11px] text-gray-400">recent</span>
                         </div>
                         <p className="text-sm text-gray-600 mt-0.5 break-words">{comment.text}</p>
@@ -108,6 +108,7 @@ const NoteModal = ({ note, onClose }) => {
                 className="relative z-10 bg-white w-full flex flex-col h-[100dvh] md:h-auto md:rounded-2xl md:shadow-2xl md:max-w-2xl md:max-h-[90vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
+
                 {/* ── MOBILE TOP NAV ── */}
                 <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0 bg-white">
                     <button onClick={onClose} className="flex items-center gap-1.5 text-gray-600">
@@ -157,7 +158,7 @@ const NoteModal = ({ note, onClose }) => {
                         {/* CARD 1: Note */}
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-                            {/* Section 1: Tags + Title */}
+                            {/* Row 1: Tags + Title */}
                             <div className="px-4 pt-4 pb-3">
                                 {note.tags?.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -175,7 +176,7 @@ const NoteModal = ({ note, onClose }) => {
 
                             <div className="border-t border-gray-100" />
 
-                            {/* Section 2: Author — full width block, NO icons beside it */}
+                            {/* Row 2: Author only — NO icons here */}
                             <div className="px-4 py-3 flex items-center gap-3">
                                 {note.author_profile_picture_url ? (
                                     <img
@@ -190,7 +191,7 @@ const NoteModal = ({ note, onClose }) => {
                                 )}
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span className="text-sm font-semibold text-gray-800 break-words">
+                                        <span className="text-sm font-semibold text-gray-800">
                                             {note.author_username || 'Unknown'}
                                         </span>
                                         <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
@@ -201,7 +202,7 @@ const NoteModal = ({ note, onClose }) => {
 
                             <div className="border-t border-gray-100" />
 
-                            {/* Section 3: Like + Views — their own dedicated row */}
+                            {/* Row 3: Like + Views — completely separate row */}
                             <div className="px-4 py-2.5 flex items-center gap-5 bg-gray-50">
                                 <button
                                     onClick={handleLike}
@@ -218,12 +219,11 @@ const NoteModal = ({ note, onClose }) => {
 
                             <div className="border-t border-gray-100" />
 
-                            {/* Section 4: Body content */}
+                            {/* Row 4: Body content */}
                             <div className="px-4 py-4">
                                 <p className="text-sm text-gray-600 leading-relaxed break-words">
                                     {note.text || note.description}
                                 </p>
-
                                 {note.file_paths?.length > 0 && (
                                     <div className="mt-3 flex flex-col gap-2">
                                         {note.file_paths.map((file, i) => {
