@@ -96,7 +96,7 @@ const Bookmarks_page_content = ({ sortBy }) => {
                             <BsBookmarkDashFill size={20} className='text-yellow-400' />
                         </button>
 
-                        <h3 className='text-lg font-semibold text-gray-800 mb-3 pr-8'>{note.title}</h3>
+                        <h3 className='text-lg font-semibold text-gray-800 mb-3 pr-8 break-all'>{note.title}</h3>
 
                         <div className='flex items-center gap-2 mb-3'>
                             {note.author_profile_picture_url ? (
@@ -117,7 +117,7 @@ const Bookmarks_page_content = ({ sortBy }) => {
                         </div>
 
                         <div className="flex gap-3 mb-4 flex-grow">
-                            <p className='text-sm text-gray-600 line-clamp-3 flex-1'>
+                            <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
                                 {note.text}
                             </p>
                             {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
