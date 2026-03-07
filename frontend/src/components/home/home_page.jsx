@@ -6,7 +6,6 @@ import { LuEye } from "react-icons/lu";
 import { MdOutlineFileDownload } from "react-icons/md";
 import { LuBookmarkMinus } from "react-icons/lu";
 import { BsBookmarkDashFill } from "react-icons/bs";
-import { GoPaperclip } from "react-icons/go";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
@@ -25,11 +24,13 @@ const Home_page = () => {
     const lastNoteElementRef = useCallback(node => {
         if (loading) return;
         if (observer.current) observer.current.disconnect();
+
         observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && Array.isArray(notes) && notes.length > 0 && hasMore) {
+            if (entries[0].isIntersecting && hasMore) {
                 setPage(prevPage => prevPage + 1);
             }
         });
+
         if (node) observer.current.observe(node);
     }, [loading, hasMore]);
 
@@ -142,18 +143,6 @@ const Home_page = () => {
                                             {note.type === 'post' ? 'Note' : 'Discussion'}
                                         </span>
                                     )}
-                                    {note.file_paths?.length > 0 && (
-                                        <button
-                                            className='flex items-center gap-1 px-2.5 h-[26px] bg-[#B3B3B6]/60 text-white rounded-[12px] hover:bg-[#B3B3B6]/80 transition-colors'
-                                            onClick={e => e.stopPropagation()}
-                                        >
-                                            <GoPaperclip size={11} className='text-white' />
-                                            <span className='text-[10px] whitespace-nowrap hidden sm:inline'>
-                                                {note.file_paths.length} Attachment{note.file_paths.length !== 1 ? 's' : ''}
-                                            </span>
-                                            <span className='text-[10px] sm:hidden'>{note.file_paths.length}</span>
-                                        </button>
-                                    )}
                                 </div>
                             </div>
 
@@ -213,33 +202,40 @@ const Home_page = () => {
 
                                     {/* Comments */}
                                     <div className='flex items-center gap-1'>
-                                        <PiChatText size={14} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{note.comments_count || 0}</span>
+                                        <PiChatText size={16} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                            {note.comments_count || 0}
+                                        </span>
                                     </div>
 
                                     {/* Views */}
                                     <div className='flex items-center gap-1'>
-                                        <LuEye size={14} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{formatViews(note.views)}</span>
+                                        <LuEye size={16} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                            {formatViews(note.views)}
+                                        </span>
                                     </div>
-
-                                    {/* Share */}
-                                    <ShareButton
-                                        targetId={noteId}
-                                        title={note.title}
-                                        text={note.text?.substring(0, 100) || 'Check out this post'}
-                                    />
 
                                     {/* Bookmark */}
                                     <button
                                         onClick={(e) => handleBookmark(note, e)}
-                                        className='flex items-center hover:text-yellow-500 transition-colors'
+                                        className='flex items-center justify-center hover:text-yellow-500 transition-colors'
+                                        title="Bookmark"
                                     >
                                         {isBookmarked(noteId)
-                                            ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
-                                            : <LuBookmarkMinus size={14} className='text-[#292D32]' />
+                                            ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                            : <LuBookmarkMinus size={16} className='text-[#292D32]' />
                                         }
                                     </button>
+
+                                    {/* Share */}
+                                    <div className="flex items-center justify-center">
+                                        <ShareButton
+                                            targetId={noteId}
+                                            title={note.title}
+                                            text={note.text?.substring(0, 100) || 'Check out this post'}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>

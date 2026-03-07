@@ -24,7 +24,7 @@ export const SearchProvider = ({ children }) => {
     });
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const limit = 5;
+    const limit = 10;
     const [allTags, setAllTags] = useState([]);
     const fetchedTags = React.useRef(false);
 

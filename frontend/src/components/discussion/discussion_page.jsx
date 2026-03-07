@@ -122,16 +122,6 @@ const Discussion_page = () => {
                                                 <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                             </div>
                                         </div>
-
-                                        {post.file_paths?.length > 0 && (
-                                            <button
-                                                className='flex-shrink-0 flex items-center gap-1.5 px-3 h-[28px] bg-[#B3B3B6]/60 text-white rounded-[12px] hover:bg-[#B3B3B6]/80 transition-colors'
-                                                onClick={e => e.stopPropagation()}
-                                            >
-                                                <GoPaperclip size={12} className='text-white' />
-                                                <span className='text-[11px] whitespace-nowrap'>{post.file_paths.length} Attachment{post.file_paths.length !== 1 ? 's' : ''}</span>
-                                            </button>
-                                        )}
                                     </div>
 
                                     {/* ── Content ─────────────────────────────────── */}

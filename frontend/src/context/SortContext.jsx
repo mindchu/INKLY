@@ -21,7 +21,7 @@ export const SortProvider = ({ children, contentType }) => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const limit = 5;
+    const limit = 10;
     const lastFetchedSearch = useRef(null);
 
     const fetchRecommended = async (pageNum = 0, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
