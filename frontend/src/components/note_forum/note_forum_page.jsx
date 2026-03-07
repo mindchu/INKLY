@@ -57,6 +57,16 @@ const Note_forum_page = () => {
     toggleBookmark(post);
   };
 
+    const handleFollowChange = (authorId, isNowFollowing) => {
+        setNotes(prevNotes => 
+            prevNotes.map(note => 
+                note.author_id === authorId 
+                    ? { ...note, is_following: isNowFollowing } 
+                    : note
+            )
+        );
+    };
+
   if (loading && posts.length === 0) {
     return (
       <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
@@ -102,7 +112,11 @@ const Note_forum_page = () => {
                       <div className='min-w-0'>
                         <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
                           <span className='truncate'>{post.author_username || 'Unknown'}</span>
-                          <FollowChip authorId={post.author_id} initialIsFollowing={post.is_following} />
+                          <FollowChip
+                            authorId={post.author_id}
+                            initialIsFollowing={post.is_following}
+                            onFollowChange={handleFollowChange}
+                          />
                         </p>
                         <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>
                           {new Date(post.created_at).toLocaleDateString()}

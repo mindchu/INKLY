@@ -64,6 +64,16 @@ const Home_page = () => {
         toggleBookmark(note);
     };
 
+    const handleFollowChange = (authorId, isNowFollowing) => {
+        setNotes(prevNotes => 
+            prevNotes.map(note => 
+                note.author_id === authorId 
+                    ? { ...note, is_following: isNowFollowing } 
+                    : note
+            )
+        );
+    };
+
     const handleCardClick = (note) => {
         navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
     };
@@ -112,7 +122,11 @@ const Home_page = () => {
                                     <div className='min-w-0'>
                                         <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
                                             <span className='truncate'>{note.author_username || 'Unknown'}</span>
-                                            <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                            <FollowChip
+                                                authorId={note.author_id}
+                                                initialIsFollowing={note.is_following}
+                                                onFollowChange={handleFollowChange}
+                                            />
                                         </p>
                                         <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                     </div>
