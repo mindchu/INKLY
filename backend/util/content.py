@@ -126,35 +126,20 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
             
         return all_content
 
-    # Build query with case-insensitive tag matching
+    # Build query — only apply explicit filter_tags and exclude_tags
+    # interests/following are used for boosting, NOT filtering
     query = {}
 
     if filter_tags:
-        # Include: post must have ALL specified tags (AND logic)
         query["tags"] = {"$all": _make_case_insensitive_tag_query(filter_tags)}
-    elif interested_tags or following_ids:
-        or_conditions = []
-        if interested_tags:
-            or_conditions.append({"tags": {"$in": _make_case_insensitive_tag_query(interested_tags)}})
-        if following_ids:
-            or_conditions.append({"author_id": {"$in": following_ids}})
-        query["$or"] = or_conditions
 
     if exclude_tags:
-        # Exclude: post must not have ANY of the specified tags (OR logic = $nin)
         if "tags" in query:
             query["tags"]["$nin"] = _make_case_insensitive_tag_query(exclude_tags)
         else:
             query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
     content = fetch_and_format(query)
-
-    # Fallback to all content if nothing found
-    if not content:
-        fallback_query = {}
-        if exclude_tags:
-            fallback_query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
-        content = fetch_and_format(fallback_query)
 
     # Sorting
     if sort_by == 'likes':
@@ -163,10 +148,27 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
         content.sort(key=lambda x: x.get('views', 0), reverse=True)
     elif sort_by == 'comments':
         content.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
-    else:  # recent / date
+    else:  # date / recent
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
-    final_content = content[skip:skip+limit]
+    # Boost: if user has interests or following, float matching content to top
+    # while preserving the relative sort order within each group
+    if user_id and (interested_tags or following_ids):
+        interested_tags_lower = [t.lower() for t in interested_tags]
+
+        def is_boosted(doc):
+            if doc.get('author_id') in following_ids:
+                return True
+            doc_tags_lower = [t.lower() for t in doc.get('tags', [])]
+            if any(t in doc_tags_lower for t in interested_tags_lower):
+                return True
+            return False
+
+        boosted = [doc for doc in content if is_boosted(doc)]
+        rest = [doc for doc in content if not is_boosted(doc)]
+        content = boosted + rest
+
+    final_content = content[skip:skip + limit]
     for doc in final_content:
         doc.pop('title_embedding', None)
         
@@ -258,11 +260,9 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         query["author_id"] = {"$in": following_ids}
 
     if tags_filter:
-        # Include: must have ALL tags (AND logic)
         query["tags"] = {"$all": _make_case_insensitive_tag_query(tags_filter)}
 
     if exclude_tags:
-        # Exclude: must not have ANY of the tags (OR logic = $nin)
         if "tags" in query:
             query["tags"]["$nin"] = _make_case_insensitive_tag_query(exclude_tags)
         else:
