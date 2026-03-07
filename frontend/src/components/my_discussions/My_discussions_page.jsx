@@ -5,6 +5,7 @@ import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
 import LikeButton from '../button/LikeButton'
 import DeleteButton from '../button/DeleteButton'
+import ShareButton from '../button/ShareButton';
 
 import { useMyNotesContext } from '../../context/MyNotesContext'
 import { useBookmarks } from '../../context/BookmarksContext'
@@ -218,6 +219,12 @@ const My_discussions_page = () => {
                                             <BsBookmarkDash size={16} />
                                         )}
                                     </button>
+
+                                    <ShareButton
+                                        targetId={disc._id || disc.id}
+                                        title={disc.title}
+                                        text={disc.text?.substring(0, 100) || 'Check out this discussion'}
+                                    />
                                 </div>
                             </div>
                         </div>

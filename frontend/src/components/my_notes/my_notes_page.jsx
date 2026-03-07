@@ -215,12 +215,6 @@ const My_notes_page = () => {
                     }}
                   />
 
-                  <ShareButton
-                    targetId={note._id || note.id}
-                    title={note.title}
-                    text={note.text?.substring(0, 100) || 'Check out this note'}
-                  />
-
                   <button
                     className={`transition ${isBookmarked(note._id || note.id) ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-700 hover:text-gray-900'}`}
                     onClick={(e) => handleBookmark(note, e)}
@@ -231,6 +225,12 @@ const My_notes_page = () => {
                       <BsBookmarkDash size={16} />
                     )}
                   </button>
+
+                  <ShareButton
+                    targetId={note._id || note.id}
+                    title={note.title}
+                    text={note.text?.substring(0, 100) || 'Check out this note'}
+                  />
                 </div>
               </div>
             </div>

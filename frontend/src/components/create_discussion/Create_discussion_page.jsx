@@ -356,7 +356,7 @@ const Create_discussion_page = () => {
                                     className='mt-1 w-4 h-4 accent-[#6B9D63] cursor-pointer'
                                 />
                                 <span className='text-sm text-[#2C3E28]'>
-                                    I confirm that I have the right to upload these files and grant the platform permission to store and display them.
+                                    By uploading, I confirm I own these materials and agree to share them with the community, allowing other users to view, download, and use them for their studies.
                                 </span>
                             </label>
                         </div>
