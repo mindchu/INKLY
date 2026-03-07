@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { LuPencil } from "react-icons/lu";
 import { AiOutlineHome } from "react-icons/ai";
-import { FiSidebar, FiMenu, FiX } from "react-icons/fi";
+import { FiSidebar, FiMenu, FiX, FiChevronForward, FiChevronLeft } from "react-icons/fi";
 import { BiChat } from "react-icons/bi";
 import { RiSearch2Line } from "react-icons/ri";
 import { HiOutlineUsers } from "react-icons/hi2";
@@ -18,11 +18,31 @@ import { getMediaUrl } from '../config';
 import { FaUserCircle } from 'react-icons/fa';
 
 
+// ── Mobile tab bar pages ────────────────────────────────────────────────────
+const TAB_PAGE_1 = [
+    { label: 'Home',       icon: AiOutlineHome,    path: '/home' },
+    { label: 'Discussion', icon: BiChat,            path: '/discussion' },
+    { label: 'Search',     icon: RiSearch2Line,     path: '/search' },
+    { label: 'Profile',    icon: CgProfile,         path: '/profile' },
+]
+
+const TAB_PAGE_2 = [
+    { label: 'Notes',      icon: CgNotes,           path: '/note_forum' },
+    { label: 'Following',  icon: HiOutlineUsers,    path: '/following' },
+    { label: 'Bookmark',   icon: CiBookmarkMinus,   path: '/bookmarks' },
+    { label: 'Create',     icon: IoCreateOutline,   path: '/create_note' },
+]
+// ───────────────────────────────────────────────────────────────────────────
+
+
 const Side_bar = () => {
     const { isOpen, toggleSidebar, closeSidebar } = useSidebar();
     const { profileData, logout } = useProfileContext();
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Which page of tabs is shown in the mobile tab bar
+    const [tabPage, setTabPage] = useState(1);
 
     const handleSignOut = async () => {
         await logout();
@@ -39,27 +59,27 @@ const Side_bar = () => {
     const menuItems = [
         {
             section: 'Explore', items: [
-                { label: 'Home', icon: <AiOutlineHome size={20} />, path: '/home' },
-                { label: 'Discussion', icon: <BiChat size={20} />, path: '/discussion' },
-                { label: 'Note', icon: <CgNotes size={20} />, path: '/note_forum' },
-                { label: 'Search', icon: <RiSearch2Line size={20} />, path: '/search' },
-                { label: 'Following', icon: <HiOutlineUsers size={20} />, path: '/following' },
+                { label: 'Home',       icon: <AiOutlineHome size={20} />,   path: '/home' },
+                { label: 'Discussion', icon: <BiChat size={20} />,          path: '/discussion' },
+                { label: 'Note',       icon: <CgNotes size={20} />,         path: '/note_forum' },
+                { label: 'Search',     icon: <RiSearch2Line size={20} />,   path: '/search' },
+                { label: 'Following',  icon: <HiOutlineUsers size={20} />,  path: '/following' },
             ]
         },
         {
             section: 'My content', items: [
-                { label: 'My Note', icon: <CgNotes size={20} />, path: '/my_notes' },
-                { label: 'My Discussion', icon: <BiChat size={20} />, path: '/my_discussions' },
-                { label: 'Create Note', icon: <IoCreateOutline size={20} />, path: '/create_note' },
-                { label: 'Create Discussion', icon: <BiChat size={20} />, path: '/create_discussion' },
-                { label: 'Bookmark', icon: <CiBookmarkMinus size={20} />, path: '/bookmarks' },
+                { label: 'My Note',           icon: <CgNotes size={20} />,        path: '/my_notes' },
+                { label: 'My Discussion',     icon: <BiChat size={20} />,         path: '/my_discussions' },
+                { label: 'Create Note',       icon: <IoCreateOutline size={20} />, path: '/create_note' },
+                { label: 'Create Discussion', icon: <BiChat size={20} />,         path: '/create_discussion' },
+                { label: 'Bookmark',          icon: <CiBookmarkMinus size={20} />, path: '/bookmarks' },
             ]
         },
         {
             section: 'Account', items: [
-                { label: 'Profile', icon: <CgProfile size={20} />, path: '/profile' },
-                { label: 'Interests', icon: <LuPencil size={20} />, path: '/interests' },
-                { label: 'Sign Out', icon: <PiSignOutBold size={20} />, onClick: handleSignOut },
+                { label: 'Profile',   icon: <CgProfile size={20} />,    path: '/profile' },
+                { label: 'Interests', icon: <LuPencil size={20} />,     path: '/interests' },
+                { label: 'Sign Out',  icon: <PiSignOutBold size={20} />, onClick: handleSignOut },
             ]
         },
     ];
@@ -72,8 +92,11 @@ const Side_bar = () => {
         });
     }
 
+    const currentTabs = tabPage === 1 ? TAB_PAGE_1 : TAB_PAGE_2;
+
     return (
         <>
+            {/* ── Desktop sidebar (hidden on mobile) ──────────────── */}
             {/* Mobile Overlay */}
             {isOpen && (
                 <div
@@ -83,43 +106,41 @@ const Side_bar = () => {
             )}
 
             <div className={`
-                ${isOpen ? 'translate-x-0 w-[260px]' : '-translate-x-full w-[260px] md:translate-x-0 md:w-[80px]'} 
-                fixed md:relative z-50 h-screen bg-white shadow-2xl flex flex-col transition-all duration-300
+                hidden md:flex
+                ${isOpen ? 'translate-x-0 w-[260px]' : 'translate-x-0 w-[80px]'} 
+                fixed md:relative z-50 h-screen bg-white shadow-2xl flex-col transition-all duration-300
             `}>
                 <div className='flex flex-row items-center justify-between'>
                     <div className='flex flex-row select-none'>
-                        {(isOpen || window.innerWidth >= 768) && (
-                            <div className={`flex flex-row items-center transition-opacity duration-300 ${!isOpen && 'md:hidden'}`}>
-                                <LuPencil size={20} className='mt-[34px] ml-[24px]' />
-                                <img src='/src/assets/image.png' className='w-[64px] h-[32px] mt-[30px] ml-[16px]' alt="Inkly" />
-                            </div>
-                        )}
+                        <div className={`flex flex-row items-center transition-opacity duration-300 ${!isOpen && 'md:hidden'}`}>
+                            <LuPencil size={20} className='mt-[34px] ml-[24px]' />
+                            <img src='/src/assets/image.png' className='w-[64px] h-[32px] mt-[30px] ml-[16px]' alt="Inkly" />
+                        </div>
                     </div>
                     <div className="flex items-center gap-2 mt-[26px] mr-[16px]">
                         <button onClick={toggleSidebar} className='cursor-pointer hover:bg-[#E8FFDF] rounded-xl p-1'>
-                            {isOpen ? <FiSidebar size={30} /> : <FiMenu size={30} className="md:hidden" />}
-                            {!isOpen && <FiSidebar size={30} className="hidden md:block" />}
+                            <FiSidebar size={30} />
                         </button>
                     </div>
                 </div>
 
                 <div className={`flex flex-col gap-3 select-none grow mt-8 ${isOpen ? 'overflow-y-auto' : 'overflow-visible md:items-center'}`}>
-                    {/* Profile Section in Sidebar */}
+                    {/* Profile Section */}
                     <div className={`px-4 mb-4 ${!isOpen && 'md:px-0'}`}>
                         <div
                             onClick={() => navigate('/profile')}
                             className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors ${!isOpen && 'md:justify-center'}`}
                         >
-                        {profileData?.profile_picture_url ? (
-                            <div
-                                className="w-10 h-10 rounded-full bg-cover bg-center border border-gray-100 flex-shrink-0"
-                                style={{ backgroundImage: `url("${getMediaUrl(profileData.profile_picture_url)}")` }}
-                            ></div>
-                        ) : (
-                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                <FaUserCircle size={24} className="text-green-600 opacity-70" />
-                            </div>
-                        )}
+                            {profileData?.profile_picture_url ? (
+                                <div
+                                    className="w-10 h-10 rounded-full bg-cover bg-center border border-gray-100 flex-shrink-0"
+                                    style={{ backgroundImage: `url("${getMediaUrl(profileData.profile_picture_url)}")` }}
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <FaUserCircle size={24} className="text-green-600 opacity-70" />
+                                </div>
+                            )}
                             {isOpen && (
                                 <div className="overflow-hidden">
                                     <p className="font-['Inter'] text-sm font-semibold text-gray-800 truncate">{profileData?.username || 'User'}</p>
@@ -165,6 +186,87 @@ const Side_bar = () => {
                             <div className="h-4" />
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* ── Mobile bottom tab bar (hidden on md+) ───────────── */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+                <div className="flex items-stretch h-[60px]">
+
+                    {tabPage === 1 ? (
+                        <>
+                            {TAB_PAGE_1.map((tab) => {
+                                const Icon = tab.icon;
+                                const isActive = location.pathname === tab.path;
+                                return (
+                                    <button
+                                        key={tab.path}
+                                        onClick={() => navigate(tab.path)}
+                                        className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 px-1 relative transition-colors duration-150 ${
+                                            isActive ? 'text-[#3E4A34]' : 'text-gray-400 hover:text-gray-600'
+                                        }`}
+                                    >
+                                        {isActive && (
+                                            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-[#3E4A34] rounded-full" />
+                                        )}
+                                        <span className={`p-1.5 rounded-xl transition-colors duration-150 ${isActive ? 'bg-[#EEF2E1]' : ''}`}>
+                                            <Icon size={20} />
+                                        </span>
+                                        <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                            {tab.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                            {/* More → */}
+                            <button
+                                onClick={() => setTabPage(2)}
+                                className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 px-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <span className="p-1.5 rounded-xl">
+                                    <FiChevronForward size={20} />
+                                </span>
+                                <span className="text-[10px] font-medium leading-none">More</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            {/* ← Back */}
+                            <button
+                                onClick={() => setTabPage(1)}
+                                className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 px-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <span className="p-1.5 rounded-xl">
+                                    <FiChevronLeft size={20} />
+                                </span>
+                                <span className="text-[10px] font-medium leading-none">Back</span>
+                            </button>
+                            {TAB_PAGE_2.map((tab) => {
+                                const Icon = tab.icon;
+                                const isActive = location.pathname === tab.path;
+                                return (
+                                    <button
+                                        key={tab.path}
+                                        onClick={() => navigate(tab.path)}
+                                        className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 px-1 relative transition-colors duration-150 ${
+                                            isActive ? 'text-[#3E4A34]' : 'text-gray-400 hover:text-gray-600'
+                                        }`}
+                                    >
+                                        {isActive && (
+                                            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-[#3E4A34] rounded-full" />
+                                        )}
+                                        <span className={`p-1.5 rounded-xl transition-colors duration-150 ${isActive ? 'bg-[#EEF2E1]' : ''}`}>
+                                            <Icon size={20} />
+                                        </span>
+                                        <span className={`text-[10px] leading-none ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                            {tab.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </>
+                    )}
+
                 </div>
             </div>
         </>

@@ -9,10 +9,8 @@ import { BsBookmarkDashFill } from "react-icons/bs";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { useSortContext } from '../../context/SortContext';
 import { api } from '../../util/api';
-// import NoteModal from './NoteModal';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
-
 import ShareButton from '../button/ShareButton';
 
 
@@ -80,24 +78,22 @@ const Home_page = () => {
     }
 
     return (
-        <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative'>
-            {/* {selectedNote && (
-                <div className="absolute inset-0 backdrop-blur-sm bg-white/30 z-10 pointer-events-none" />
-            )} */}
+        // pb-[76px] on mobile so content won't hide behind the fixed tab bar
+        <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative pb-[76px] md:pb-0'>
 
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8`}>
+            {/* 1 col on mobile, 2 on sm, 3 on lg */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-8`}>
                 {notes.map((note, index) => {
-                    // Trigger fetch when 3 items away from the bottom to make scroll smoother
                     const isTriggerNote = index === Math.max(0, notes.length - 3);
                     return (
                         <div
                             ref={isTriggerNote ? lastNoteElementRef : null}
                             key={note._id || note.id}
-                            className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
+                            className='bg-white rounded-xl p-4 md:p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]'
                             onClick={() => handleCardClick(note)}
                         >
                             <div className="flex justify-between items-start mb-3">
-                                <h3 className='text-lg font-semibold text-gray-800 flex-1 pr-2'>{note.title}</h3>
+                                <h3 className='text-base md:text-lg font-semibold text-gray-800 flex-1 pr-2 line-clamp-2'>{note.title}</h3>
                                 {note.type && (
                                     <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider flex-shrink-0 ${note.type === 'post'
                                         ? 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -113,15 +109,15 @@ const Home_page = () => {
                                     <img
                                         src={getMediaUrl(note.author_profile_picture_url)}
                                         alt={note.author_username}
-                                        className="w-6 h-6 rounded-full object-cover"
+                                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                                     />
                                 ) : (
-                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white'>
+                                    <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white flex-shrink-0'>
                                         {note.author_username?.[0]?.toUpperCase() || 'U'}
                                     </div>
                                 )}
-                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2'>
-                                    {note.author_username || 'Unknown'}
+                                <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0'>
+                                    <span className='truncate'>{note.author_username || 'Unknown'}</span>
                                     <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
                                 </span>
                             </div>
@@ -131,7 +127,7 @@ const Home_page = () => {
                                     {note.text}
                                 </p>
                                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                                         <img
                                             src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                                             alt="Thumbnail"
@@ -149,21 +145,21 @@ const Home_page = () => {
                                 </div>
                             )}
 
-                            <div className='flex flex-wrap gap-2 mb-4'>
+                            <div className='flex flex-wrap gap-1.5 mb-4'>
                                 {note.tags?.map((tag, tagIndex) => (
                                     <span
                                         key={tagIndex}
-                                        className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium'
+                                        className='text-xs text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full font-medium'
                                     >
                                         #{tag}
                                     </span>
                                 ))}
                             </div>
 
-                            <div className='border-t border-gray-200 mb-4'></div>
+                            <div className='border-t border-gray-200 mb-3'></div>
 
                             <div className='flex items-center justify-between text-sm text-gray-600'>
-                                <div className='flex items-center gap-4'>
+                                <div className='flex items-center gap-3'>
                                     <button
                                         onClick={(e) => handleLike(note._id || note.id, e)}
                                         className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
@@ -187,10 +183,10 @@ const Home_page = () => {
                                     </div>
                                 </div>
                                 <div className='flex items-center gap-2'>
-                                    <ShareButton 
-                                        targetId={note._id || note.id} 
-                                        title={note.title} 
-                                        text={note.text?.substring(0, 100) || 'Check out this discussion'} 
+                                    <ShareButton
+                                        targetId={note._id || note.id}
+                                        title={note.title}
+                                        text={note.text?.substring(0, 100) || 'Check out this discussion'}
                                     />
                                     <button
                                         onClick={(e) => handleBookmark(note, e)}
@@ -219,10 +215,6 @@ const Home_page = () => {
                     <p className="text-gray-400 font-['Inter'] text-sm">You've reached the end!</p>
                 </div>
             )}
-
-            {/* {selectedNote && (
-                <NoteModal note={selectedNote} onClose={handleCloseModal} />
-            )} */}
         </div>
     )
 }
