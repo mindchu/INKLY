@@ -31,7 +31,6 @@ const Discussion_page = () => {
         if (node) observer.current.observe(node);
     }, [loading, hasMore]);
 
-    // Filter content to only show discussions
     const posts = React.useMemo(() => content.filter(item => item.type === 'discussion'), [content]);
 
     const handleLike = async (postId, e) => {
@@ -39,7 +38,7 @@ const Discussion_page = () => {
         try {
             const response = await api.post(`/content/${postId}/like`);
             if (response.success) {
-                setPosts(prev => prev.map(post => {
+                setContent(prev => prev.map(post => {
                     if ((post._id || post.id) === postId) {
                         return {
                             ...post,
@@ -70,59 +69,73 @@ const Discussion_page = () => {
 
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
-            <div className='flex flex-col gap-[24px] px-[40px] py-[50px]'>
+            <div className='flex flex-col gap-4 px-3 md:px-6 lg:px-10 py-5 md:py-8'>
                 {posts.length > 0 ? (
                     <>
                         {posts.map((post, index) => {
-                            // Trigger fetch when 3 items away from the bottom to make scroll smoother
+                            const postId = post._id || post.id;
                             const isTriggerPost = index === Math.max(0, posts.length - 3);
+                            const thumbFile = post.file_paths?.find(f =>
+                                ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
+                            );
+
                             return (
                                 <div
                                     ref={isTriggerPost ? lastPostElementRef : null}
-                                    key={post._id || post.id}
-                                    className='flex flex-col w-full min-h-[150px] bg-white rounded-[12px] p-[12px] shadow-sm cursor-pointer hover:shadow-md transition-shadow'
-                                    onClick={() => navigate(`/content/${post._id || post.id}`)}
+                                    key={postId}
+                                    className='w-full bg-white rounded-[12px] p-3 md:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow'
+                                    onClick={() => navigate(`/content/${postId}`)}
                                 >
-                                    <div className='flex justify-between flex-row w-full'>
-                                        <div className='flex flex-row justify-center gap-[12px] items-center'>
+                                    {/* ── Author row ──────────────────────────────── */}
+                                    <div className='flex items-center justify-between gap-2'>
+                                        <div className='flex items-center gap-2 min-w-0'>
                                             {post.author_profile_picture_url ? (
                                                 <img
                                                     src={getMediaUrl(post.author_profile_picture_url)}
                                                     alt={post.author_username}
-                                                    className="w-8 h-8 rounded-full object-cover"
+                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                                 />
                                             ) : (
-                                                <div className='w-8 h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-[10px] text-white font-bold'>
+                                                <div className='w-8 h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0'>
                                                     {post.author_username?.[0]?.toUpperCase() || 'U'}
                                                 </div>
                                             )}
-                                            <div>
-                                                <p className='font-["Inter"] text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-2'>
-                                                    {post.author_username || 'Unknown'}
+                                            <div className='min-w-0'>
+                                                <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
+                                                    <span className='truncate'>{post.author_username || 'Unknown'}</span>
                                                     <FollowChip authorId={post.author_id} initialIsFollowing={post.is_following} />
                                                 </p>
-                                                <p className='font-["Inter"] text-[9px] font-regular text-[#124C09]/70'>Posted recently</p>
+                                                <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                             </div>
                                         </div>
+
                                         {post.file_paths?.length > 0 && (
-                                            <div className='mt-[8px] mr-[20px]'>
-                                                <button className='px-4 h-[30px] bg-[#B3B3B6]/60 text-white items-center flex justify-center rounded-[12px] gap-[8px] cursor-pointer select-none hover:bg-[#B3B3B6]/80'>
-                                                    <GoPaperclip size={14} className='text-white' />
-                                                    <p className='text-xs'>{post.file_paths.length} Attachment(s)</p>
-                                                </button>
-                                            </div>
+                                            <button
+                                                className='flex-shrink-0 flex items-center gap-1.5 px-3 h-[28px] bg-[#B3B3B6]/60 text-white rounded-[12px] hover:bg-[#B3B3B6]/80 transition-colors'
+                                                onClick={e => e.stopPropagation()}
+                                            >
+                                                <GoPaperclip size={12} className='text-white' />
+                                                <span className='text-[11px] whitespace-nowrap'>{post.file_paths.length} Attachment{post.file_paths.length !== 1 ? 's' : ''}</span>
+                                            </button>
                                         )}
                                     </div>
 
-                                    <div className='mt-[16px] flex gap-4'>
-                                        <div className="flex-1 min-w-0">
-                                            <p className='font-["Inter"] text-[18px] font-semibold text-gray-800 break-all'>{post.title}</p>
-                                            <p className='font-["Inter"] text-[13px] font-regular text-gray-600 mt-[12px] break-all whitespace-pre-wrap line-clamp-3'>{post.text}</p>
+                                    {/* ── Content ─────────────────────────────────── */}
+                                    <div className='mt-3 flex gap-3'>
+                                        <div className='flex-1 min-w-0'>
+                                            <p className='font-["Inter"] text-[15px] md:text-[17px] font-semibold text-gray-800 break-words leading-snug'>
+                                                {post.title}
+                                            </p>
+                                            {post.text && (
+                                                <p className='font-["Inter"] text-[12px] md:text-[13px] text-gray-500 mt-1.5 break-words line-clamp-2 md:line-clamp-3 whitespace-pre-wrap'>
+                                                    {post.text}
+                                                </p>
+                                            )}
                                         </div>
-                                        {post.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                            <div className="w-[100px] h-[80px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                                        {thumbFile && (
+                                            <div className='w-[72px] h-[60px] md:w-[90px] md:h-[72px] rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100'>
                                                 <img
-                                                    src={getMediaUrl(`/uploads/${post.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
+                                                    src={getMediaUrl(`/uploads/${thumbFile}`)}
                                                     alt="Thumbnail"
                                                     className="w-full h-full object-cover"
                                                 />
@@ -130,58 +143,72 @@ const Discussion_page = () => {
                                         )}
                                     </div>
 
-                                    <div className='flex flex-row items-center gap-[8px] flex-wrap mt-[16px]'>
-                                        {post.tags?.map((tag, index) => (
-                                            <p key={index} className='flex w-auto bg-[#E8FFDF] items-center px-[10px] py-1 rounded-[12px] text-[#124C09]/70 font-["Inter"] text-[12px] font-regular'>
-                                                #{tag}
-                                            </p>
-                                        ))}
-                                    </div>
-                                    <div className='flex flex-row justify-between mt-[16px] border-t border-gray-100 pt-3'>
-                                        <div></div>
+                                    {/* ── Tags ────────────────────────────────────── */}
+                                    {post.tags?.length > 0 && (
+                                        <div className='flex flex-row flex-wrap gap-1.5 mt-2.5'>
+                                            {post.tags.map((tag, i) => (
+                                                <span
+                                                    key={i}
+                                                    className='bg-[#E8FFDF] text-[#124C09]/70 font-["Inter"] text-[11px] md:text-[12px] px-2.5 py-0.5 rounded-full'
+                                                >
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                        <div className='flex flex-row gap-[18px] mr-[32px]'>
+                                    {/* ── Actions ─────────────────────────────────── */}
+                                    <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100'>
+                                        <div className='flex items-center gap-3 md:gap-4'>
+                                            {/* Like */}
                                             <button
-                                                onClick={(e) => handleLike(post._id || post.id, e)}
-                                                className='cursor-pointer gap-[6px] items-center flex flex-row hover:text-red-500 transition-colors'
+                                                onClick={(e) => handleLike(postId, e)}
+                                                className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                             >
-                                                {post.is_liked ? (
-                                                    <IoHeart size={14} className='text-red-500' />
-                                                ) : (
-                                                    <IoHeartOutline size={14} className='text-[#292D32]' />
-                                                )}
-                                                <p className={`font-["Inter"] text-[12px] font-regular select-none ${post.is_liked ? 'text-red-500' : ''}`}>
+                                                {post.is_liked
+                                                    ? <IoHeart size={14} className='text-red-500' />
+                                                    : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                                }
+                                                <span className={`font-["Inter"] text-[12px] select-none ${post.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                                     {post.like_count || 0}
-                                                </p>
+                                                </span>
                                             </button>
-                                            <button className='cursor-pointer gap-[6px] items-center flex flex-row hover:text-blue-500 transition-colors'>
+
+                                            {/* Comments */}
+                                            <button className='flex items-center gap-1 hover:text-blue-500 transition-colors'>
                                                 <GoComment size={14} className='text-[#292D32]' />
-                                                <p className='font-["Inter"] text-[12px] font-regular select-none'>{post.comments_count || 0}</p>
+                                                <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{post.comments_count || 0}</span>
                                             </button>
-                                            <div className='gap-[6px] items-center flex flex-row text-gray-400'>
+
+                                            {/* Views */}
+                                            <div className='flex items-center gap-1'>
                                                 <LuEye size={14} className='text-[#292D32]' />
-                                                <p className='font-["Inter"] text-[12px] font-regular select-none'>{post.views || 0}</p>
+                                                <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{post.views || 0}</span>
                                             </div>
+
+                                            {/* Bookmark */}
                                             <button
-                                                className='cursor-pointer flex flex-row hover:text-yellow-500 transition-colors'
                                                 onClick={(e) => handleBookmark(post, e)}
+                                                className='flex items-center hover:text-yellow-500 transition-colors'
                                             >
-                                                {isBookmarked(post._id || post.id) ? (
-                                                    <BsBookmarkDashFill size={14} className='text-yellow-400' />
-                                                ) : (
-                                                    <LuBookmarkMinus size={14} className='text-[#292D32]' />
-                                                )}
+                                                {isBookmarked(postId)
+                                                    ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
+                                                    : <LuBookmarkMinus size={14} className='text-[#292D32]' />
+                                                }
                                             </button>
-                                            <ShareButton 
-                                                targetId={post._id || post.id} 
-                                                title={post.title} 
-                                                text={post.text?.substring(0, 100) || 'Check out this discussion'} 
+
+                                            {/* Share */}
+                                            <ShareButton
+                                                targetId={postId}
+                                                title={post.title}
+                                                text={post.text?.substring(0, 100) || 'Check out this discussion'}
                                             />
                                         </div>
                                     </div>
                                 </div>
                             );
                         })}
+
                         {loading && posts.length > 0 && (
                             <div className="w-full flex justify-center py-4">
                                 <p className="text-gray-500 font-['Inter'] animate-pulse">Loading more...</p>
@@ -194,13 +221,13 @@ const Discussion_page = () => {
                         )}
                     </>
                 ) : (
-                    <div className='w-full text-center py-20 text-gray-500'>
+                    <div className='w-full text-center py-20 text-gray-500 font-["Inter"]'>
                         No discussions found. Start one!
                     </div>
                 )}
             </div>
         </div>
-    )
+    );
 }
 
 export default Discussion_page
