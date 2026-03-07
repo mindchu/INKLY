@@ -64,7 +64,7 @@ async def get_user_posts(user_id: str, request: Request):
     for post in posts:
         post_id_str = str(post['_id'])
         post['_id'] = post_id_str
-        post['likes_count'] = post.get('like_count', 0)
+        post['like_count'] = post.get('like_count', 0)
         post['is_liked'] = post_id_str in user_liked_set
         post['comments_count'] = len(post.get('comment_ids', [])) 
         

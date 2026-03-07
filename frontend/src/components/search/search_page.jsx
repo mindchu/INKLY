@@ -50,7 +50,7 @@ const Search_page = () => {
                         return {
                             ...note,
                             is_liked: response.is_liked,
-                            likes_count: response.is_liked ? (note.likes_count || 0) + 1 : (note.likes_count || 1) - 1
+                            like_count: response.is_liked ? (note.like_count || 0) + 1 : (note.like_count || 1) - 1
                         };
                     }
                     return note;
@@ -144,7 +144,7 @@ const Search_page = () => {
                                                 <IoHeartOutline size={14} className='text-[#292D32]' />
                                             )}
                                             <p className={`font-[Inter] text-[14px] font-semibold select-none ${note.is_liked ? 'text-red-500' : 'text-[#124C09]'}`}>
-                                                {note.likes_count || 0}
+                                                {note.like_count || 0}
                                             </p>
                                         </button>
                                         <button className='cursor-pointer flex flex-row items-center gap-[6px] hover:text-blue-500 transition-colors'>

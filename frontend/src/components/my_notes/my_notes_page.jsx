@@ -30,7 +30,7 @@ const My_notes_page = () => {
   const stats = [
     { value: localNotes.length.toString(), label: 'Total items' },
     { value: localNotes.reduce((sum, note) => sum + (note.views || 0), 0).toString(), label: 'Total views' },
-    { value: localNotes.reduce((sum, note) => sum + (note.likes_count || 0), 0).toString(), label: 'Total likes' }
+    { value: localNotes.reduce((sum, note) => sum + (note.like_count || 0), 0).toString(), label: 'Total likes' }
   ]
 
   const filteredAndSortedNotes = useMemo(() => {
@@ -56,8 +56,6 @@ const My_notes_page = () => {
 
     return sorted;
   }, [localNotes, searchQuery, sortBy]);
-
-  // handleLike, handleDeleteClick, and handleDeleteNote have all been deleted!
 
   const handleBookmark = (note, e) => {
     e.stopPropagation();
@@ -172,7 +170,7 @@ const My_notes_page = () => {
                   <LikeButton 
                     targetId={note._id || note.id} 
                     initialIsLiked={note.is_liked}
-                    initialLikesCount={note.likes_count || 0}
+                    initialLikesCount={note.like_count || 0}
                     onLikeSuccess={(id, isLiked) => {
                       // Keep local notes updated so the total stats at the top recalculate properly
                       setLocalNotes(prev => prev.map(n => {
@@ -180,7 +178,7 @@ const My_notes_page = () => {
                           return {
                             ...n,
                             is_liked: isLiked,
-                            likes_count: isLiked ? (n.likes_count || 0) + 1 : (n.likes_count || 1) - 1
+                            like_count: isLiked ? (n.like_count || 0) + 1 : (n.like_count || 1) - 1
                           };
                         }
                         return n;

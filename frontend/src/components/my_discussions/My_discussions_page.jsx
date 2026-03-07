@@ -28,7 +28,7 @@ const My_discussions_page = () => {
     const stats = [
         { value: localDiscussions.length.toString(), label: 'Total discussions' },
         { value: localDiscussions.reduce((sum, disc) => sum + (disc.views || 0), 0).toString(), label: 'Total views' },
-        { value: localDiscussions.reduce((sum, disc) => sum + (disc.likes_count || 0), 0).toString(), label: 'Total likes' }
+        { value: localDiscussions.reduce((sum, disc) => sum + (disc.like_count || 0), 0).toString(), label: 'Total likes' }
     ]
 
     const filteredAndSortedDiscussions = useMemo(() => {
@@ -168,14 +168,14 @@ const My_discussions_page = () => {
                                     <LikeButton 
                                         targetId={disc._id || disc.id}
                                         initialIsLiked={disc.is_liked}
-                                        initialLikesCount={disc.likes_count || 0}
+                                        initialLikesCount={disc.like_count || 0}
                                         onLikeSuccess={(id, isLiked) => {
                                             setLocalDiscussions(prev => prev.map(d => {
                                                 if ((d._id || d.id) === id) {
                                                     return {
                                                         ...d,
                                                         is_liked: isLiked,
-                                                        likes_count: isLiked ? (d.likes_count || 0) + 1 : (d.likes_count || 1) - 1
+                                                        like_count: isLiked ? (d.like_count || 0) + 1 : (d.like_count || 1) - 1
                                                     };
                                                 }
                                                 return d;

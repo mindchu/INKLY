@@ -35,7 +35,7 @@ Return the new URL in the JSON response
 Find the existing GET /content/{content_id} route in api.py
 Add a MongoDB database command to increment ($inc) the views field by 1 for this content_id
 Check the GET /content/recommended and /users/{user_id}/posts routes
-Make sure the returned JSON for each content item includes total likes_count and comments_count
+Make sure the returned JSON for each content item includes total like_count and comments_count
 Open the existing GET /content/recommended and GET /content/{id} routes
 For each content item being returned, check if the current user's ID is in the item's liked_by array
 Add a new boolean field is_liked to the JSON response for each item

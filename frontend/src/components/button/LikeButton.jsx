@@ -28,7 +28,7 @@ const LikeButton = ({
             if (response.success) {
                 // Sync exactly with what the server returns
                 setIsLiked(response.is_liked);
-                setLikesCount(response.likes_count || (newIsLiked ? likesCount + 1 : likesCount - 1));
+                setLikesCount(response.like_count || (newIsLiked ? likesCount + 1 : likesCount - 1));
                 
                 // If the parent component needs to know (e.g., updating total stats)
                 if (onLikeSuccess) onLikeSuccess(targetId, response.is_liked);

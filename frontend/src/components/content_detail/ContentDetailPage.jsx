@@ -7,9 +7,9 @@ import { MdOutlineFileDownload, MdArrowBack, MdDelete, MdEdit } from 'react-icon
 import { LuEye } from 'react-icons/lu';
 import { IoHeartOutline, IoHeart, IoArrowForward } from "react-icons/io5";
 import { api } from '../../util/api';
-// import { CONFIG } from '../../config'; // Uncomment if you move the base URL here
 import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
+import DeleteButton from '../../components/button/DeleteButton';
 
 // --- Helper Functions ---
 
@@ -31,6 +31,33 @@ const addReplyToTree = (comments, parentId, newReply) => {
             return { ...comment, replies: addReplyToTree(comment.replies, parentId, newReply) };
         }
         return comment;
+    });
+};
+
+// Recursive function to delete a comment/reply from the tree locally
+const deleteCommentFromTree = (commentsList, commentId) => {
+    return commentsList
+        .filter(c => c._id !== commentId) // Remove it if it's at the current level
+        .map(c => ({
+            ...c,
+            replies: c.replies ? deleteCommentFromTree(c.replies, commentId) : [] // Check deeper levels
+        }));
+};
+
+// Recursive function to toggle likes locally
+const toggleCommentLikeInTree = (commentsList, commentId, isLiked) => {
+    return commentsList.map(c => {
+        if (c._id === commentId) {
+            return {
+                ...c,
+                is_liked: isLiked,
+                like_count: isLiked ? (c.like_count || 0) + 1 : Math.max(0, (c.like_count || 1) - 1)
+            };
+        }
+        if (c.replies?.length > 0) {
+            return { ...c, replies: toggleCommentLikeInTree(c.replies, commentId, isLiked) };
+        }
+        return c;
     });
 };
 
@@ -78,9 +105,6 @@ const ContentDetailPage = () => {
             setLoading(true);
             try {
                 const response = await api.get(`/content/${contentId}`);
-
-                console.log("🔍 DATA FROM BACKEND:", response.data);
-
                 setContent(response.data);
                 setComments(response.comments || []);
             } catch (error) {
@@ -155,7 +179,6 @@ const ContentDetailPage = () => {
                 parent_id: parentId
             });
             if (response.success) {
-                // Update local state recursively instead of refetching the whole page!
                 setComments(prev => addReplyToTree(prev, parentId, response.data));
                 setReplyText('');
                 setReplyingTo(null);
@@ -164,6 +187,18 @@ const ContentDetailPage = () => {
             console.error('Failed to post reply:', error);
         } finally {
             setPostingReply(false);
+        }
+    };
+
+    // --- NEW: Comment Like & Delete Handlers ---
+    const handleLikeComment = async (commentId) => {
+        try {
+            const response = await api.post(`/comment/${commentId}/like`);
+            if (response.success) {
+                setComments(prev => toggleCommentLikeInTree(prev, commentId, response.is_liked));
+            }
+        } catch (error) {
+            console.error('Failed to toggle comment like:', error);
         }
     };
 
@@ -190,13 +225,40 @@ const ContentDetailPage = () => {
                         </div>
                         <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
 
+                        {/* --- NEW: Like, Reply, and Delete Action Bar --- */}
                         <div className="flex items-center gap-4 mt-2">
+                            {/* Reply Button */}
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
                                 className="text-xs text-green-600 font-medium hover:underline"
                             >
                                 {replyingTo === comment._id ? 'Cancel' : 'Reply'}
                             </button>
+
+                            {/* Comment Like Button */}
+                            <button
+                                onClick={() => handleLikeComment(comment._id)}
+                                className={`flex items-center gap-1 text-xs font-medium hover:text-red-500 transition-colors ${comment.is_liked ? 'text-red-500' : 'text-gray-500'}`}
+                            >
+                                {comment.is_liked ? <IoHeart size={14} /> : <IoHeartOutline size={14} />}
+                                <span>{comment.like_count || 0}</span>
+                            </button>
+
+                            {/* Delete Button (Only shows if the logged-in user owns the comment) */}
+                            {profileData && (profileData.google_id === comment.author_id || profileData.is_admin) && (
+                                <DeleteButton 
+                                    targetId={comment._id}
+                                    itemName="Comment"
+                                    endpointUrl={
+                                        profileData.is_admin 
+                                            ? `/admin/content/${contentId}/comment/${comment._id}` 
+                                            : `/comment/${comment._id}`
+                                    }
+                                    onDeleteSuccess={(id) => {
+                                        setComments(prev => deleteCommentFromTree(prev, id));
+                                    }}
+                                />
+                            )}
                         </div>
 
                         {replyingTo === comment._id && (
@@ -327,7 +389,7 @@ const ContentDetailPage = () => {
                                 <button onClick={handleLike} className="flex items-center gap-2 hover:text-red-500 transition-colors">
                                     {content.is_liked ? <IoHeart size={24} className="text-red-500" /> : <IoHeartOutline size={24} />}
                                     <span className={content.is_liked ? 'text-red-500 font-medium' : 'font-medium'}>
-                                        {content.like_count || 0} {/* Changed from likes_count to like_count! */}
+                                        {content.like_count || 0}
                                     </span>
                                 </button>
                                 <div className="flex items-center gap-2">
@@ -340,9 +402,6 @@ const ContentDetailPage = () => {
 
                     {/* Body */}
                     <div className="p-8">
-                        {/* Note: If content.text is raw HTML, consider using:
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content.text) }} />
-                        */}
                         <div className="prose prose-green max-w-none text-gray-700 leading-relaxed text-lg mb-8 whitespace-pre-wrap">
                             {content.text}
                         </div>

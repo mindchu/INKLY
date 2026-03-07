@@ -125,7 +125,7 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
             liked_by = doc.get('liked_by_user_ids', [])
             comment_ids = doc.get('comment_ids', [])
             
-            doc['likes_count'] = doc.get('like_count', 0)
+            doc['like_count'] = doc.get('like_count', 0)
             doc['comments_count'] = len(doc.get('comment_ids', []))
             doc['is_liked'] = doc_id_str in user_liked_set
             doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
@@ -160,7 +160,7 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'likes', limi
 
     # Sorting
     if sort_by == 'likes':
-        content.sort(key=lambda x: x.get('likes_count', 0), reverse=True)
+        content.sort(key=lambda x: x.get('like_coun', 0), reverse=True)
     elif sort_by == 'views':
         content.sort(key=lambda x: x.get('views', 0), reverse=True)
     else: # recent
@@ -184,7 +184,7 @@ def get_content_by_id(content_id: str, user_id: Optional[str] = None) -> Optiona
         liked_by = doc.get('liked_by_user_ids', [])
         comment_ids = doc.get('comment_ids', [])
         
-        doc['likes_count'] = len(liked_by)
+        doc['like_coun'] = len(liked_by)
         doc['comments_count'] = len(comment_ids)
         doc['is_liked'] = user_id in liked_by if user_id else False
         
@@ -230,7 +230,7 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
     for doc in all_content:
         doc_id_str = str(doc['_id'])
         doc['_id'] = doc_id_str
-        doc['likes_count'] = doc.get('like_count', 0)
+        doc['like_coun'] = doc.get('like_count', 0)
         doc['comments_count'] = len(doc.get('comment_ids', []))
         doc['is_liked'] = doc_id_str in user_liked_set
         doc['is_bookmarked'] = True
@@ -294,7 +294,7 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         for doc in all_content:
             doc_id_str = str(doc['_id'])
             doc['_id'] = doc_id_str
-            doc['likes_count'] = doc.get('like_count', 0)
+            doc['like_count'] = doc.get('like_count', 0)
             doc['comments_count'] = len(doc.get('comment_ids', []))
             doc['is_liked'] = doc_id_str in user_liked_set
             doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
@@ -338,7 +338,7 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         results.sort(key=lambda x: x.get('search_score', 0), reverse=True)
     else:
         if sort_by in ["popular", "top", "likes"]:
-            results.sort(key=lambda x: x.get('likes_count', 0), reverse=True)
+            results.sort(key=lambda x: x.get('like_count', 0), reverse=True)
         elif sort_by in ["hot", "views"]:
             results.sort(key=lambda x: x.get('views', 0), reverse=True)
         else: # recent / new
@@ -382,7 +382,7 @@ def create_comment(parent_id: str, author_id: str, text: str) -> Optional[Dict[s
 def get_comment_tree(parent_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Recursively builds a tree of comments.
-    Updated to accept user_id so it can tell the frontend if the user liked the comments.
+    Updated to safely strip ObjectIds so FastAPI doesn't crash.
     """
     parent = db.posts.find_one({"_id": parent_id})
     if not parent: parent = db.discussions.find_one({"_id": parent_id})
@@ -398,23 +398,22 @@ def get_comment_tree(parent_id: str, user_id: Optional[str] = None) -> List[Dict
     cursor = db.comments.find({"_id": {"$in": child_ids}})
     comments = []
     
-    # Bulk check likes for these comments
     user_liked_set = set()
     if user_id:
-        liked_docs = db.likes.find({"user_id": user_id, "content_id": {"$in": child_ids}})
-        user_liked_set = {ld["content_id"] for ld in liked_docs}
+        liked_docs = db.likes.find({"user_id": user_id, "target_id": {"$in": child_ids}})
+        user_liked_set = {str(ld["target_id"]) for ld in liked_docs}
     
     for doc in cursor:
         doc_id_str = str(doc['_id'])
         doc['_id'] = doc_id_str
-        
-        # New Like Format
-        doc['likes_count'] = doc.get('like_count', 0)
+        doc['like_count'] = doc.get('like_count', 0)
         doc['is_liked'] = doc_id_str in user_liked_set
         doc.pop('liked_by_user_ids', None)
-
-        doc['replies'] = get_comment_tree(doc_id_str, user_id)
-            
+        doc.pop('comment_ids', None)
+        doc.pop('reply_ids', None)
+        if 'author_id' in doc:
+            doc['author_id'] = str(doc['author_id'])
+        doc['replies'] = get_comment_tree(doc_id_str, user_id)    
         author = db.users.find_one({"google_id": doc.get('author_id')}, {"username": 1, "profile_picture_url": 1})
         doc['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
         doc['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
@@ -448,6 +447,34 @@ def toggle_like(content_id: str, user_id: str) -> Optional[bool]:
             "created_at": datetime.now(timezone.utc).isoformat()
         })
         found_collection.update_one({"_id": content_id}, {"$inc": {"like_count": 1}})
+        return True
+    
+def toggle_comment_like(comment_id: str, user_id: str):
+    # Check if the user already liked this comment
+    existing_like = db.likes.find_one({
+        "target_id": comment_id, 
+        "user_id": user_id,
+        "type": "comment"
+    })
+    if existing_like:
+        db.likes.delete_one({"_id": existing_like["_id"]})
+        db.comments.update_one(
+            # FIX: Just use comment_id directly!
+            {"_id": comment_id}, 
+            {"$inc": {"like_count": -1}}
+        )
+        return False
+    else:
+        db.likes.insert_one({
+            "target_id": comment_id,
+            "user_id": user_id,
+            "type": "comment"
+        })
+        db.comments.update_one(
+            # FIX: Just use comment_id directly!
+            {"_id": comment_id}, 
+            {"$inc": {"like_count": 1}}
+        )
         return True
 
 def toggle_bookmark(user_id: str, content_id: str) -> Optional[bool]:
