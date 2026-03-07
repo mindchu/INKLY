@@ -16,7 +16,7 @@ const Home_Top_bar = () => {
 
   const handleIncludeKeyDown = (e) => {
     if (e.key === 'Enter' && includeInput.trim()) {
-      const tag = includeInput.trim().toLowerCase();
+      const tag = includeInput.trim();
       if (!includeTags.includes(tag)) {
         setIncludeTags(prev => [...prev, tag]);
       }
@@ -26,7 +26,7 @@ const Home_Top_bar = () => {
 
   const handleExcludeKeyDown = (e) => {
     if (e.key === 'Enter' && excludeInput.trim()) {
-      const tag = excludeInput.trim().toLowerCase();
+      const tag = excludeInput.trim();
       if (!excludeTags.includes(tag)) {
         setExcludeTags(prev => [...prev, tag]);
       }
@@ -86,9 +86,9 @@ const Home_Top_bar = () => {
           </div>
         </div>
 
-        {/* Filter By Section */}
-        <div className='mt-3 ml-5 flex flex-col gap-2 pb-2 pr-8'>
-          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Filter by:</p>
+        {/* Filter By Section — horizontal layout */}
+        <div className='mt-3 ml-5 flex flex-row items-start gap-6 pb-2 pr-8 flex-wrap'>
+          <p className='text-[#124C09] font-["Inter"] text-[18px] select-none pt-1'>Filter by:</p>
 
           {/* Include Tags */}
           <div className='flex flex-row items-center gap-2 flex-wrap'>
@@ -110,6 +110,9 @@ const Home_Top_bar = () => {
               className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-36'
             />
           </div>
+
+          {/* Divider */}
+          <div className='w-px bg-gray-200 self-stretch' />
 
           {/* Exclude Tags */}
           <div className='flex flex-row items-center gap-2 flex-wrap'>

@@ -130,8 +130,8 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
     query = {}
 
     if filter_tags:
-        # Case-insensitive include tags
-        query["tags"] = {"$in": _make_case_insensitive_tag_query(filter_tags)}
+        # Include: post must have ALL specified tags (AND logic)
+        query["tags"] = {"$all": _make_case_insensitive_tag_query(filter_tags)}
     elif interested_tags or following_ids:
         or_conditions = []
         if interested_tags:
@@ -141,8 +141,11 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
         query["$or"] = or_conditions
 
     if exclude_tags:
-        # Case-insensitive exclude tags
-        query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
+        # Exclude: post must not have ANY of the specified tags (OR logic = $nin)
+        if "tags" in query:
+            query["tags"]["$nin"] = _make_case_insensitive_tag_query(exclude_tags)
+        else:
+            query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
     content = fetch_and_format(query)
 
@@ -255,9 +258,11 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         query["author_id"] = {"$in": following_ids}
 
     if tags_filter:
+        # Include: must have ALL tags (AND logic)
         query["tags"] = {"$all": _make_case_insensitive_tag_query(tags_filter)}
 
     if exclude_tags:
+        # Exclude: must not have ANY of the tags (OR logic = $nin)
         if "tags" in query:
             query["tags"]["$nin"] = _make_case_insensitive_tag_query(exclude_tags)
         else:
