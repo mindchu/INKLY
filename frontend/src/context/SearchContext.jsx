@@ -17,7 +17,7 @@ export const SearchProvider = ({ children }) => {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
-        sort: 'hot',
+        sort: 'recent',
         tags: [],
         exclude_tags: [],
         type: 'all'
@@ -39,7 +39,7 @@ export const SearchProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error('Failed to fetch tags:', error);
-                fetchedTags.current = false; // Allow retry on error if needed
+                fetchedTags.current = false;
             }
         };
         fetchTags();
@@ -86,14 +86,11 @@ export const SearchProvider = ({ children }) => {
         }
     }, [query, filters]);
 
-    // Reset pagination when query or filters change
     useEffect(() => {
         setPage(0);
         setHasMore(true);
     }, [query, filters]);
 
-    // Fetch when page changes, ensuring we don't fetch page 0 twice
-    // since the Search UI naturally kicks off a performSearch() externally
     useEffect(() => {
         if (page > 0) {
             performSearch(query, filters, page);

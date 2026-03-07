@@ -3,9 +3,9 @@ import { RxCaretUp } from "react-icons/rx";
 import { RxCaretDown } from "react-icons/rx";
 import { RiSearch2Line } from "react-icons/ri";
 import { FiMenu } from "react-icons/fi";
-import { MdOutlineWhatshot } from "react-icons/md";
-import { IoSparklesOutline } from "react-icons/io5";
-import { BiTrendingUp } from "react-icons/bi";
+import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
+import { IoHeartOutline } from "react-icons/io5";
+import { BiCommentDetail } from "react-icons/bi";
 import { useSearch } from '../../context/SearchContext';
 import { useSidebar } from '../../context/SidebarContext';
 
@@ -38,6 +38,13 @@ const Search_top_bar = () => {
         }
     };
 
+    const sortButtons = [
+        { value: 'views', label: 'Views', icon: <MdOutlineRemoveRedEye size={16} /> },
+        { value: 'comments', label: 'Comments', icon: <BiCommentDetail size={16} /> },
+        { value: 'likes', label: 'Likes', icon: <IoHeartOutline size={16} /> },
+        { value: 'recent', label: 'Date', icon: <MdOutlineDateRange size={16} /> },
+    ];
+
     return (
         <div className={`w-full bg-white shadow-md transition-all duration-300 py-3`}>
             <div className='flex flex-row mt-1.5 gap-3 items-center ml-5 justify-between w-full pr-8'>
@@ -49,8 +56,8 @@ const Search_top_bar = () => {
                     <p className='font-["Julius Sans One"] text-[32px] text-[#3E4A34] font-thin select-none'>SEARCH</p>
                 </div>
             </div>
-            <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 w- items-center border-2 rounded-2xl p-1.5 pl-4 '>
-                <button className='cursor-pointer'>
+            <div className='ml-5 mr-5 mt-1.5 flex flex-row gap-3 items-center border-2 rounded-2xl p-1.5 pl-4'>
+                <button className='cursor-pointer' onClick={handleSearchClick}>
                     <RiSearch2Line size={22} className='flex opacity-50' />
                 </button>
                 <input
@@ -62,60 +69,45 @@ const Search_top_bar = () => {
                     onKeyDown={handleKeyDown}
                 />
             </div>
-            <div className='ml-5 mt-1.5 text-[#577F4E] font-["Inter"] flex fex-row items-center gap-2 select-none'>
+            <div className='ml-5 mt-1.5 text-[#577F4E] font-["Inter"] flex flex-row items-center gap-2 select-none'>
                 <button onClick={() => setShowFilters(!showFilters)} className='text-[#577F4E] font-["Inter"]'>
-                    {showFilters ? <RxCaretUp strokeWidth={2} className='' /> : <RxCaretDown strokeWidth={2} className='' />}
+                    {showFilters ? <RxCaretUp strokeWidth={2} /> : <RxCaretDown strokeWidth={2} />}
                 </button>
                 <p>{showFilters ? 'Hide Filters' : 'Show Filters'}</p>
             </div>
             {showFilters && (
                 <div className='flex flex-row gap-3 ml-5 pt-4 pl-8 pb-4 bg-[#F8F6F6] rounded-[12px] items-center select-none'>
+                    {/* Sort By */}
                     <div className='flex flex-col gap-1'>
                         <label className='text-[18px] text-[#577F4E] font-["Inter"] mb-0.5'>Sort by</label>
                         <div className='flex flex-row gap-2 h-[38px]'>
-                            <button
-                                onClick={() => setFilters({ ...filters, sort: 'hot' })}
-                                className={`flex flex-row items-center gap-1.5 px-4 rounded-full transition-all ${filters.sort === 'hot'
-                                    ? 'bg-[#F4A460] text-white border border-[#F4A460]'
-                                    : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
+                            {sortButtons.map(({ value, label, icon }) => (
+                                <button
+                                    key={value}
+                                    onClick={() => setFilters({ ...filters, sort: value })}
+                                    className={`flex flex-row items-center gap-1.5 px-4 rounded-full transition-all ${
+                                        filters.sort === value
+                                            ? 'bg-[#3E4A34] text-white'
+                                            : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
                                     }`}
-                            >
-                                <MdOutlineWhatshot size={16} />
-                                <span className='font-["Inter"] text-[14px] font-medium'>Hot</span>
-                            </button>
-                            <button
-                                onClick={() => setFilters({ ...filters, sort: 'new' })}
-                                className={`flex flex-row items-center gap-1.5 px-4 rounded-full transition-all ${filters.sort === 'new'
-                                    ? 'bg-[#6B9BD1] text-white border border-[#6B9BD1]'
-                                    : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <IoSparklesOutline size={16} />
-                                <span className='font-["Inter"] text-[14px] font-medium'>New</span>
-                            </button>
-                            <button
-                                onClick={() => setFilters({ ...filters, sort: 'top' })}
-                                className={`flex flex-row items-center gap-1.5 px-4 rounded-full transition-all ${filters.sort === 'top'
-                                    ? 'bg-[#FFD700] text-gray-800 border border-[#FFD700]'
-                                    : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <BiTrendingUp size={16} />
-                                <span className='font-["Inter"] text-[14px] font-medium'>Top</span>
-                            </button>
+                                >
+                                    {icon}
+                                    <span className='font-["Inter"] text-[14px] font-medium'>{label}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
+
+                    {/* Filter Tags */}
                     <div className='flex flex-col gap-1 relative'>
                         <label className='text-[18px] text-[#577F4E] font-["Inter"]'>Filter tags</label>
                         <div className='relative w-full border-2 bg-white border-[#577F4E] rounded-lg min-h-[38px] flex flex-wrap items-center gap-1.5 px-2 py-1'>
-                            {/* Current selected tag chips inline */}
                             {filters.tags.map((tag, idx) => (
                                 <span key={idx} className='bg-[#EDF2EB] text-[#577F4E] px-2 py-0.5 rounded text-sm flex items-center gap-1 border border-[#D1DFCC] h-fit whitespace-nowrap'>
                                     {tag}
                                     <button onClick={() => setFilters({ ...filters, tags: filters.tags.filter(t => t !== tag) })} className='hover:text-red-500 font-["Inter"] font-bold'>×</button>
                                 </span>
                             ))}
-                            {/* The input field within the container */}
                             <input
                                 type='text'
                                 value={filterTagInput}
@@ -123,8 +115,6 @@ const Search_top_bar = () => {
                                 placeholder={filters.tags.length === 0 ? 'Type to search...' : ''}
                                 className='flex-1 min-w-[120px] bg-transparent outline-none border-none font-["Inter"] text-[16px] text-gray-700 placeholder-gray-400 py-0.5'
                             />
-
-                            {/* Autocomplete Dropdown */}
                             {filterTagInput && filteredSuggestions.length > 0 && (
                                 <div className='absolute z-20 mt-1 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-lg max-h-[150px] overflow-y-auto'>
                                     {filteredSuggestions.slice(0, 5).map((tag, idx) => (
@@ -147,17 +137,17 @@ const Search_top_bar = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Exclude Tags */}
                     <div className='flex flex-col gap-1 relative'>
                         <label className='text-[18px] text-[#577F4E] font-["Inter"]'>Exclude tags</label>
                         <div className='relative w-full border-2 bg-white border-[#577F4E] rounded-lg min-h-[38px] flex flex-wrap items-center gap-1.5 px-2 py-1'>
-                            {/* Current excluded tag chips inline */}
                             {(filters.exclude_tags || []).map((tag, idx) => (
                                 <span key={idx} className='bg-[#FCE8E8] text-[#C0392B] px-2 py-0.5 rounded text-sm flex items-center gap-1 border border-[#F5C6C6] h-fit whitespace-nowrap'>
                                     {tag}
                                     <button onClick={() => setFilters({ ...filters, exclude_tags: filters.exclude_tags.filter(t => t !== tag) })} className='hover:text-red-700 font-["Inter"] font-bold'>×</button>
                                 </span>
                             ))}
-                            {/* The input field within the container */}
                             <input
                                 type='text'
                                 value={excludeTagInput}
@@ -165,8 +155,6 @@ const Search_top_bar = () => {
                                 placeholder={(filters.exclude_tags && filters.exclude_tags.length > 0) ? '' : 'Type to search...'}
                                 className='flex-1 min-w-[120px] bg-transparent outline-none border-none font-["Inter"] text-[16px] text-gray-700 placeholder-gray-400 py-0.5'
                             />
-
-                            {/* Autocomplete Dropdown */}
                             {excludeTagInput && excludeSuggestions.length > 0 && (
                                 <div className='absolute z-20 mt-1 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-lg max-h-[150px] overflow-y-auto'>
                                     {excludeSuggestions.slice(0, 5).map((tag, idx) => (
@@ -190,9 +178,9 @@ const Search_top_bar = () => {
                             )}
                         </div>
                     </div>
-
                 </div>
             )}
+
             <div className='flex flex-row justify-between items-center ml-5 mr-5 mt-2.5 mb-2 border-b-2 border-none select-none'>
                 <div className='flex flex-row gap-6'>
                     <button
