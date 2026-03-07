@@ -4,7 +4,6 @@ import { MessageCircle, Eye } from 'lucide-react'
 import { FaRegEdit } from "react-icons/fa"
 import { BsBookmarkDashFill, BsBookmarkDash } from "react-icons/bs"
 
-// Import your new reusable components (Adjust the path if needed based on your folder structure)
 import LikeButton from '../../components/button/LikeButton';
 import DeleteButton from '../../components/button/DeleteButton';
 import ShareButton from '../../components/button/ShareButton';
@@ -31,11 +30,10 @@ const My_notes_page = () => {
     { value: localNotes.length.toString(), label: 'Total items' },
     { value: localNotes.reduce((sum, note) => sum + (note.views || 0), 0).toString(), label: 'Total views' },
     { value: localNotes.reduce((sum, note) => sum + (note.like_count || 0), 0).toString(), label: 'Total likes' }
-  ]
+  ];
 
   const filteredAndSortedNotes = useMemo(() => {
     let filtered = [...localNotes];
-
     let sorted = [...filtered];
     switch (sortBy) {
       case 'date_created':
@@ -53,7 +51,6 @@ const My_notes_page = () => {
       default:
         break;
     }
-
     return sorted;
   }, [localNotes, searchQuery, sortBy]);
 
@@ -85,49 +82,54 @@ const My_notes_page = () => {
         <div className="absolute inset-0 backdrop-blur-sm bg-white/30 z-10 pointer-events-none" />
       )}
 
-      <div className='px-8 py-6'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
+      <div className='px-4 sm:px-8 py-6'>
+        {/* Stats row */}
+        <div className='grid grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8'>
           {stats.map((stat, index) => (
-            <div key={index} className='bg-white rounded-xl p-6 shadow-sm'>
-              <div className='text-4xl font-semibold mb-2'>{stat.value}</div>
-              <div className='text-gray-600'>{stat.label}</div>
+            <div key={index} className='bg-white rounded-xl p-4 sm:p-6 shadow-sm'>
+              <div className='text-2xl sm:text-4xl font-semibold mb-1 sm:mb-2'>{stat.value}</div>
+              <div className='text-gray-600 text-xs sm:text-sm'>{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        {/* Notes grid */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6'>
           {filteredAndSortedNotes.map((note) => (
             <div
               key={note._id || note.id}
-              className='bg-white rounded-xl p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
+              className='bg-white rounded-xl p-4 sm:p-6 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow'
               onClick={() => handleCardClick(note)}
             >
-              <h3 className='text-lg font-semibold text-gray-800 mb-3 break-all'>{note.title}</h3>
+              {/* Title */}
+              <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 break-words line-clamp-2'>{note.title}</h3>
 
-              <div className='flex items-center gap-2 mb-3'>
+              {/* Author */}
+              <div className='flex items-center gap-2 mb-3 min-w-0'>
                 {note.author_profile_picture_url ? (
                   <img
                     src={getMediaUrl(note.author_profile_picture_url)}
                     alt={note.author_username}
-                    className="w-6 h-6 rounded-full object-cover"
+                    className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold'>
+                  <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0'>
                     {note.author_username?.[0]?.toUpperCase() || 'U'}
                   </div>
                 )}
-                <span className='text-sm font-medium text-gray-700 flex items-center gap-2'>
-                  {note.author_username || 'Me'}
+                <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0 truncate'>
+                  <span className='truncate'>{note.author_username || 'Me'}</span>
                   <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
                 </span>
               </div>
 
+              {/* Body + thumbnail */}
               <div className="flex gap-3 mb-4 flex-grow">
-                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
+                <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-words'>
                   {note.text}
                 </p>
                 {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
                     <img
                       src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
                       alt="Thumbnail"
@@ -137,7 +139,8 @@ const My_notes_page = () => {
                 )}
               </div>
 
-              {(note.file_paths?.length > 0) && (
+              {/* Attachments badge */}
+              {note.file_paths?.length > 0 && (
                 <div className='mb-4'>
                   <span className='text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>
                     📎 {note.file_paths.length} Attachment(s)
@@ -145,29 +148,31 @@ const My_notes_page = () => {
                 </div>
               )}
 
-              <div className='flex flex-wrap gap-2 mb-4'>
-                {note.tags?.map((tag, tagIndex) => (
-                  <span
-                    key={tagIndex}
-                    className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium'
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
+              {/* Tags */}
+              {note.tags?.length > 0 && (
+                <div className='flex flex-wrap gap-2 mb-4'>
+                  {note.tags.map((tag, tagIndex) => (
+                    <span
+                      key={tagIndex}
+                      className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium whitespace-nowrap'
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <div className='border-t border-gray-200 mb-4'></div>
 
-              <div className='flex items-center justify-between text-sm text-gray-600'>
-                <div className='flex items-center gap-4'>
-
-                  {/* REPLACED WITH NEW LIKE BUTTON COMPONENT */}
+              {/* Actions */}
+              <div className='flex items-center justify-between text-sm text-gray-600 gap-2'>
+                {/* Stats */}
+                <div className='flex items-center gap-3 min-w-0'>
                   <LikeButton
                     targetId={note._id || note.id}
                     initialIsLiked={note.is_liked}
                     initialLikesCount={note.like_count || 0}
                     onLikeSuccess={(id, isLiked) => {
-                      // Keep local notes updated so the total stats at the top recalculate properly
                       setLocalNotes(prev => prev.map(n => {
                         if ((n._id || n.id) === id) {
                           return {
@@ -180,25 +185,25 @@ const My_notes_page = () => {
                       }));
                     }}
                   />
-
                   <div className='flex items-center gap-1'>
-                    <MessageCircle size={16} />
-                    <span>{note.comments_count || 0}</span>
+                    <MessageCircle size={15} />
+                    <span className='text-xs sm:text-sm'>{note.comments_count || 0}</span>
                   </div>
                   <div className='flex items-center gap-1'>
-                    <Eye size={16} />
-                    <span>{note.views || 0}</span>
+                    <Eye size={15} />
+                    <span className='text-xs sm:text-sm'>{note.views || 0}</span>
                   </div>
                 </div>
-                <div className='flex items-center gap-2'>
+
+                {/* Action buttons */}
+                <div className='flex items-center gap-2 flex-shrink-0'>
                   <button
                     className='hover:text-gray-800 transition'
                     onClick={(e) => handleEdit(note, e)}
                   >
-                    <FaRegEdit size={16} />
+                    <FaRegEdit size={15} />
                   </button>
 
-                  {/* REPLACED WITH NEW DELETE BUTTON COMPONENT */}
                   <DeleteButton
                     targetId={note._id || note.id}
                     itemName="Note"
@@ -212,9 +217,9 @@ const My_notes_page = () => {
                     onClick={(e) => handleBookmark(note, e)}
                   >
                     {isBookmarked(note._id || note.id) ? (
-                      <BsBookmarkDashFill size={16} />
+                      <BsBookmarkDashFill size={15} />
                     ) : (
-                      <BsBookmarkDash size={16} />
+                      <BsBookmarkDash size={15} />
                     )}
                   </button>
 
@@ -228,11 +233,15 @@ const My_notes_page = () => {
             </div>
           ))}
         </div>
-      </div>
 
-      {/* The entire Delete Confirmation Modal code block has been completely removed! */}
+        {filteredAndSortedNotes.length === 0 && !loading && (
+          <div className='w-full flex justify-center py-20'>
+            <p className='font-["Inter"] text-xl text-gray-500'>No notes found.</p>
+          </div>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
 export default My_notes_page
