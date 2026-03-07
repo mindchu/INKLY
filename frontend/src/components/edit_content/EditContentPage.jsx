@@ -11,6 +11,7 @@ const EditContentPage = () => {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -66,9 +67,12 @@ const EditContentPage = () => {
     };
 
     const handleCancel = () => {
-        if (window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-            navigate(-1);
-        }
+        setShowCancelModal(true);
+    };
+
+    const handleConfirmCancel = () => {
+        setShowCancelModal(false);
+        navigate(-1);
     };
 
     useEffect(() => {
@@ -125,6 +129,37 @@ const EditContentPage = () => {
 
                 </div>
             </div>
+            {showCancelModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-[#E3E8D9]">
+                <div className="flex items-center text-center justify-center gap-3 mb-4 text-[#C85A5A]">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 className="text-lg font-semibold text-[#2C3E28]">Discard Changes?</h3>
+                </div>
+                
+                <p className="text-[#7A8A73] mb-6 text-center">
+                    Are you sure you want to cancel? All unsaved changes will be lost forever.
+                </p>
+
+                <div className="flex gap-3">
+                    <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="flex-1 px-4 py-2 border border-[#D4D9C6] text-[#577F4E] rounded-md hover:bg-[#F5F7EF] transition-colors font-medium"
+                    >
+                    Keep Editing
+                    </button>
+                    <button
+                    onClick={handleConfirmCancel}
+                    className="flex-1 px-4 py-2 bg-[#C85A5A] text-white rounded-md hover:bg-[#A84848] transition-colors font-medium shadow-sm"
+                    >
+                    Discard
+                    </button>
+                </div>
+                </div>
+            </div>
+            )}
         </div>
     );
 };
