@@ -131,7 +131,7 @@ const Interests_page = () => {
                                     Add
                                 </button>
                             </div>
-
+                            <br />
                             {/* Suggestions Dropdown */}
                             {tagInput && filteredSuggestions.length > 0 && (
                                 <TagsChipAdd tags={filteredSuggestions} handleAddTag={handleAddTag} interests={userInterests} />
