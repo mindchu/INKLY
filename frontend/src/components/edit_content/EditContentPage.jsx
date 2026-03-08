@@ -322,7 +322,7 @@ const EditContentPage = () => {
                                 <p className="text-xs sm:text-sm font-medium text-[#577F4E]">Current Files:</p>
                                 {existingAttachments.map((filePath, index) => (
                                     <div key={`existing-${index}`} className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 bg-[#E8F0E5] rounded-lg border border-[#C7D9C1] min-w-0 overflow-hidden'>
-                                        <p className='w-full min-w-0 overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] truncate'>{filePath.split('/').pop()}</p>
+                                        <p className='w-full min-w-0 max-w-full overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] break-all sm:truncate'>{filePath.split('/').pop()}</p>
                                         <button onClick={() => handleRemoveExistingAttachment(filePath)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium shrink-0 sm:self-center'>
                                             Remove
                                         </button>
@@ -336,7 +336,7 @@ const EditContentPage = () => {
                                 <p className="text-xs sm:text-sm font-medium text-[#577F4E]">New Files to Upload:</p>
                                 {attachments.map((file, index) => (
                                     <div key={`new-${index}`} className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 bg-[#F5F7EF] rounded-lg border border-[#E3E8D9] min-w-0 overflow-hidden'>
-                                        <p className='w-full min-w-0 overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] truncate'>{file.name}</p>
+                                        <p className='w-full min-w-0 max-w-full overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] break-all sm:truncate'>{file.name}</p>
                                         <button onClick={() => handleRemoveNewAttachment(index)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium shrink-0 sm:self-center'>
                                             Remove
                                         </button>
