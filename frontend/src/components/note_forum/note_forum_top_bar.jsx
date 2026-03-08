@@ -4,9 +4,7 @@ import { RiSearch2Line } from "react-icons/ri";
 import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
 import { IoHeartOutline, IoClose } from "react-icons/io5";
 import { BiCommentDetail } from "react-icons/bi";
-import { FiMenu } from "react-icons/fi";
 import { useSortContext } from '../../context/SortContext';
-import { useSidebar } from '../../context/SidebarContext';
 
 const SORT_OPTIONS = [
   { key: 'views',    icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
@@ -17,7 +15,6 @@ const SORT_OPTIONS = [
 
 const Note_forum_top_bar = () => {
   const { sortBy, setSortBy, localSearch, setLocalSearch, fetchSearch, includeTags, setIncludeTags, excludeTags, setExcludeTags } = useSortContext();
-  const { toggleSidebar } = useSidebar();
 
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
@@ -50,9 +47,6 @@ const Note_forum_top_bar = () => {
       {/* ── Header row ─────────────────────────────────────────── */}
       <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
         <div className='flex flex-row items-center gap-3'>
-          <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
-            <FiMenu size={24} className="text-[#3E4A34]" />
-          </button>
           <BiMessageSquare size={32} className='opacity-70' />
           <p className='font-["Julius_Sans_One"] text-[28px] md:text-[32px] text-[#3E4A34] font-thin select-none'>NOTE FORUM</p>
         </div>

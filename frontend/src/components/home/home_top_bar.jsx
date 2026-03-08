@@ -3,9 +3,7 @@ import { PiBookOpenTextLight } from "react-icons/pi";
 import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
 import { IoHeartOutline, IoClose, IoSparkles } from "react-icons/io5";
 import { BiCommentDetail } from "react-icons/bi";
-import { FiMenu } from "react-icons/fi";
 import { useSortContext } from '../../context/SortContext';
-import { useSidebar } from '../../context/SidebarContext';
 
 const SORT_OPTIONS = [
   { key: 'recommended', icon: <IoSparkles size={12} />,           label: 'Recommended' },
@@ -17,7 +15,6 @@ const SORT_OPTIONS = [
 
 const Home_Top_bar = () => {
   const { sortBy, setSortBy, includeTags, setIncludeTags, excludeTags, setExcludeTags } = useSortContext();
-  const { toggleSidebar } = useSidebar();
 
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
@@ -47,9 +44,6 @@ const Home_Top_bar = () => {
       {/* ── Header row ─────────────────────────────────────────── */}
       <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
         <div className='flex flex-row items-center gap-3'>
-          <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
-            <FiMenu size={24} className="text-[#3E4A34]" />
-          </button>
           <PiBookOpenTextLight size={38} className='opacity-70' />
           <p className='font-["Julius_Sans_One"] text-[28px] md:text-[32px] font-thin text-[#3E4A34] select-none'>HOME</p>
         </div>
@@ -57,7 +51,7 @@ const Home_Top_bar = () => {
 
       {/* ── Sort row ───────────────────────────────────────────── */}
       <div className='mt-2 ml-4 md:ml-5 pr-4 md:pr-8'>
-        {/* Desktop — unchanged */}
+        {/* Desktop */}
         <div className='hidden md:flex flex-row items-center gap-3'>
           <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Sort by:</p>
           <div className='flex flex-row gap-2'>
@@ -76,7 +70,7 @@ const Home_Top_bar = () => {
           </div>
         </div>
 
-        {/* Mobile — wraps into 2 rows */}
+        {/* Mobile */}
         <div className='md:hidden'>
           <p className='text-[#124C09] font-["Inter"] text-[13px] font-medium mb-1.5 select-none'>Sort by:</p>
           <div className='flex flex-row flex-wrap gap-1.5'>
@@ -97,7 +91,7 @@ const Home_Top_bar = () => {
       </div>
 
       {/* ── Filter row ─────────────────────────────────────────── */}
-      {/* Desktop — unchanged */}
+      {/* Desktop */}
       <div className='hidden md:block'>
         <div className='mt-3 ml-5 flex flex-row items-center gap-6 pb-2 pr-8 flex-wrap'>
           <p className='text-[#124C09] font-["Inter"] text-[18px] select-none'>Filter by:</p>
@@ -140,7 +134,7 @@ const Home_Top_bar = () => {
         </div>
       </div>
 
-      {/* Mobile — always visible, stacked */}
+      {/* Mobile */}
       <div className='md:hidden mt-3 ml-4 pr-4 pb-1 flex flex-col gap-2'>
         <p className='text-[#124C09] font-["Inter"] text-[13px] font-medium select-none'>Filter by:</p>
 
