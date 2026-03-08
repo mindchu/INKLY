@@ -11,12 +11,27 @@ import { useSidebar } from '../../context/SidebarContext';
 
 const Search_top_bar = () => {
     const [showFilters, setShowFilters] = useState(false);
-    const [activeTab, setActiveTab] = useState('all');
     const { query, setQuery, performSearch, filters, setFilters, allTags } = useSearch();
     const { toggleSidebar } = useSidebar();
 
     const [filterTagInput, setFilterTagInput] = useState('');
     const [excludeTagInput, setExcludeTagInput] = useState('');
+
+    const handleTabChange = (tab) => {
+        let type = 'all';
+        if (tab === 'notes') type = 'post';
+        if (tab === 'discussion') type = 'discussion';
+
+        setFilters({ ...filters, type });
+    };
+
+    const getActiveTab = () => {
+        if (filters.type === 'post') return 'notes';
+        if (filters.type === 'discussion') return 'discussion';
+        return 'all';
+    };
+
+    const activeTab = getActiveTab();
 
     const filteredSuggestions = allTags ? allTags.filter(tag =>
         tag.name.toLowerCase().includes(filterTagInput.toLowerCase()) &&
@@ -90,11 +105,10 @@ const Search_top_bar = () => {
                                 <button
                                     key={value}
                                     onClick={() => setFilters({ ...filters, sort: value })}
-                                    className={`flex flex-row items-center gap-1.5 px-3 sm:px-4 h-[36px] rounded-full transition-all text-sm ${
-                                        filters.sort === value
-                                            ? 'bg-[#3E4A34] text-white'
-                                            : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
-                                    }`}
+                                    className={`flex flex-row items-center gap-1.5 px-3 sm:px-4 h-[36px] rounded-full transition-all text-sm ${filters.sort === value
+                                        ? 'bg-[#3E4A34] text-white'
+                                        : 'bg-white border border-[#577F4E] text-gray-600 hover:bg-gray-50'
+                                        }`}
                                 >
                                     {icon}
                                     <span className='font-["Inter"] text-[13px] sm:text-[14px] font-medium'>{label}</span>
@@ -192,12 +206,11 @@ const Search_top_bar = () => {
                     {['all', 'notes', 'discussion'].map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`pb-1 font-["Inter"] text-[15px] sm:text-[18px] whitespace-nowrap capitalize ${
-                                activeTab === tab
+                            onClick={() => handleTabChange(tab)}
+                            className={`pb-1 font-["Inter"] text-[15px] sm:text-[18px] whitespace-nowrap capitalize ${activeTab === tab
                                     ? 'text-[#577F4E] border-b-2 border-[#577F4E]'
                                     : 'text-gray-500'
-                            }`}
+                                }`}
                         >
                             {tab === 'all' ? 'All results' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
