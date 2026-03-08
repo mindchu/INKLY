@@ -118,6 +118,17 @@ const AdminTerminalPage = () => {
         }
     }, [deleteTagName, popularTags]);
 
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+    });
+
+const closeConfirmModal = () => {
+    setConfirmModal({ ...confirmModal, isOpen: false });
+};
+
     const handleAddTag = () => {
         const trimmed = tagInput.trim();
         if (trimmed && !sourceTags.includes(trimmed)) {
@@ -167,12 +178,18 @@ const AdminTerminalPage = () => {
         }
     };
 
-    const handleDeleteContent = async (e) => {
+    const handleDeleteContent = (e) => {
         e.preventDefault();
-        if (!window.confirm(`Are you sure you want to delete content ID: ${deleteContentId}? This action cannot be undone.`)) {
-            return;
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Content?',
+            message: `Are you sure you want to delete content ID: ${deleteContentId}? This action cannot be undone.`,
+            onConfirm: executeDeleteContent
+        });
+    };
 
+    const executeDeleteContent = async () => {
+        closeConfirmModal();
         setDeleteLoading(true);
         setDeleteMessage('');
         setDeleteError('');
@@ -188,6 +205,7 @@ const AdminTerminalPage = () => {
         }
     };
 
+    // --- TAG CREATION ---
     const handleCreateTag = async (e) => {
         e.preventDefault();
         setCreateTagLoading(true);
@@ -208,19 +226,24 @@ const AdminTerminalPage = () => {
         }
     };
 
-    const handleDeleteTag = async (e) => {
+    // --- TAG DELETION ---
+    const handleDeleteTag = (e) => {
         e.preventDefault();
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Tag?',
+            message: `Are you sure you want to delete the tag '${deleteTagName}'? This will remove it from all usage and cannot be undone.`,
+            onConfirm: executeDeleteTag
+        });
+    };
 
-        if (!window.confirm(`Are you sure you want to delete the tag '${deleteTagName}'? This will remove it from all usage and cannot be undone.`)) {
-            return;
-        }
-
+    const executeDeleteTag = async () => {
+        closeConfirmModal();
         setDeleteTagLoading(true);
         setDeleteTagMessage('');
         setDeleteTagError('');
 
         try {
-            // Encode the tag name in case it contains special characters like #
             const encodedTagName = encodeURIComponent(deleteTagName.trim());
             const response = await api.delete(`/tags/${encodedTagName}`);
             setDeleteTagMessage(response.message || 'Tag deleted successfully!');
@@ -233,12 +256,19 @@ const AdminTerminalPage = () => {
         }
     };
 
-    const handleDeleteComment = async (e) => {
+    // --- COMMENT DELETION ---
+    const handleDeleteComment = (e) => {
         e.preventDefault();
-        if (!window.confirm(`Are you sure you want to delete comment ID: ${deleteCommentId}? This action cannot be undone.`)) {
-            return;
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Comment?',
+            message: `Are you sure you want to delete comment ID: ${deleteCommentId}? This action cannot be undone.`,
+            onConfirm: executeDeleteComment
+        });
+    };
 
+    const executeDeleteComment = async () => {
+        closeConfirmModal();
         setDeleteCommentLoading(true);
         setDeleteCommentMessage('');
         setDeleteCommentError('');
@@ -505,7 +535,7 @@ const AdminTerminalPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Delete Content Card */}
                         <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E3E8D9] flex flex-col">
-                            <h3 className="text-xl font-bold mb-2 text-[#3A5335]">Remove Post/Discussion</h3>
+                            <h3 className="text-xl font-bold mb-2 text-[#3A5335]">Remove Note/Discussion</h3>
                             <p className="text-sm text-[#7A8A73] mb-6">Purge any primary content using its specific Identifier.</p>
 
                             {deleteMessage && <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-sm">{deleteMessage}</div>}
@@ -578,6 +608,36 @@ const AdminTerminalPage = () => {
                     </div>
                 </section>
             </div>
+            {/* --- Dynamic Confirmation Modal --- */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+                    <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-sm p-5 sm:p-6 border border-[#E3E8D9]">
+                        <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                            <svg className="w-5 h-5 text-[#C85A5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <h3 className="text-base sm:text-lg font-semibold text-[#2C3E28]">{confirmModal.title}</h3>
+                        </div>
+                        <p className="text-[#7A8A73] mb-4 sm:mb-6 text-center text-sm">
+                            {confirmModal.message}
+                        </p>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={closeConfirmModal} 
+                                className="flex-1 px-4 py-2.5 border border-[#D4D9C6] text-[#577F4E] rounded-xl hover:bg-[#F5F7EF] transition-colors font-medium text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmModal.onConfirm} 
+                                className="flex-1 px-4 py-2.5 bg-[#C85A5A] text-white rounded-xl hover:bg-[#A84848] transition-colors font-medium text-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
