@@ -27,6 +27,16 @@ const Bookmarks_page_content = () => {
         navigate(`/content/${id}`, { state: { from: location.pathname } });
     };
 
+    const handleFollowChange = (authorId, isNowFollowing) => {
+        setBookmarkedNotes(prevNotes =>
+            prevNotes.map(note =>
+                note.author_id === authorId
+                    ? { ...note, is_following: isNowFollowing }
+                    : note
+            )
+        );
+    };
+
     const handleLike = async (postId, e) => {
         e.stopPropagation();
         try {
@@ -152,7 +162,11 @@ const Bookmarks_page_content = () => {
                             )}
                             <span className='text-sm font-medium text-gray-700 flex items-center gap-2'>
                                 {note.author_username}
-                                <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                <FollowChip
+                                    authorId={note.author_id}
+                                    initialIsFollowing={note.is_following}
+                                    onFollowChange={handleFollowChange}
+                                />
                             </span>
                         </div>
 

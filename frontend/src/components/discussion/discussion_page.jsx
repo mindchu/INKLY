@@ -60,7 +60,7 @@ const Discussion_page = () => {
     };
 
     const handleFollowChange = (authorId, isNowFollowing) => {
-        setNotes(prevNotes =>
+        setContent(prevNotes =>
             prevNotes.map(note =>
                 note.author_id === authorId
                     ? { ...note, is_following: isNowFollowing }
