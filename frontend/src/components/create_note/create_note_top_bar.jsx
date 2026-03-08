@@ -10,10 +10,7 @@ const Create_note_top_bar = () => {
         <div className='w-full bg-white shadow-md py-3'>
             <div className='flex flex-row gap-3 items-center mt-2 mx-4 sm:mx-5 justify-between'>
                 <div className='flex flex-row items-center gap-3'>
-                    <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
-                        <FiMenu size={24} className="text-[#3E4A34]" />
-                    </button>
-                    <RiStickyNoteAddLine size={28} className='opacity-70 hidden sm:block' />
+                    <RiStickyNoteAddLine size={28} className='opacity-70' />
                     <p className='font-["Inter"] text-[20px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>CREATE NEW NOTES</p>
                 </div>
                 <button
