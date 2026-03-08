@@ -11,8 +11,8 @@ import { getMediaUrl } from '../../config';
 import { TagsChipView } from '../common/TagsChip';
 
 
-const Bookmarks_page_content = ({ sortBy }) => {
-    const { bookmarkedNotes, toggleBookmark, loading, setBookmarkedNotes } = useBookmarks();
+const Bookmarks_page_content = () => {
+    const { bookmarkedNotes, toggleBookmark, loading, setBookmarkedNotes, includeTags, excludeTags, sortBy } = useBookmarks();
 
     const formatViews = (views) => {
         if (views >= 1000) {
@@ -45,25 +45,42 @@ const Bookmarks_page_content = ({ sortBy }) => {
     const sortedNotes = useMemo(() => {
         let sorted = [...bookmarkedNotes];
 
+        // ── Tag filtering ─────────────────────────────────────────
+        if (includeTags.length > 0) {
+            sorted = sorted.filter(note =>
+                includeTags.every(tag =>
+                    (note.tags || []).some(t => t.toLowerCase() === tag.toLowerCase())
+                )
+            );
+        }
+        if (excludeTags.length > 0) {
+            sorted = sorted.filter(note =>
+                !excludeTags.some(tag =>
+                    (note.tags || []).some(t => t.toLowerCase() === tag.toLowerCase())
+                )
+            );
+        }
+
+        // ── Sorting ───────────────────────────────────────────────
         switch (sortBy) {
-            case 'date_created':
-                sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            case 'views':
+                sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
                 break;
-            case 'most_recent':
+            case 'comments':
+                sorted.sort((a, b) => (b.comments_count || 0) - (a.comments_count || 0));
+                break;
+            case 'likes':
+                sorted.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+                break;
+            case 'date':
                 sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                break;
-            case 'title_az':
-                sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-                break;
-            case 'title_za':
-                sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
                 break;
             default:
                 break;
         }
 
         return sorted;
-    }, [bookmarkedNotes, sortBy]);
+    }, [bookmarkedNotes, sortBy, includeTags, excludeTags]);
 
     if (loading) {
         return (
@@ -80,6 +97,18 @@ const Bookmarks_page_content = ({ sortBy }) => {
                     <BsBookmarkDashFill size={64} className='text-gray-300 mx-auto mb-4' />
                     <h2 className='text-2xl font-semibold text-gray-600 mb-2'>No Bookmarks Yet</h2>
                     <p className='text-gray-500'>Start bookmarking notes to see them here!</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (sortedNotes.length === 0) {
+        return (
+            <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
+                <div className='text-center'>
+                    <BsBookmarkDashFill size={64} className='text-gray-300 mx-auto mb-4' />
+                    <h2 className='text-2xl font-semibold text-gray-600 mb-2'>No Results</h2>
+                    <p className='text-gray-500'>No bookmarks match your current filters.</p>
                 </div>
             </div>
         );

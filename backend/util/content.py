@@ -65,6 +65,61 @@ def _make_case_insensitive_tag_query(tags: List[str]) -> List[re.Pattern]:
     """Convert a list of tag strings to case-insensitive regex patterns."""
     return [re.compile(f'^{re.escape(tag)}$', re.IGNORECASE) for tag in tags]
 
+def fetch_and_format(query, user_id, content_type, following_ids):
+    """
+    Fetch posts and discussions matching query, then annotate each doc
+    with like/bookmark/following status and author info.
+    Now a module-level function — caller must pass user_id, content_type, following_ids explicitly.
+    """
+    posts = []
+    discussions = []
+    
+    if not content_type or content_type == 'post':
+        posts = list(db.posts.find(query))
+        for p in posts: p['type'] = 'post'
+    
+    if not content_type or content_type == 'discussion':
+        discussions = list(db.discussions.find(query))
+        for d in discussions: d['type'] = 'discussion'
+    
+    user_bookmarks = []
+    if user_id:
+        user_doc = db.users.find_one({"google_id": user_id}, {"bookmark_ids": 1})
+        if user_doc:
+            user_bookmarks = user_doc.get('bookmark_ids', [])
+
+    all_content = posts + discussions
+    
+    content_ids = [str(doc['_id']) for doc in all_content]
+    user_liked_set = set()
+    
+    if user_id and content_ids:
+        liked_docs = db.likes.find({
+            "user_id": user_id, 
+            "content_id": {"$in": content_ids}
+        })
+        user_liked_set = {ld["content_id"] for ld in liked_docs}
+
+    for doc in all_content:
+        doc_id_str = str(doc['_id'])
+        doc['_id'] = doc_id_str
+        doc['like_count'] = doc.get('like_count', 0)
+        doc['comments_count'] = len(doc.get('comment_ids', []))
+        doc['is_liked'] = doc_id_str in user_liked_set
+        doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
+        doc['is_following'] = doc.get('author_id') in following_ids if user_id else False
+        doc.pop('liked_by_user_ids', None)
+        
+        if 'tags' not in doc:
+            doc['tags'] = []
+        
+        author = db.users.find_one({"google_id": doc.get('author_id')}, {"username": 1, "profile_picture_url": 1})
+        doc['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
+        doc['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
+        
+    return all_content
+
+
 def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', limit: int = 10, skip: int = 0, filter_tags: Optional[List[str]] = None, exclude_tags: Optional[List[str]] = None, content_type: Optional[str] = None) -> list:
     interested_tags = []
     following_ids = []
@@ -75,59 +130,7 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
             interested_tags = user_doc.get('interested_tags', [])
             following_ids = user_doc.get('following_ids', [])
 
-    def fetch_and_format(query):
-        posts = []
-        discussions = []
-        
-        if not content_type or content_type == 'post':
-            posts = list(db.posts.find(query))
-            for p in posts: p['type'] = 'post'
-        
-        if not content_type or content_type == 'discussion':
-            discussions = list(db.discussions.find(query))
-            for d in discussions: d['type'] = 'discussion'
-        
-        user_bookmarks = []
-        user_following = []
-        if user_id:
-            user_doc = db.users.find_one({"google_id": user_id}, {"bookmark_ids": 1, "following_ids": 1})
-            if user_doc:
-                user_bookmarks = user_doc.get('bookmark_ids', [])
-                user_following = user_doc.get('following_ids', [])
-
-        all_content = posts + discussions
-        
-        content_ids = [str(doc['_id']) for doc in all_content]
-        user_liked_set = set()
-        
-        if user_id and content_ids:
-            liked_docs = db.likes.find({
-                "user_id": user_id, 
-                "content_id": {"$in": content_ids}
-            })
-            user_liked_set = {ld["content_id"] for ld in liked_docs}
-
-        for doc in all_content:
-            doc_id_str = str(doc['_id'])
-            doc['_id'] = doc_id_str
-            doc['like_count'] = doc.get('like_count', 0)
-            doc['comments_count'] = len(doc.get('comment_ids', []))
-            doc['is_liked'] = doc_id_str in user_liked_set
-            doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
-            doc['is_following'] = doc.get('author_id') in following_ids if user_id else False
-            doc.pop('liked_by_user_ids', None)
-            
-            if 'tags' not in doc:
-                doc['tags'] = []
-            
-            author = db.users.find_one({"google_id": doc.get('author_id')}, {"username": 1, "profile_picture_url": 1})
-            doc['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
-            doc['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
-            
-        return all_content
-
-    # Build query — only apply explicit filter_tags and exclude_tags
-    # interests/following are used for boosting, NOT filtering
+    # Build query
     query = {}
 
     if filter_tags:
@@ -139,7 +142,8 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
         else:
             query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
-    content = fetch_and_format(query)
+    # Pass all needed variables explicitly to the module-level function
+    content = fetch_and_format(query, user_id, content_type, following_ids)
 
     # Sorting
     if sort_by == 'likes':
@@ -148,28 +152,21 @@ def get_recommended_content(user_id: Optional[str], sort_by: str = 'recent', lim
         content.sort(key=lambda x: x.get('views', 0), reverse=True)
     elif sort_by == 'comments':
         content.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
-    else:  # date / recent / recommended — base sort by date, boost will reorder
+    else:
         content.sort(key=lambda x: x.get('created_at', ''), reverse=True)
 
     # Boost: only apply when sort is 'recommended'
-    # Score each doc by number of matching interest tags + following
-    # Higher score = more relevant to user, floats to top
-    # Score 0 = no match, still shown but after boosted content
     if sort_by == 'recommended' and user_id and (interested_tags or following_ids):
         interested_tags_lower = [t.lower() for t in interested_tags]
 
         def boost_score(doc):
             score = 0
-            # Following gets a strong flat boost
             if doc.get('author_id') in following_ids:
                 score += 100
-            # Each matching interest tag adds 1 point
             doc_tags_lower = [t.lower() for t in doc.get('tags', [])]
             score += sum(1 for t in interested_tags_lower if t in doc_tags_lower)
             return score
 
-        # Stable sort: items with score > 0 float up, ordered by score desc
-        # Items with score 0 stay at the bottom in their original sort order
         boosted = sorted(
             [doc for doc in content if boost_score(doc) > 0],
             key=boost_score,
@@ -257,7 +254,8 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
 
 def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all", skip: int = 0, limit: int = 10) -> List[Dict[str, Any]]:
     query: Dict[str, Any] = {}
-    
+    following_ids = []
+
     if scope == "owned" and user_id:
         query["author_id"] = user_id
     elif scope == "bookmarks" and user_id:
@@ -269,6 +267,10 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         following_ids = user_doc.get('following_ids', []) if user_doc else []
         query["author_id"] = {"$in": following_ids}
 
+    if user_id and not following_ids:
+        user_doc = db.users.find_one({"google_id": user_id}, {"following_ids": 1})
+        following_ids = user_doc.get('following_ids', []) if user_doc else []
+
     if tags_filter:
         query["tags"] = {"$all": _make_case_insensitive_tag_query(tags_filter)}
 
@@ -278,42 +280,8 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         else:
             query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
-    def fetch_with_query(q_obj):
-        posts = list(db.posts.find(q_obj))
-        discussions = list(db.discussions.find(q_obj))
-        
-        user_bookmarks = []
-        user_following = []
-        if user_id:
-            user_doc = db.users.find_one({"google_id": user_id}, {"bookmark_ids": 1, "following_ids": 1})
-            if user_doc:
-                user_bookmarks = user_doc.get('bookmark_ids', [])
-                user_following = user_doc.get('following_ids', [])
-
-        all_content = posts + discussions
-        
-        content_ids = [str(doc['_id']) for doc in all_content]
-        user_liked_set = set()
-        if user_id and content_ids:
-            liked_docs = db.likes.find({"user_id": user_id, "content_id": {"$in": content_ids}})
-            user_liked_set = {ld["content_id"] for ld in liked_docs}
-
-        for doc in all_content:
-            doc_id_str = str(doc['_id'])
-            doc['_id'] = doc_id_str
-            doc['like_count'] = doc.get('like_count', 0)
-            doc['comments_count'] = len(doc.get('comment_ids', []))
-            doc['is_liked'] = doc_id_str in user_liked_set
-            doc['is_bookmarked'] = doc_id_str in user_bookmarks if user_id else False
-            doc['is_following'] = doc.get('author_id') in user_following if user_id else False
-            doc.pop('liked_by_user_ids', None)
-            
-            author = db.users.find_one({"google_id": doc.get('author_id')}, {"username": 1, "profile_picture_url": 1})
-            doc['author_username'] = author.get('username', 'Unknown') if author else 'Unknown'
-            doc['author_profile_picture_url'] = author.get('profile_picture_url') if author else None
-        return all_content
-
-    results = fetch_with_query(query)
+    # Use the module-level fetch_and_format, passing all needed variables
+    results = fetch_and_format(query, user_id, content_type=None, following_ids=following_ids)
 
     if q and results:
         query_embedding = embeddings.embedding_manager.generate_embedding(q)
@@ -337,7 +305,16 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
                 filtered_results.append(doc)
                 
         results = filtered_results
-        results.sort(key=lambda x: x.get('search_score', 0), reverse=True)
+
+        # Respect explicit sort_by even during search; default to relevance score
+        if sort_by == 'likes':
+            results.sort(key=lambda x: x.get('like_count', 0), reverse=True)
+        elif sort_by == 'views':
+            results.sort(key=lambda x: x.get('views', 0), reverse=True)
+        elif sort_by == 'comments':
+            results.sort(key=lambda x: x.get('comments_count', 0), reverse=True)
+        else:
+            results.sort(key=lambda x: x.get('search_score', 0), reverse=True)
     else:
         if sort_by == 'likes':
             results.sort(key=lambda x: x.get('like_count', 0), reverse=True)
@@ -583,9 +560,6 @@ def _delete_comment_recursive(comment_id: str) -> None:
     db.likes.delete_many({"content_id": comment_id})
 
 def update_content_in_db(content_id: str, updated_data: dict) -> bool:
-    """
-    Updates the document in either the posts or discussions collection.
-    """
     result = db.posts.update_one(
         {"_id": content_id}, 
         {"$set": updated_data}

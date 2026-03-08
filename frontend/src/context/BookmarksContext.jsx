@@ -17,12 +17,35 @@ export const BookmarksProvider = ({ children }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [localSearch, setLocalSearch] = useState('');
     const [loading, setLoading] = useState(false);
+    const [includeTags, setIncludeTags] = useState([]);
+    const [excludeTags, setExcludeTags] = useState([]);
+    const [sortBy, setSortBy] = useState('date');
     const { profileData } = useProfileContext();
     const lastFetchedId = React.useRef(null);
-
     const lastFetchedSearch = React.useRef(null);
 
-    const fetchBookmarks = async (force = false) => {
+    // Map frontend sort keys → backend sort_by values
+    const getSortParam = (sort) => {
+        switch (sort) {
+            case 'views':    return 'views';
+            case 'comments': return 'comments';
+            case 'likes':    return 'likes';
+            case 'date':     return 'recent';
+            default:         return 'recent';
+        }
+    };
+
+    const buildParams = (query = '', sort = sortBy, incTags = includeTags, excTags = excludeTags) => {
+        const params = new URLSearchParams();
+        if (query.trim()) params.append('q', query.trim());
+        params.append('sort_by', getSortParam(sort));
+        params.append('scope', 'bookmarks');
+        incTags.forEach(tag => params.append('tags', tag));
+        excTags.forEach(tag => params.append('exclude_tags', tag));
+        return params.toString();
+    };
+
+    const fetchBookmarks = async (force = false, sort = sortBy, incTags = includeTags, excTags = excludeTags) => {
         const currentId = profileData?.google_id || profileData?._id;
         if (!currentId) {
             setBookmarkedNotes([]);
@@ -36,7 +59,7 @@ export const BookmarksProvider = ({ children }) => {
         lastFetchedSearch.current = null;
         setLoading(true);
         try {
-            const response = await api.get('/search?scope=bookmarks&sort_by=recent');
+            const response = await api.get(`/search?${buildParams('', sort, incTags, excTags)}`);
             setBookmarkedNotes(response.data || []);
         } catch (error) {
             console.error('Failed to fetch bookmarks:', error);
@@ -60,12 +83,7 @@ export const BookmarksProvider = ({ children }) => {
         setLoading(true);
         setSearchQuery(query);
         try {
-            const params = new URLSearchParams();
-            params.append('q', query);
-            params.append('sort_by', 'recent');
-            params.append('scope', 'bookmarks');
-
-            const response = await api.get(`/search?${params.toString()}`);
+            const response = await api.get(`/search?${buildParams(query)}`);
             setBookmarkedNotes(response.data || []);
         } catch (error) {
             console.error('Failed to search bookmarks:', error);
@@ -74,11 +92,23 @@ export const BookmarksProvider = ({ children }) => {
         }
     };
 
+    // Re-fetch from backend whenever sort or tags change
+    useEffect(() => {
+        const currentId = profileData?.google_id || profileData?._id;
+        if (!currentId) return;
+        if (lastFetchedSearch.current) {
+            fetchSearch(lastFetchedSearch.current);
+        } else {
+            fetchBookmarks(true, sortBy, includeTags, excludeTags);
+        }
+    }, [sortBy, includeTags, excludeTags]);
+
+    // Re-fetch when profile changes
     useEffect(() => {
         if (lastFetchedSearch.current) {
             fetchSearch(lastFetchedSearch.current);
         } else {
-            fetchBookmarks()
+            fetchBookmarks();
         }
     }, [profileData]);
 
@@ -104,13 +134,20 @@ export const BookmarksProvider = ({ children }) => {
     return (
         <BookmarksContext.Provider value={{
             bookmarkedNotes,
+            setBookmarkedNotes,
             toggleBookmark,
             isBookmarked,
             searchQuery,
             localSearch,
             setLocalSearch,
             fetchSearch,
-            loading
+            loading,
+            sortBy,
+            setSortBy,
+            includeTags,
+            setIncludeTags,
+            excludeTags,
+            setExcludeTags,
         }}>
             {children}
         </BookmarksContext.Provider>
