@@ -18,33 +18,42 @@ import { getMediaUrl } from '../config';
 import { FaUserCircle } from 'react-icons/fa';
 
 
-// ── Mobile tab pages ────────────────────────────────────────────────────────
-// Page 0: no arrows (full width 4 tabs)
-// Pages 1–3: back + 4 tabs + next (where applicable)
-const TAB_PAGES = [
+// ── Mobile tab pages — same order as desktop sidebar ────────────────────────
+// Desktop: Home, Discussion, Note, Search, Following,
+//          My Note, My Discussion, Create Note, Create Discussion, Bookmark,
+//          Profile, Interests, Sign Out, [Admin]
+const BASE_TAB_PAGES = [
     [
-        { label: 'Home',       iconOff: AiOutlineHome,    iconOn: AiFillHome,         path: '/home' },
-        { label: 'Discussion', iconOff: BiChat,            iconOn: BiSolidChat,         path: '/discussion' },
-        { label: 'Search',     iconOff: RiSearch2Line,     iconOn: RiSearch2Fill,       path: '/search' },
-        { label: 'Profile',    iconOff: MdPersonOutline,   iconOn: MdPerson,            path: '/profile' },
+        { label: 'Home',       iconOff: AiOutlineHome,  iconOn: AiFillHome,      path: '/home' },
+        { label: 'Discussion', iconOff: BiChat,          iconOn: BiSolidChat,     path: '/discussion' },
+        { label: 'Note',       iconOff: PiNotepadLight,  iconOn: PiNotepadBold,   path: '/note_forum' },
+        { label: 'Search',     iconOff: RiSearch2Line,   iconOn: RiSearch2Fill,   path: '/search' },
     ],
     [
-        { label: 'Notes',     iconOff: PiNotepadLight,    iconOn: PiNotepadBold,       path: '/note_forum' },
-        { label: 'Following', iconOff: HiOutlineUsers,    iconOn: HiUsers,             path: '/following' },
-        { label: 'Bookmark',  iconOff: IoBookmarkOutline, iconOn: IoBookmark,          path: '/bookmarks' },
-        { label: 'Create',    iconOff: IoCreateOutline,   iconOn: IoCreate,            path: '/create_note' },
+        { label: 'Following',  iconOff: HiOutlineUsers,  iconOn: HiUsers,         path: '/following' },
+        { label: 'My Note',    iconOff: CgNotes,         iconOn: CgNotes,         path: '/my_notes' },
+        { label: 'My Disc.',   iconOff: BiChat,          iconOn: BiSolidChat,     path: '/my_discussions' },
+        { label: 'Create Note',iconOff: IoCreateOutline, iconOn: IoCreate,        path: '/create_note' },
     ],
     [
-        { label: 'My Notes',  iconOff: CgNotes,           iconOn: CgNotes,             path: '/my_notes' },
-        { label: 'My Disc.',  iconOff: BiChat,             iconOn: BiSolidChat,         path: '/my_discussions' },
-        { label: 'Interests', iconOff: MdInterests,        iconOn: MdInterests,         path: '/interests' },
-        { label: 'Sign Out',  iconOff: PiSignOutBold,      iconOn: PiSignOutBold,       path: null, isSignOut: true },
-    ],
-    [
-        { label: 'Admin',     iconOff: MdAdminPanelSettings, iconOn: MdAdminPanelSettings, path: '/admin', isAdmin: true },
+        { label: 'Create Disc.',iconOff: IoCreateOutline,iconOn: IoCreate,        path: '/create_discussion' },
+        { label: 'Bookmark',   iconOff: IoBookmarkOutline,iconOn: IoBookmark,     path: '/bookmarks' },
+        { label: 'Profile',    iconOff: MdPersonOutline, iconOn: MdPerson,        path: '/profile' },
+        { label: 'Interests',  iconOff: MdInterests,     iconOn: MdInterests,     path: '/interests' },
     ],
 ]
-// ───────────────────────────────────────────────────────────────────────────
+
+// Last page — User: Sign Out only
+const USER_LAST_PAGE = [
+    { label: 'Sign Out', iconOff: PiSignOutBold, iconOn: PiSignOutBold, path: null, isSignOut: true },
+]
+
+// Last page — Admin: Admin + Sign Out
+const ADMIN_LAST_PAGE = [
+    { label: 'Admin',    iconOff: MdAdminPanelSettings, iconOn: MdAdminPanelSettings, path: '/admin', isAdmin: true },
+    { label: 'Sign Out', iconOff: PiSignOutBold,         iconOn: PiSignOutBold,         path: null, isSignOut: true },
+]
+// ────────────────────────────────────────────────────────────────────────────
 
 
 const Side_bar = () => {
@@ -59,13 +68,19 @@ const Side_bar = () => {
         navigate('/signin');
     };
 
+    const visibleTabPages = [
+        ...BASE_TAB_PAGES,
+        profileData?.is_admin ? ADMIN_LAST_PAGE : USER_LAST_PAGE,
+    ];
+    const totalPages = visibleTabPages.length;
+    const currentTabs = visibleTabPages[tabPage] || visibleTabPages[0];
+
     useEffect(() => {
         if (window.innerWidth < 768) closeSidebar();
     }, [location.pathname, closeSidebar]);
 
-    // Auto-jump to correct tab page based on active route
     useEffect(() => {
-        TAB_PAGES.forEach((page, pageIdx) => {
+        visibleTabPages.forEach((page, pageIdx) => {
             if (page.some(tab => tab.path && tab.path === location.pathname)) {
                 setTabPage(pageIdx);
             }
@@ -108,12 +123,6 @@ const Side_bar = () => {
         });
     }
 
-    // Only show admin tab page if user is admin
-    const visibleTabPages = profileData?.is_admin ? TAB_PAGES : TAB_PAGES.slice(0, 3);
-    const totalPages = visibleTabPages.length;
-    const currentTabs = visibleTabPages[tabPage] || visibleTabPages[0];
-
-    // Is this the first page? → no arrows, full width
     const isFirstPage = tabPage === 0;
     const isLastPage  = tabPage === totalPages - 1;
 
@@ -238,7 +247,7 @@ const Side_bar = () => {
                             </button>
                         )}
 
-                        {/* Tabs — stretch full width on page 0, share space on others */}
+                        {/* Tabs */}
                         <div className="flex flex-1 items-stretch">
                             {currentTabs.map((tab) => {
                                 const isActive = location.pathname === tab.path;
@@ -261,11 +270,9 @@ const Side_bar = () => {
                                                         : 'text-gray-400 hover:text-gray-600'
                                         }`}
                                     >
-                                        {/* Active pill */}
                                         {isActive && !tab.isSignOut && (
                                             <span className="absolute inset-x-2 top-1 bottom-1 bg-[#EEF2E1] rounded-xl -z-0" />
                                         )}
-
                                         <span className="relative z-10">
                                             {isActive && !tab.isSignOut
                                                 ? <IconOn size={22} />
