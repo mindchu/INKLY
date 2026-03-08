@@ -84,7 +84,7 @@ const Note_forum_page = () => {
           <>
             {posts.map((post, index) => {
               const postId = post._id || post.id;
-              const isTriggerPost = index === Math.max(0, posts.length - 3);
+              const isTriggerPost = index === Math.max(0, posts.length - 5);
               const thumbFile = post.file_paths?.find(f =>
                 ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
               );

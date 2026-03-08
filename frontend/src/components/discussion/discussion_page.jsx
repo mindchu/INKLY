@@ -60,10 +60,10 @@ const Discussion_page = () => {
     };
 
     const handleFollowChange = (authorId, isNowFollowing) => {
-        setNotes(prevNotes => 
-            prevNotes.map(note => 
-                note.author_id === authorId 
-                    ? { ...note, is_following: isNowFollowing } 
+        setNotes(prevNotes =>
+            prevNotes.map(note =>
+                note.author_id === authorId
+                    ? { ...note, is_following: isNowFollowing }
                     : note
             )
         );
@@ -84,7 +84,7 @@ const Discussion_page = () => {
                     <>
                         {posts.map((post, index) => {
                             const postId = post._id || post.id;
-                            const isTriggerPost = index === Math.max(0, posts.length - 3);
+                            const isTriggerPost = index === Math.max(0, posts.length - 5);
                             const thumbFile = post.file_paths?.find(f =>
                                 ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
                             );
@@ -115,7 +115,7 @@ const Discussion_page = () => {
                                                     <span className='truncate'>{post.author_username || 'Unknown'}</span>
                                                     <FollowChip
                                                         authorId={post.author_id}
-                                                        initialIsFollowing={post.is_following} 
+                                                        initialIsFollowing={post.is_following}
                                                         onFollowChange={handleFollowChange}
                                                     />
                                                 </p>

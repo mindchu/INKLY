@@ -252,7 +252,7 @@ def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
         
     return all_content
 
-def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all", skip: int = 0, limit: int = 10) -> List[Dict[str, Any]]:
+def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[str] = None, exclude_tags: List[str] = None, sort_by: str = "recent", scope: str = "all", skip: int = 0, limit: int = 10, content_type: Optional[str] = None) -> List[Dict[str, Any]]:
     query: Dict[str, Any] = {}
     following_ids = []
 
@@ -281,7 +281,7 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
             query["tags"] = {"$nin": _make_case_insensitive_tag_query(exclude_tags)}
 
     # Use the module-level fetch_and_format, passing all needed variables
-    results = fetch_and_format(query, user_id, content_type=None, following_ids=following_ids)
+    results = fetch_and_format(query, user_id, content_type=content_type, following_ids=following_ids)
 
     if q and results:
         query_embedding = embeddings.embedding_manager.generate_embedding(q)
@@ -325,11 +325,20 @@ def get_search_results(user_id: Optional[str], q: str = "", tags_filter: List[st
         else:
             results.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
+    # Calculate stats for the matched set before pagination
+    stats = {
+        "total_count": len(results),
+        "note_count": sum(1 for doc in results if doc.get('type') == 'post'),
+        "discussion_count": sum(1 for doc in results if doc.get('type') == 'discussion'),
+        "total_views": sum(doc.get('views', 0) for doc in results),
+        "total_likes": sum(doc.get('like_count', 0) for doc in results)
+    }
+
     final_results = results[skip:skip+limit]
     for doc in final_results:
         doc.pop('title_embedding', None)
         
-    return final_results
+    return final_results, stats
 
 
 def create_comment(parent_id: str, author_id: str, text: str) -> Optional[Dict[str, Any]]:

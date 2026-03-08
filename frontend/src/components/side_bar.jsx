@@ -24,22 +24,22 @@ import { FaUserCircle } from 'react-icons/fa';
 //          Profile, Interests, Sign Out, [Admin]
 const BASE_TAB_PAGES = [
     [
-        { label: 'Home',       iconOff: AiOutlineHome,  iconOn: AiFillHome,      path: '/home' },
-        { label: 'Discussion', iconOff: BiChat,          iconOn: BiSolidChat,     path: '/discussion' },
-        { label: 'Note',       iconOff: PiNotepadLight,  iconOn: PiNotepadBold,   path: '/note_forum' },
-        { label: 'Search',     iconOff: RiSearch2Line,   iconOn: RiSearch2Fill,   path: '/search' },
+        { label: 'Home', iconOff: AiOutlineHome, iconOn: AiFillHome, path: '/home' },
+        { label: 'Discussion', iconOff: BiChat, iconOn: BiSolidChat, path: '/discussion' },
+        { label: 'Note', iconOff: PiNotepadLight, iconOn: PiNotepadBold, path: '/note_forum' },
+        { label: 'Search', iconOff: RiSearch2Line, iconOn: RiSearch2Fill, path: '/search' },
     ],
     [
-        { label: 'Following',  iconOff: HiOutlineUsers,  iconOn: HiUsers,         path: '/following' },
-        { label: 'My Note',    iconOff: CgNotes,         iconOn: CgNotes,         path: '/my_notes' },
-        { label: 'My Disc.',   iconOff: BiChat,          iconOn: BiSolidChat,     path: '/my_discussions' },
-        { label: 'Create Note',iconOff: IoCreateOutline, iconOn: IoCreate,        path: '/create_note' },
+        { label: 'Following', iconOff: HiOutlineUsers, iconOn: HiUsers, path: '/following' },
+        { label: 'My Note', iconOff: CgNotes, iconOn: CgNotes, path: '/my_notes' },
+        { label: 'My Disc.', iconOff: BiChat, iconOn: BiSolidChat, path: '/my_discussions' },
+        { label: 'Create Note', iconOff: IoCreateOutline, iconOn: IoCreate, path: '/create_note' },
     ],
     [
-        { label: 'Create Disc.',iconOff: IoCreateOutline,iconOn: IoCreate,        path: '/create_discussion' },
-        { label: 'Bookmark',   iconOff: IoBookmarkOutline,iconOn: IoBookmark,     path: '/bookmarks' },
-        { label: 'Profile',    iconOff: MdPersonOutline, iconOn: MdPerson,        path: '/profile' },
-        { label: 'Interests',  iconOff: MdInterests,     iconOn: MdInterests,     path: '/interests' },
+        { label: 'Create Disc.', iconOff: IoCreateOutline, iconOn: IoCreate, path: '/create_discussion' },
+        { label: 'Bookmark', iconOff: IoBookmarkOutline, iconOn: IoBookmark, path: '/bookmarks' },
+        { label: 'Profile', iconOff: MdPersonOutline, iconOn: MdPerson, path: '/profile' },
+        { label: 'Interests', iconOff: MdInterests, iconOn: MdInterests, path: '/interests' },
     ],
 ]
 
@@ -50,8 +50,8 @@ const USER_LAST_PAGE = [
 
 // Last page — Admin: Admin + Sign Out
 const ADMIN_LAST_PAGE = [
-    { label: 'Admin',    iconOff: MdAdminPanelSettings, iconOn: MdAdminPanelSettings, path: '/admin', isAdmin: true },
-    { label: 'Sign Out', iconOff: PiSignOutBold,         iconOn: PiSignOutBold,         path: null, isSignOut: true },
+    { label: 'Admin', iconOff: MdAdminPanelSettings, iconOn: MdAdminPanelSettings, path: '/admin', isAdmin: true },
+    { label: 'Sign Out', iconOff: PiSignOutBold, iconOn: PiSignOutBold, path: null, isSignOut: true },
 ]
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -90,27 +90,27 @@ const Side_bar = () => {
     const menuItems = [
         {
             section: 'Explore', items: [
-                { label: 'Home',       icon: <AiOutlineHome size={20} />,   path: '/home' },
-                { label: 'Discussion', icon: <BiChat size={20} />,          path: '/discussion' },
-                { label: 'Note',       icon: <CgNotes size={20} />,         path: '/note_forum' },
-                { label: 'Search',     icon: <RiSearch2Line size={20} />,   path: '/search' },
-                { label: 'Following',  icon: <HiOutlineUsers size={20} />,  path: '/following' },
+                { label: 'Home', icon: <AiOutlineHome size={20} />, path: '/home' },
+                { label: 'Discussion', icon: <BiChat size={20} />, path: '/discussion' },
+                { label: 'Note', icon: <CgNotes size={20} />, path: '/note_forum' },
+                { label: 'Search', icon: <RiSearch2Line size={20} />, path: '/search' },
+                { label: 'Following', icon: <HiOutlineUsers size={20} />, path: '/following' },
             ]
         },
         {
             section: 'My content', items: [
-                { label: 'My Note',           icon: <CgNotes size={20} />,          path: '/my_notes' },
-                { label: 'My Discussion',     icon: <BiChat size={20} />,           path: '/my_discussions' },
-                { label: 'Create Note',       icon: <IoCreateOutline size={20} />,  path: '/create_note' },
-                { label: 'Create Discussion', icon: <BiChat size={20} />,           path: '/create_discussion' },
-                { label: 'Bookmark',          icon: <CiBookmarkMinus size={20} />,  path: '/bookmarks' },
+                { label: 'My Note', icon: <CgNotes size={20} />, path: '/my_notes' },
+                { label: 'My Discussion', icon: <BiChat size={20} />, path: '/my_discussions' },
+                { label: 'Create Note', icon: <IoCreateOutline size={20} />, path: '/create_note' },
+                { label: 'Create Discussion', icon: <BiChat size={20} />, path: '/create_discussion' },
+                { label: 'Bookmark', icon: <CiBookmarkMinus size={20} />, path: '/bookmarks' },
             ]
         },
         {
             section: 'Account', items: [
-                { label: 'Profile',   icon: <CgProfile size={20} />,     path: '/profile' },
-                { label: 'Interests', icon: <LuPencil size={20} />,      path: '/interests' },
-                { label: 'Sign Out',  icon: <PiSignOutBold size={20} />, onClick: handleSignOut },
+                { label: 'Profile', icon: <CgProfile size={20} />, path: '/profile' },
+                { label: 'Interests', icon: <LuPencil size={20} />, path: '/interests' },
+                { label: 'Sign Out', icon: <PiSignOutBold size={20} />, onClick: handleSignOut },
             ]
         },
     ];
@@ -124,7 +124,7 @@ const Side_bar = () => {
     }
 
     const isFirstPage = tabPage === 0;
-    const isLastPage  = tabPage === totalPages - 1;
+    const isLastPage = tabPage === totalPages - 1;
 
     return (
         <>
@@ -190,7 +190,7 @@ const Side_bar = () => {
                                     return (
                                         <div key={itemIdx} className="relative group w-full px-2">
                                             <button
-                                                onClick={item.onClick || (() => navigate(item.path))}
+                                                onClick={item.onClick || (() => navigate(item.path, { state: { refresh: Date.now() } }))}
                                                 className={`
                                                     flex flex-row items-center w-full h-[40px] rounded-xl transition-all duration-200
                                                     ${isActive ? 'bg-[#E8FFDF] text-[#124C09]' : 'hover:bg-gray-100 text-gray-700'}
@@ -224,11 +224,10 @@ const Side_bar = () => {
                         <button
                             key={i}
                             onClick={() => setTabPage(i)}
-                            className={`rounded-full transition-all duration-300 ${
-                                tabPage === i
+                            className={`rounded-full transition-all duration-300 ${tabPage === i
                                     ? 'w-5 h-1.5 bg-[#3E4A34]'
                                     : 'w-1.5 h-1.5 bg-gray-300 hover:bg-gray-400'
-                            }`}
+                                }`}
                         />
                     ))}
                 </div>
@@ -252,23 +251,22 @@ const Side_bar = () => {
                             {currentTabs.map((tab) => {
                                 const isActive = location.pathname === tab.path;
                                 const IconOff = tab.iconOff;
-                                const IconOn  = tab.iconOn;
+                                const IconOn = tab.iconOn;
                                 return (
                                     <button
                                         key={tab.label}
                                         onClick={() => {
                                             if (tab.isSignOut) { handleSignOut(); return; }
-                                            navigate(tab.path);
+                                            navigate(tab.path, { state: { refresh: Date.now() } });
                                         }}
-                                        className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 px-1 relative transition-all duration-200 ${
-                                            tab.isSignOut
+                                        className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 px-1 relative transition-all duration-200 ${tab.isSignOut
                                                 ? 'text-red-400 hover:text-red-600'
                                                 : tab.isAdmin
                                                     ? isActive ? 'text-amber-700' : 'text-amber-500 hover:text-amber-600'
                                                     : isActive
                                                         ? 'text-[#3E4A34]'
                                                         : 'text-gray-400 hover:text-gray-600'
-                                        }`}
+                                            }`}
                                     >
                                         {isActive && !tab.isSignOut && (
                                             <span className="absolute inset-x-2 top-1 bottom-1 bg-[#EEF2E1] rounded-xl -z-0" />
@@ -279,9 +277,8 @@ const Side_bar = () => {
                                                 : <IconOff size={22} />
                                             }
                                         </span>
-                                        <span className={`relative z-10 text-[10px] leading-none tracking-tight ${
-                                            isActive && !tab.isSignOut ? 'font-bold' : 'font-medium'
-                                        }`}>
+                                        <span className={`relative z-10 text-[10px] leading-none tracking-tight ${isActive && !tab.isSignOut ? 'font-bold' : 'font-medium'
+                                            }`}>
                                             {tab.label}
                                         </span>
                                     </button>

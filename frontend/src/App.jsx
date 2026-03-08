@@ -169,7 +169,7 @@ const App = () => {
                   path="/my_notes"
                   element={
                     <ProtectedRoute>
-                      <MyNotesProvider>
+                      <MyNotesProvider defaultType="post">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
                           <div className="flex flex-col flex-1 min-h-0">
@@ -189,7 +189,7 @@ const App = () => {
                   path="/my_discussions"
                   element={
                     <ProtectedRoute>
-                      <MyNotesProvider>
+                      <MyNotesProvider defaultType="discussion">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
                           <div className="flex flex-col flex-1 min-h-0">
