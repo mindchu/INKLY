@@ -54,7 +54,7 @@ const Discussion_top_bar = () => {
                         <FiMenu size={24} className="text-[#3E4A34]" />
                     </button>
                     <BiMessageSquare size={32} className='opacity-70' />
-                    <p className='font-["Julius Sans One"] text-[24px] md:text-[32px] text-[#3E4A34] font-thin select-none'>DISCUSSION FORUM</p>
+                    <p className='font-["Julius_Sans_One"] text-[24px] md:text-[32px] text-[#3E4A34] font-thin select-none'>DISCUSSION FORUM</p>
                 </div>
             </div>
 

@@ -11,7 +11,7 @@ const Create_discussion_top_bar = () => {
             <div className='flex flex-row gap-3 items-center mt-2 mx-4 sm:mx-5 justify-between'>
                 <div className='flex flex-row items-center gap-3'>
                     <BiChat size={28} className='opacity-70 text-[#3E4A34]' />
-                    <p className='font-["Inter"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>CREATE NEW DISCUSSION</p>
+                    <p className='font-["Julius_Sans_One"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>CREATE NEW DISCUSSION</p>
                 </div>
                 <button
                     onClick={() => window.handlePublishNote?.()}

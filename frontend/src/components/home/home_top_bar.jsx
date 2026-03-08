@@ -51,7 +51,7 @@ const Home_Top_bar = () => {
             <FiMenu size={24} className="text-[#3E4A34]" />
           </button>
           <PiBookOpenTextLight size={38} className='opacity-70' />
-          <p className='font-["Julius Sans One"] text-[28px] md:text-[32px] text-[#3E4A34] font-thin select-none'>HOME</p>
+          <p className='font-["Julius_Sans_One"] text-[28px] md:text-[32px] font-thin text-[#3E4A34] select-none'>HOME</p>
         </div>
       </div>
 
