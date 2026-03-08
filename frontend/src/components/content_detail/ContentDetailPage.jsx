@@ -120,16 +120,14 @@ const ContentDetailPage = () => {
 
     const handleDelete = async () => {
         try {
-            // Separate the endpoints based on admin status
-            const endpointUrl = profileData.is_admin 
-                ? `/admin/content/${contentId}` 
+            const endpointUrl = profileData.is_admin
+                ? `/admin/content/${contentId}`
                 : `/content/${contentId}`;
             const response = await api.delete(endpointUrl);
             if (response.success) {
                 if (location.state && location.state.from) {
                     navigate(location.state.from);
-                } 
-                else if (content.type === 'discussion') {
+                } else if (content.type === 'discussion') {
                     navigate('/discussion');
                 } else {
                     navigate('/note_forum');
@@ -200,26 +198,26 @@ const ContentDetailPage = () => {
 
     const renderComments = (commentList, level = 0) => {
         return commentList.map((comment) => (
-            <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-6 border-l-2 border-gray-100 pl-3' : ''}`}>
+            <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-4 sm:ml-6 border-l-2 border-gray-100 pl-3' : ''}`}>
                 <div className="flex items-start gap-2">
                     {comment.author_profile_picture_url ? (
                         <img
                             src={getMediaUrl(comment.author_profile_picture_url)}
                             alt={comment.author_username}
-                            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover flex-shrink-0"
                         />
                     ) : (
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
                             {comment.author_username?.[0]?.toUpperCase() || 'U'}
                         </div>
                     )}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-sm">{comment.author_username || 'Anonymous'}</span>
+                            <span className="font-semibold text-xs sm:text-sm">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-xs text-gray-400">recent</span>
                         </div>
-                        <p className="text-sm text-gray-700 mt-1 break-words">{comment.text}</p>
-                        <div className="flex items-center gap-4 mt-2">
+                        <p className="text-xs sm:text-sm text-gray-700 mt-1 break-words">{comment.text}</p>
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
                                 className="text-xs text-green-600 font-medium hover:underline"
@@ -230,7 +228,7 @@ const ContentDetailPage = () => {
                                 onClick={() => handleLikeComment(comment._id)}
                                 className={`flex items-center gap-1 text-xs font-medium hover:text-red-500 transition-colors ${comment.is_liked ? 'text-red-500' : 'text-gray-500'}`}
                             >
-                                {comment.is_liked ? <IoHeart size={14} /> : <IoHeartOutline size={14} />}
+                                {comment.is_liked ? <IoHeart size={13} /> : <IoHeartOutline size={13} />}
                                 <span>{comment.like_count || 0}</span>
                             </button>
                             {profileData && (profileData.google_id === comment.author_id || profileData.is_admin) && (
@@ -255,13 +253,13 @@ const ContentDetailPage = () => {
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
                                     placeholder={`Reply to ${comment.author_username || 'user'}...`}
-                                    className="flex-1 min-w-0 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                    className="flex-1 min-w-0 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20"
                                     autoFocus
                                 />
                                 <button
                                     onClick={() => handleReply(comment._id)}
                                     disabled={postingReply || !replyText.trim() || replyText.length > MAX_COMMENT_LENGTH}
-                                    className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex-shrink-0"
+                                    className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex-shrink-0"
                                 >
                                     Reply
                                 </button>
@@ -273,7 +271,7 @@ const ContentDetailPage = () => {
                     comment.replies?.length > 0 && renderComments(comment.replies, level + 1)
                 ) : (
                     comment.replies?.length > 0 && (
-                        <div className="mt-4 ml-8">
+                        <div className="mt-4 ml-6 sm:ml-8">
                             <Link
                                 to={`/content/${contentId}/comment/${comment._id}`}
                                 state={location.state}
@@ -307,7 +305,8 @@ const ContentDetailPage = () => {
 
     return (
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
-            <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+            {/* Extra bottom padding on mobile to clear the tab bar */}
+            <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 pb-24 md:pb-8">
 
                 {/* Back Button */}
                 <button
@@ -316,14 +315,14 @@ const ContentDetailPage = () => {
                         else if (content.type === 'discussion') navigate('/discussion');
                         else navigate('/note_forum');
                     }}
-                    className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-4 md:mb-6 transition-colors font-medium"
+                    className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-4 md:mb-6 transition-colors font-medium text-sm sm:text-base"
                 >
                     <MdArrowBack size={20} />
                     <span>Back</span>
                 </button>
 
                 {notificationMessage && (
-                    <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+                    <div className="fixed top-4 left-3 right-3 sm:left-auto sm:right-4 sm:w-auto z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm text-center sm:text-left">
                         {notificationMessage}
                     </div>
                 )}
@@ -331,80 +330,85 @@ const ContentDetailPage = () => {
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
 
                     {/* ── Header ── */}
-                    <div className="p-5 md:p-8 border-b border-gray-100">
+                    <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100">
 
                         {/* Tags */}
                         <TagsChipView tags={content.tags} />
 
-
                         {/* Title */}
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 break-words">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mt-2 mb-4 break-words leading-tight">
                             {content.title}
                         </h1>
 
-                        {/* Author row — full width, no icons beside it */}
-                        <div className="flex items-center gap-3 mb-4">
+                        {/* Author row */}
+                        <div className="flex items-start sm:items-center gap-3">
+                            {/* Avatar */}
                             {content.author_profile_picture_url ? (
                                 <img
                                     src={getMediaUrl(content.author_profile_picture_url)}
                                     alt={content.author_username}
-                                    className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
+                                    className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
                                 />
                             ) : (
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-base md:text-lg font-semibold flex-shrink-0">
+                                <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-sm md:text-lg font-semibold flex-shrink-0">
                                     {content.author_username?.[0]?.toUpperCase() || 'U'}
                                 </div>
                             )}
-                            <div className="min-w-0">
+
+                            {/* Name + meta — grows to fill space */}
+                            <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap text-sm md:text-base">
                                     {content.author_username || 'Unknown'}
                                     <FollowChip authorId={content.author_id} initialIsFollowing={content.is_following} />
                                 </p>
                                 <p className="text-xs md:text-sm text-gray-500">Published recently</p>
                             </div>
-                            <div className="flex items-center gap-4 text-gray-400">
-                                {/* EDIT BUTTON: Only the original author can see this */}
+
+                            {/* Actions — always on the right, wraps on tiny screens */}
+                            <div className="flex items-center gap-2 sm:gap-3 text-gray-400 flex-shrink-0">
+                                {/* Edit — author only */}
                                 {profileData && profileData.google_id === content.author_id && (
-                                    <>
                                     <button
                                         onClick={() => navigate(`/edit/${contentId}`)}
                                         className="p-1.5 hover:text-blue-500 transition-colors"
                                         title="Edit"
                                     >
-                                        <MdEdit size={20} />
+                                        <MdEdit size={18} className="sm:w-5 sm:h-5" />
                                     </button>
-                                    </>
                                 )}
 
-                                {/* DELETE BUTTON: The author OR an admin can see this */}
+                                {/* Delete — author or admin */}
                                 {profileData && (profileData.google_id === content.author_id || profileData.is_admin) && (
                                     <button
                                         onClick={() => setShowDeleteConfirm(true)}
                                         className="p-1.5 hover:text-red-500 transition-colors"
                                         title="Delete"
                                     >
-                                        <MdDelete size={20} />
+                                        <MdDelete size={18} className="sm:w-5 sm:h-5" />
                                     </button>
                                 )}
 
-                                {/* LIKE BUTTON */}
-                                <button onClick={handleLike}
-                                    className={`flex items-center gap-1.5 transition-colors hover:text-red-500 ${content.is_liked ? 'text-red-500' : ''}`}
+                                {/* Like */}
+                                <button
+                                    onClick={handleLike}
+                                    className={`flex items-center gap-1 transition-colors hover:text-red-500 ${content.is_liked ? 'text-red-500' : ''}`}
                                 >
-                                    {content.is_liked ? <IoHeart size={20} /> : <IoHeartOutline size={20} />}
-                                    <span className="text-sm font-medium">{content.like_count || 0}</span>
+                                    {content.is_liked ? <IoHeart size={18} className="sm:w-5 sm:h-5" /> : <IoHeartOutline size={18} className="sm:w-5 sm:h-5" />}
+                                    <span className="text-xs sm:text-sm font-medium">{content.like_count || 0}</span>
                                 </button>
-                            <div className="flex items-center gap-1.5">
-                                <LuEye size={20} />
-                                <span className="text-sm font-medium">{content.views || 0}</span>
+
+                                {/* Views */}
+                                <div className="flex items-center gap-1">
+                                    <LuEye size={18} className="sm:w-5 sm:h-5" />
+                                    <span className="text-xs sm:text-sm font-medium">{content.views || 0}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* ── Body ── */}
-                    <div className="p-5 md:p-8">
-                        <div className="text-gray-700 leading-relaxed text-base md:text-lg mb-8 whitespace-pre-wrap break-words">
+                    <div className="p-4 sm:p-6 md:p-8">
+                        <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg mb-8 whitespace-pre-wrap break-words">
                             {content.text}
                         </div>
 
@@ -412,12 +416,12 @@ const ContentDetailPage = () => {
                         {content.file_paths?.length > 0 && (
                             <div className="mt-6 pt-6 border-t border-gray-100">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <GoPaperclip size={20} className="text-gray-600" />
-                                    <h3 className="text-base md:text-xl font-bold text-gray-900">
+                                    <GoPaperclip size={18} className="text-gray-600" />
+                                    <h3 className="text-sm sm:text-base md:text-xl font-bold text-gray-900">
                                         Attachments ({content.file_paths.length})
                                     </h3>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {content.file_paths.map((file, index) => {
                                         const fileInfo = getFileIcon(file);
                                         const fileUrl = getMediaUrl(`/uploads/${file}`);
@@ -426,22 +430,32 @@ const ContentDetailPage = () => {
                                             <div key={index} className="flex flex-col border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                                                 {isImage && (
                                                     <div className="w-full bg-gray-50 flex items-center justify-center p-2 border-b border-gray-100">
-                                                        <img src={fileUrl} alt={file} className="max-h-[200px] md:max-h-[300px] object-contain rounded-lg" />
+                                                        <img
+                                                            src={fileUrl}
+                                                            alt={file}
+                                                            className="max-h-[180px] sm:max-h-[220px] md:max-h-[300px] w-full object-contain rounded-lg"
+                                                        />
                                                     </div>
                                                 )}
-                                                <div className="flex items-center justify-between p-3 md:p-4 bg-white">
+                                                <div className="flex items-center justify-between p-3 bg-white">
                                                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                        <div className={`${fileInfo.color} text-white px-2 py-1 rounded-lg font-bold text-xs flex-shrink-0`}>
+                                                        <div className={`${fileInfo.color} text-white px-2 py-0.5 rounded-lg font-bold text-xs flex-shrink-0`}>
                                                             {fileInfo.label}
                                                         </div>
-                                                        <p className="font-medium text-gray-900 truncate text-sm">{file}</p>
+                                                        <p className="font-medium text-gray-900 truncate text-xs sm:text-sm">{file}</p>
                                                     </div>
                                                     <div className="flex gap-1 flex-shrink-0 ml-2">
-                                                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition text-blue-600" onClick={() => window.open(fileUrl, '_blank')}>
-                                                            <LuEye size={18} />
+                                                        <button
+                                                            className="p-1.5 hover:bg-gray-100 rounded-lg transition text-blue-600"
+                                                            onClick={() => window.open(fileUrl, '_blank')}
+                                                        >
+                                                            <LuEye size={16} />
                                                         </button>
-                                                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-600" onClick={() => window.open(fileUrl, '_blank')}>
-                                                            <MdOutlineFileDownload size={18} />
+                                                        <button
+                                                            className="p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-600"
+                                                            onClick={() => window.open(fileUrl, '_blank')}
+                                                        >
+                                                            <MdOutlineFileDownload size={16} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -454,24 +468,24 @@ const ContentDetailPage = () => {
                     </div>
 
                     {/* ── Comments ── */}
-                    <div className="p-5 md:p-8 bg-gray-50 border-t border-gray-100">
-                        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-5">Comments</h3>
+                    <div className="p-4 sm:p-6 md:p-8 bg-gray-50 border-t border-gray-100">
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-4 sm:mb-5">Comments</h3>
 
                         {/* Comment input */}
-                        <form onSubmit={handleAddComment} className="mb-6 md:mb-8">
-                            <div className="flex gap-2 md:gap-3">
+                        <form onSubmit={handleAddComment} className="mb-5 sm:mb-8">
+                            <div className="flex gap-2 sm:gap-3">
                                 {profileData?.profile_picture_url ? (
                                     <img
                                         src={getMediaUrl(profileData.profile_picture_url)}
                                         alt="Me"
-                                        className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
+                                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
                                     />
                                 ) : (
-                                    <div className="w-9 h-9 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center text-[11px] text-green-700 font-bold flex-shrink-0">
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center text-[10px] text-green-700 font-bold flex-shrink-0">
                                         {profileData?.username?.[0]?.toUpperCase() || 'Me'}
                                     </div>
                                 )}
-                                <div className="flex-1 flex gap-2 min-w-0">
+                                <div className="flex-1 flex flex-col sm:flex-row gap-2 min-w-0">
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => {
@@ -490,7 +504,7 @@ const ContentDetailPage = () => {
                                     <button
                                         type="submit"
                                         disabled={postingComment || !newComment.trim() || newComment.length > MAX_COMMENT_LENGTH}
-                                        className="bg-green-600 text-white px-4 md:px-6 py-2 rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex-shrink-0"
+                                        className="w-full sm:w-auto bg-green-600 text-white px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors flex-shrink-0"
                                     >
                                         Post
                                     </button>
@@ -504,7 +518,7 @@ const ContentDetailPage = () => {
                         ) : (
                             <div className="space-y-4">
                                 {comments.length > 0 ? renderComments(comments) : (
-                                    <div className="text-center py-10 text-gray-400 text-sm bg-white rounded-xl border border-dashed border-gray-200">
+                                    <div className="text-center py-8 sm:py-10 text-gray-400 text-sm bg-white rounded-xl border border-dashed border-gray-200">
                                         No comments yet. Be the first to join the conversation!
                                     </div>
                                 )}
@@ -516,13 +530,13 @@ const ContentDetailPage = () => {
 
             {/* Delete Confirm Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 md:p-8">
-                        <div className="w-14 h-14 md:w-16 md:h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-5 mx-auto">
-                            <MdDelete size={28} />
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+                    <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md p-6 sm:p-8">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-4 sm:mb-5 mx-auto">
+                            <MdDelete size={24} />
                         </div>
-                        <h3 className="text-xl md:text-2xl font-bold text-gray-900 text-center mb-2">Delete Content?</h3>
-                        <p className="text-gray-500 text-center mb-6 text-sm md:text-base">
+                        <h3 className="text-lg sm:text-2xl font-bold text-gray-900 text-center mb-2">Delete Content?</h3>
+                        <p className="text-gray-500 text-center mb-5 sm:mb-6 text-sm">
                             This action cannot be undone. All comments and data will be permanently removed.
                         </p>
                         <div className="flex gap-3">
