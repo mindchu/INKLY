@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { RxCaretUp } from "react-icons/rx";
 import { RxCaretDown } from "react-icons/rx";
 import { RiSearch2Line } from "react-icons/ri";
@@ -16,6 +16,24 @@ const Search_top_bar = () => {
 
     const [filterTagInput, setFilterTagInput] = useState('');
     const [excludeTagInput, setExcludeTagInput] = useState('');
+    const [showIncludeSuggestions, setShowIncludeSuggestions] = useState(false);
+    const [showExcludeSuggestions, setShowExcludeSuggestions] = useState(false);
+
+    const includeContainerRef = useRef(null);
+    const excludeContainerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (includeContainerRef.current && !includeContainerRef.current.contains(event.target)) {
+                setShowIncludeSuggestions(false);
+            }
+            if (excludeContainerRef.current && !excludeContainerRef.current.contains(event.target)) {
+                setShowExcludeSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleTabChange = (tab) => {
         let type = 'all';
@@ -131,17 +149,21 @@ const Search_top_bar = () => {
                                 type='text'
                                 value={filterTagInput}
                                 onChange={(e) => setFilterTagInput(e.target.value)}
+                                onFocus={() => setShowIncludeSuggestions(true)}
                                 placeholder={filters.tags.length === 0 ? 'Type to search...' : ''}
                                 className='flex-1 min-w-[80px] bg-transparent outline-none border-none font-["Inter"] text-[14px] sm:text-[16px] text-gray-700 placeholder-gray-400 py-0.5'
                             />
-                            {filterTagInput && filteredSuggestions.length > 0 && (
+                            {showIncludeSuggestions && filteredSuggestions.length > 0 && (
                                 <div className='absolute top-full left-0 z-20 mt-1 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-lg max-h-[150px] overflow-y-auto'>
                                     {filteredSuggestions.slice(0, 5).map((tag, idx) => (
                                         <button
                                             key={idx}
-                                            onClick={() => {
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
                                                 setFilters({ ...filters, tags: [...filters.tags, tag.name] });
                                                 setFilterTagInput('');
+                                                setShowIncludeSuggestions(false);
                                             }}
                                             className='w-full text-left px-3 py-2 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0'
                                         >
@@ -171,18 +193,22 @@ const Search_top_bar = () => {
                                 type='text'
                                 value={excludeTagInput}
                                 onChange={(e) => setExcludeTagInput(e.target.value)}
+                                onFocus={() => setShowExcludeSuggestions(true)}
                                 placeholder={(filters.exclude_tags && filters.exclude_tags.length > 0) ? '' : 'Type to search...'}
                                 className='flex-1 min-w-[80px] bg-transparent outline-none border-none font-["Inter"] text-[14px] sm:text-[16px] text-gray-700 placeholder-gray-400 py-0.5'
                             />
-                            {excludeTagInput && excludeSuggestions.length > 0 && (
+                            {showExcludeSuggestions && excludeSuggestions.length > 0 && (
                                 <div className='absolute top-full left-0 z-20 mt-1 w-full bg-white border border-[#D4D9C6] rounded-xl shadow-lg max-h-[150px] overflow-y-auto'>
                                     {excludeSuggestions.slice(0, 5).map((tag, idx) => (
                                         <button
                                             key={idx}
-                                            onClick={() => {
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
                                                 const currentExcludes = filters.exclude_tags || [];
                                                 setFilters({ ...filters, exclude_tags: [...currentExcludes, tag.name] });
                                                 setExcludeTagInput('');
+                                                setShowExcludeSuggestions(false);
                                             }}
                                             className='w-full text-left px-3 py-2 hover:bg-[#F5F7EF] text-[#2C3E28] transition-colors flex items-center justify-between border-b border-[#F0F2EA] last:border-0'
                                         >
@@ -198,7 +224,8 @@ const Search_top_bar = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Tabs + Search button */}
             <div className='flex flex-row justify-between items-center mx-4 sm:mx-5 mt-2.5 mb-2 select-none'>
@@ -208,8 +235,8 @@ const Search_top_bar = () => {
                             key={tab}
                             onClick={() => handleTabChange(tab)}
                             className={`pb-1 font-["Inter"] text-[15px] sm:text-[18px] whitespace-nowrap capitalize ${activeTab === tab
-                                    ? 'text-[#577F4E] border-b-2 border-[#577F4E]'
-                                    : 'text-gray-500'
+                                ? 'text-[#577F4E] border-b-2 border-[#577F4E]'
+                                : 'text-gray-500'
                                 }`}
                         >
                             {tab === 'all' ? 'All results' : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -223,7 +250,7 @@ const Search_top_bar = () => {
                     Search
                 </button>
             </div>
-        </div>
+        </div >
     )
 }
 

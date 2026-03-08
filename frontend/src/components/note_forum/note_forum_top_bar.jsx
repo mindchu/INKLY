@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { BiMessageSquare } from "react-icons/bi";
+import React, { useState, useRef, useEffect } from 'react'
 import { RiSearch2Line } from "react-icons/ri";
 import { MdOutlineRemoveRedEye, MdOutlineDateRange } from "react-icons/md";
 import { IoHeartOutline, IoClose } from "react-icons/io5";
-import { BiCommentDetail } from "react-icons/bi";
+import { BiCommentDetail, BiMessageSquare } from "react-icons/bi";
 import { useSortContext } from '../../context/SortContext';
+import { useSearch } from '../../context/SearchContext';
 
 const SORT_OPTIONS = [
   { key: 'views', icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
@@ -15,9 +15,38 @@ const SORT_OPTIONS = [
 
 const Note_forum_top_bar = () => {
   const { sortBy, setSortBy, localSearch, setLocalSearch, fetchSearch, includeTags, setIncludeTags, excludeTags, setExcludeTags } = useSortContext();
+  const { allTags } = useSearch();
 
   const [includeInput, setIncludeInput] = useState('');
   const [excludeInput, setExcludeInput] = useState('');
+  const [showIncludeSuggestions, setShowIncludeSuggestions] = useState(false);
+  const [showExcludeSuggestions, setShowExcludeSuggestions] = useState(false);
+
+  const includeContainerRef = useRef(null);
+  const excludeContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (includeContainerRef.current && !includeContainerRef.current.contains(event.target)) {
+        setShowIncludeSuggestions(false);
+      }
+      if (excludeContainerRef.current && !excludeContainerRef.current.contains(event.target)) {
+        setShowExcludeSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const includeSuggestions = allTags.filter(tag =>
+    tag.name.toLowerCase().includes(includeInput.toLowerCase()) &&
+    !includeTags.includes(tag.name)
+  );
+
+  const excludeSuggestions = allTags.filter(tag =>
+    tag.name.toLowerCase().includes(excludeInput.toLowerCase()) &&
+    !excludeTags.includes(tag.name)
+  );
 
   const handleSearchSubmit = () => fetchSearch(localSearch);
   const handleKeyDown = (e) => { if (e.key === 'Enter') handleSearchSubmit(); };
@@ -27,6 +56,7 @@ const Note_forum_top_bar = () => {
       const tag = includeInput.trim();
       if (!includeTags.includes(tag)) setIncludeTags(prev => [...prev, tag]);
       setIncludeInput('');
+      setShowIncludeSuggestions(false);
     }
   };
 
@@ -35,6 +65,7 @@ const Note_forum_top_bar = () => {
       const tag = excludeInput.trim();
       if (!excludeTags.includes(tag)) setExcludeTags(prev => [...prev, tag]);
       setExcludeInput('');
+      setShowExcludeSuggestions(false);
     }
   };
 
@@ -119,13 +150,39 @@ const Note_forum_top_bar = () => {
                 <button onClick={() => removeIncludeTag(tag)} className='hover:text-green-900'><IoClose size={13} /></button>
               </span>
             ))}
-            <input
-              type='text' value={includeInput}
-              onChange={e => setIncludeInput(e.target.value)}
-              onKeyDown={handleIncludeKeyDown}
-              placeholder='Type a tag + Enter'
-              className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-36'
-            />
+            <div className='relative' ref={includeContainerRef}>
+              <input
+                type='text' value={includeInput}
+                onChange={e => {
+                  setIncludeInput(e.target.value);
+                  setShowIncludeSuggestions(true);
+                }}
+                onKeyDown={handleIncludeKeyDown}
+                onFocus={() => setShowIncludeSuggestions(true)}
+                placeholder='Type a tag + Enter'
+                className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-36'
+              />
+              {showIncludeSuggestions && includeSuggestions.length > 0 && (
+                <div className="absolute z-50 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                  {includeSuggestions.slice(0, 5).map((tag, idx) => (
+                    <button
+                      key={idx}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!includeTags.includes(tag.name)) setIncludeTags(prev => [...prev, tag.name]);
+                        setIncludeInput('');
+                        setShowIncludeSuggestions(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[13px] text-gray-700 flex items-center justify-between border-b border-gray-50 last:border-0"
+                    >
+                      <span>#{tag.name}</span>
+                      <span className="text-[10px] text-gray-400">({tag.use_count})</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className='w-px bg-gray-200 self-stretch' />
           <div className='flex flex-row items-center gap-2 flex-wrap'>
@@ -136,13 +193,39 @@ const Note_forum_top_bar = () => {
                 <button onClick={() => removeExcludeTag(tag)} className='hover:text-red-800'><IoClose size={13} /></button>
               </span>
             ))}
-            <input
-              type='text' value={excludeInput}
-              onChange={e => setExcludeInput(e.target.value)}
-              onKeyDown={handleExcludeKeyDown}
-              placeholder='Type a tag + Enter'
-              className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-36'
-            />
+            <div className='relative' ref={excludeContainerRef}>
+              <input
+                type='text' value={excludeInput}
+                onChange={e => {
+                  setExcludeInput(e.target.value);
+                  setShowExcludeSuggestions(true);
+                }}
+                onKeyDown={handleExcludeKeyDown}
+                onFocus={() => setShowExcludeSuggestions(true)}
+                placeholder='Type a tag + Enter'
+                className='text-[13px] font-["Inter"] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-36'
+              />
+              {showExcludeSuggestions && excludeSuggestions.length > 0 && (
+                <div className="absolute z-50 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                  {excludeSuggestions.slice(0, 5).map((tag, idx) => (
+                    <button
+                      key={idx}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!excludeTags.includes(tag.name)) setExcludeTags(prev => [...prev, tag.name]);
+                        setExcludeInput('');
+                        setShowExcludeSuggestions(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[13px] text-gray-700 flex items-center justify-between border-b border-gray-50 last:border-0"
+                    >
+                      <span>#{tag.name}</span>
+                      <span className="text-[10px] text-gray-400">({tag.use_count})</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -158,13 +241,38 @@ const Note_forum_top_bar = () => {
               <button onClick={() => removeIncludeTag(tag)} className='hover:text-green-900'><IoClose size={11} /></button>
             </span>
           ))}
-          <input
-            type='text' value={includeInput}
-            onChange={e => setIncludeInput(e.target.value)}
-            onKeyDown={handleIncludeKeyDown}
-            placeholder='Tag + Enter'
-            className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-28'
-          />
+          <div className='relative' ref={includeContainerRef}>
+            <input
+              type='text' value={includeInput}
+              onChange={e => {
+                setIncludeInput(e.target.value);
+                setShowIncludeSuggestions(true);
+              }}
+              onKeyDown={handleIncludeKeyDown}
+              onFocus={() => setShowIncludeSuggestions(true)}
+              placeholder='Tag + Enter'
+              className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-[#3E4A34] w-28'
+            />
+            {showIncludeSuggestions && includeSuggestions.length > 0 && (
+              <div className="absolute z-50 mt-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 overflow-y-auto">
+                {includeSuggestions.slice(0, 5).map((tag, idx) => (
+                  <button
+                    key={idx}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!includeTags.includes(tag.name)) setIncludeTags(prev => [...prev, tag.name]);
+                      setIncludeInput('');
+                      setShowIncludeSuggestions(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-[12px] text-gray-700 flex items-center justify-between border-b border-gray-50 last:border-0"
+                  >
+                    <span>#{tag.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className='flex flex-row items-center gap-2 flex-wrap'>
           <span className='text-gray-500 text-[12px] select-none'>Exclude:</span>
@@ -174,13 +282,38 @@ const Note_forum_top_bar = () => {
               <button onClick={() => removeExcludeTag(tag)} className='hover:text-red-800'><IoClose size={11} /></button>
             </span>
           ))}
-          <input
-            type='text' value={excludeInput}
-            onChange={e => setExcludeInput(e.target.value)}
-            onKeyDown={handleExcludeKeyDown}
-            placeholder='Tag + Enter'
-            className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-28'
-          />
+          <div className='relative' ref={excludeContainerRef}>
+            <input
+              type='text' value={excludeInput}
+              onChange={e => {
+                setExcludeInput(e.target.value);
+                setShowExcludeSuggestions(true);
+              }}
+              onKeyDown={handleExcludeKeyDown}
+              onFocus={() => setShowExcludeSuggestions(true)}
+              placeholder='Tag + Enter'
+              className='text-[12px] border border-gray-200 rounded-full px-3 py-1 outline-none focus:border-red-400 w-28'
+            />
+            {showExcludeSuggestions && excludeSuggestions.length > 0 && (
+              <div className="absolute z-50 mt-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 overflow-y-auto">
+                {excludeSuggestions.slice(0, 5).map((tag, idx) => (
+                  <button
+                    key={idx}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!excludeTags.includes(tag.name)) setExcludeTags(prev => [...prev, tag.name]);
+                      setExcludeInput('');
+                      setShowExcludeSuggestions(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-[12px] text-gray-700 flex items-center justify-between border-b border-gray-50 last:border-0"
+                  >
+                    <span>#{tag.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
