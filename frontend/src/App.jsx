@@ -74,7 +74,7 @@ const App = () => {
                       <SortProvider>
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <Home_Top_bar />
                             </div>
@@ -94,7 +94,7 @@ const App = () => {
                       <SortProvider contentType="discussion">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <Discussion_top_bar />
                             </div>
@@ -114,7 +114,7 @@ const App = () => {
                       <SortProvider contentType="post">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <NoteForum_top_bar />
                             </div>
@@ -134,7 +134,7 @@ const App = () => {
                       <SortProvider>
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <Search_top_bar />
                             </div>
@@ -172,7 +172,7 @@ const App = () => {
                       <MyNotesProvider defaultType="post">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <Mynotes_top_bar />
                             </div>
@@ -192,7 +192,7 @@ const App = () => {
                       <MyNotesProvider defaultType="discussion">
                         <div className="flex h-screen overflow-hidden">
                           <Sidebar />
-                          <div className="flex flex-col flex-1 min-h-0">
+                          <div className="flex flex-col flex-1 min-h-0 min-w-0">
                             <div className="shrink-0">
                               <My_discussions_top_bar />
                             </div>

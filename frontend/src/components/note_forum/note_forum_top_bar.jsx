@@ -7,10 +7,10 @@ import { BiCommentDetail } from "react-icons/bi";
 import { useSortContext } from '../../context/SortContext';
 
 const SORT_OPTIONS = [
-  { key: 'views',    icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
-  { key: 'comments', icon: <BiCommentDetail size={12} />,       label: 'Comments' },
-  { key: 'likes',    icon: <IoHeartOutline size={12} />,        label: 'Likes' },
-  { key: 'date',     icon: <MdOutlineDateRange size={12} />,    label: 'Date' },
+  { key: 'views', icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
+  { key: 'comments', icon: <BiCommentDetail size={12} />, label: 'Comments' },
+  { key: 'likes', icon: <IoHeartOutline size={12} />, label: 'Likes' },
+  { key: 'date', icon: <MdOutlineDateRange size={12} />, label: 'Date' },
 ];
 
 const Note_forum_top_bar = () => {
@@ -45,7 +45,7 @@ const Note_forum_top_bar = () => {
     <div className='w-full bg-white shadow-md py-3'>
 
       {/* ── Header row ─────────────────────────────────────────── */}
-      <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
+      <div className='flex flex-row items-center px-4 md:px-5 mt-1.5 gap-3 justify-between'>
         <div className='flex flex-row items-center gap-3'>
           <BiMessageSquare size={32} className='opacity-70' />
           <p className='font-["Julius_Sans_One"] text-[18px] md:text-[32px] text-[#3E4A34] font-thin select-none'>NOTE FORUM</p>
@@ -55,11 +55,11 @@ const Note_forum_top_bar = () => {
       {/* ── Search ─────────────────────────────────────────────── */}
       <div className='mx-4 md:mx-5 mt-2 flex flex-row gap-3 items-center border-2 rounded-2xl p-1.5 pl-4'>
         <button className='cursor-pointer flex-shrink-0' onClick={handleSearchSubmit}>
-          <RiSearch2Line size={20} className='flex opacity-50' />
+          <RiSearch2Line size={20} className='opacity-50' />
         </button>
         <input
           type='text'
-          placeholder='Search by title, subject, or tags...'
+          placeholder='Search forum by title, subject, or tags...'
           className='select-none flex flex-1 min-w-0 bg-transparent font-["Inter"] text-[15px] md:text-[18px] outline-none border-none focus:outline-none focus:ring-0'
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
@@ -77,9 +77,8 @@ const Note_forum_top_bar = () => {
               <button
                 key={key}
                 onClick={() => setSortBy(key)}
-                className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
-                  sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 {icon}
                 <span className='font-["Inter"] text-[14px] font-medium'>{label}</span>
@@ -96,9 +95,8 @@ const Note_forum_top_bar = () => {
               <button
                 key={key}
                 onClick={() => setSortBy(key)}
-                className={`flex flex-row items-center gap-1 px-3 py-1.5 rounded-full transition-all text-[12px] font-medium font-["Inter"] ${
-                  sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`flex flex-row items-center gap-1 px-3 py-1.5 rounded-full transition-all text-[12px] font-medium font-["Inter"] ${sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 {icon}
                 {label}
@@ -108,7 +106,7 @@ const Note_forum_top_bar = () => {
         </div>
       </div>
 
-      {/* ── Filter row ─────────────────────────────────────────── */}
+      {/* ── Filter row — Desktop ────────────────────────────────── */}
       {/* Desktop */}
       <div className='hidden md:block'>
         <div className='mt-3 ml-5 flex flex-row items-center gap-6 pb-2 pr-8 flex-wrap'>
@@ -149,7 +147,7 @@ const Note_forum_top_bar = () => {
         </div>
       </div>
 
-      {/* Mobile — always visible, stacked */}
+      {/* ── Filter row — Mobile ─────────────────────────────────── */}
       <div className='md:hidden mt-3 ml-4 pr-4 pb-1 flex flex-col gap-2'>
         <p className='text-[#124C09] font-["Inter"] text-[13px] font-medium select-none'>Filter by:</p>
         <div className='flex flex-row items-center gap-2 flex-wrap'>

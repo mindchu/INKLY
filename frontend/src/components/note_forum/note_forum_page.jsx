@@ -77,7 +77,7 @@ const Note_forum_page = () => {
   }
 
   return (
-    <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
+    <div className='w-full h-full bg-[#EEF2E1] overflow-y-auto overflow-x-hidden'>
       <div className='flex flex-col gap-4 px-3 md:px-6 lg:px-10 py-5 md:py-8'>
 
         {posts.length > 0 ? (
@@ -93,12 +93,12 @@ const Note_forum_page = () => {
                 <div
                   ref={isTriggerPost ? lastPostElementRef : null}
                   key={postId}
-                  className='w-full bg-white rounded-[12px] p-3 md:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow'
+                  className='w-full max-w-full box-border bg-white rounded-[12px] p-3 md:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow overflow-hidden'
                   onClick={() => navigate(`/content/${postId}`)}
                 >
                   {/* ── Author row ──────────────────────────────── */}
                   <div className='flex items-center justify-between gap-2'>
-                    <div className='flex items-center gap-2 min-w-0'>
+                    <div className='flex items-center gap-2 overflow-hidden min-w-0 flex-1'>
                       {post.author_profile_picture_url ? (
                         <img
                           src={getMediaUrl(post.author_profile_picture_url)}
@@ -111,15 +111,15 @@ const Note_forum_page = () => {
                         </div>
                       )}
                       <div className='min-w-0'>
-                        <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
-                          <span className='truncate'>{post.author_username || 'Unknown'}</span>
+                        <p className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 leading-tight overflow-hidden'>
+                          <span className='truncate block min-w-0'>{post.author_username || 'Unknown'}</span>
                           <FollowChip
                             authorId={post.author_id}
                             initialIsFollowing={post.is_following}
                             onFollowChange={handleFollowChange}
                           />
                         </p>
-                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>
+                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
                           {new Date(post.created_at).toLocaleDateString()}
                         </p>
                       </div>
@@ -129,7 +129,7 @@ const Note_forum_page = () => {
                   {/* ── Content ─────────────────────────────────── */}
                   <div className='mt-3 flex gap-3'>
                     <div className='flex-1 min-w-0'>
-                      <p className='font-["Inter"] text-[15px] md:text-[17px] font-semibold text-gray-800 break-all leading-snug'>
+                      <p className='font-["Inter"] text-[15px] md:text-[17px] font-semibold text-gray-800 leading-snug truncate'>
                         {post.title}
                       </p>
                       {post.text && (
@@ -154,8 +154,8 @@ const Note_forum_page = () => {
 
 
                   {/* ── Actions ─────────────────────────────────── */}
-                  <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100'>
-                    <div className='flex items-center gap-3 md:gap-4'>
+                  <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100 overflow-hidden'>
+                    <div className='flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar'>
                       {/* Like */}
                       <button
                         onClick={(e) => handleLike(postId, e)}
