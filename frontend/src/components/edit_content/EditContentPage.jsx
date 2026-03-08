@@ -201,9 +201,9 @@ const EditContentPage = () => {
     }
 
     return (
-        <div className='w-full min-h-screen bg-[#EEF2E1] overflow-auto font-["Inter"]'>
-            <div className='max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 md:py-8 pb-24 md:pb-8'>
-                <div className='bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[#E3E8D9] p-4 sm:p-6 md:p-8'>
+        <div className='w-full min-h-screen bg-[#EEF2E1] overflow-x-hidden overflow-y-auto font-["Inter"]'>
+            <div className='max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 md:py-8 pb-24 md:pb-8 min-w-0'>
+                <div className='bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[#E3E8D9] p-4 sm:p-6 md:p-8 overflow-hidden min-w-0'>
 
                     {/* --- Title --- */}
                     <div className='mb-5 sm:mb-6'>
@@ -270,14 +270,14 @@ const EditContentPage = () => {
                                         >
                                             <div className='flex items-center gap-2 min-w-0'>
                                                 {suggestion.color && (
-                                                    <div className='w-2 h-2 rounded-full flex-shrink-0' style={{ backgroundColor: suggestion.color }} />
+                                                    <div className='w-2 h-2 rounded-full shrink-0' style={{ backgroundColor: suggestion.color }} />
                                                 )}
                                                 <span className='text-sm truncate'>{suggestion.name || suggestion}</span>
                                             </div>
                                             {userInterests.includes(suggestion.name || suggestion) ? (
-                                                <span className='text-[10px] bg-[#E8F0E5] text-[#577F4E] px-2 py-0.5 rounded-full flex-shrink-0 ml-2'>Interested</span>
+                                                <span className='text-[10px] bg-[#E8F0E5] text-[#577F4E] px-2 py-0.5 rounded-full shrink-0 ml-2'>Interested</span>
                                             ) : (
-                                                <span className='text-xs text-gray-400 flex-shrink-0 ml-2'>({suggestion.use_count || 0})</span>
+                                                <span className='text-xs text-gray-400 shrink-0 ml-2'>({suggestion.use_count || 0})</span>
                                             )}
                                         </button>
                                     ))}
@@ -287,7 +287,7 @@ const EditContentPage = () => {
                     </div>
 
                     {/* --- Attachments --- */}
-                    <div>
+                    <div className='w-full min-w-0 overflow-hidden'>
                         <label className='block text-sm font-medium text-[#3A5335] mb-1.5 sm:mb-2'>
                             <span className='flex items-center gap-2'>
                                 <MdDriveFolderUpload className='text-[#577F4E]' size={17} />
@@ -300,7 +300,7 @@ const EditContentPage = () => {
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
-                            className={`border-2 border-dashed rounded-xl p-5 sm:p-8 text-center transition-all ${dragActive ? 'border-[#6B9D63] bg-[#F0F5ED]' : 'border-[#D4D9C6] bg-[#FAFBF8]'}`}
+                            className={`w-full min-w-0 border-2 border-dashed rounded-xl p-5 sm:p-8 text-center transition-all overflow-hidden ${dragActive ? 'border-[#6B9D63] bg-[#F0F5ED]' : 'border-[#D4D9C6] bg-[#FAFBF8]'}`}
                         >
                             <input type='file' id='file-upload' onChange={handleFileInput} accept='.pdf,.png,.jpg,.jpeg,.docx' multiple className='hidden' />
                             <label htmlFor='file-upload' className='cursor-pointer'>
@@ -318,12 +318,12 @@ const EditContentPage = () => {
                         </div>
 
                         {existingAttachments.length > 0 && (
-                            <div className='mt-3 sm:mt-4 space-y-2'>
+                            <div className='mt-3 sm:mt-4 space-y-2 w-full min-w-0 overflow-hidden'>
                                 <p className="text-xs sm:text-sm font-medium text-[#577F4E]">Current Files:</p>
                                 {existingAttachments.map((filePath, index) => (
-                                    <div key={`existing-${index}`} className='flex items-center justify-between p-2.5 sm:p-3 bg-[#E8F0E5] rounded-lg border border-[#C7D9C1] gap-2'>
-                                        <p className='text-xs sm:text-sm font-medium text-[#2C3E28] truncate min-w-0'>{filePath.split('/').pop()}</p>
-                                        <button onClick={() => handleRemoveExistingAttachment(filePath)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium flex-shrink-0'>
+                                    <div key={`existing-${index}`} className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 bg-[#E8F0E5] rounded-lg border border-[#C7D9C1] min-w-0 overflow-hidden'>
+                                        <p className='w-full min-w-0 overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] truncate'>{filePath.split('/').pop()}</p>
+                                        <button onClick={() => handleRemoveExistingAttachment(filePath)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium shrink-0 sm:self-center'>
                                             Remove
                                         </button>
                                     </div>
@@ -332,12 +332,12 @@ const EditContentPage = () => {
                         )}
 
                         {attachments.length > 0 && (
-                            <div className='mt-3 sm:mt-4 space-y-2'>
+                            <div className='mt-3 sm:mt-4 space-y-2 w-full min-w-0 overflow-hidden'>
                                 <p className="text-xs sm:text-sm font-medium text-[#577F4E]">New Files to Upload:</p>
                                 {attachments.map((file, index) => (
-                                    <div key={`new-${index}`} className='flex items-center justify-between p-2.5 sm:p-3 bg-[#F5F7EF] rounded-lg border border-[#E3E8D9] gap-2'>
-                                        <p className='text-xs sm:text-sm font-medium text-[#2C3E28] truncate min-w-0'>{file.name}</p>
-                                        <button onClick={() => handleRemoveNewAttachment(index)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium flex-shrink-0'>
+                                    <div key={`new-${index}`} className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 bg-[#F5F7EF] rounded-lg border border-[#E3E8D9] min-w-0 overflow-hidden'>
+                                        <p className='w-full min-w-0 overflow-hidden text-xs sm:text-sm font-medium text-[#2C3E28] truncate'>{file.name}</p>
+                                        <button onClick={() => handleRemoveNewAttachment(index)} className='text-[#C85A5A] hover:text-[#A84848] transition-colors text-xs sm:text-sm font-medium shrink-0 sm:self-center'>
                                             Remove
                                         </button>
                                     </div>
@@ -354,7 +354,7 @@ const EditContentPage = () => {
                                     type='checkbox'
                                     checked={licenseAgreement}
                                     onChange={(e) => setLicenseAgreement(e.target.checked)}
-                                    className='mt-0.5 w-4 h-4 accent-[#6B9D63] cursor-pointer flex-shrink-0'
+                                    className='mt-0.5 w-4 h-4 accent-[#6B9D63] cursor-pointer shrink-0'
                                 />
                                 <span className='text-xs sm:text-sm text-[#2C3E28]'>
                                     By uploading, I confirm I own these materials and agree to share them with the community, allowing other users to view, download, and use them for their studies.
