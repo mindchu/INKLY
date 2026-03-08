@@ -181,8 +181,8 @@ const Home_page = () => {
                                         className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                     >
                                         {note.is_liked
-                                            ? <IoHeart size={14} className='text-red-500' />
-                                            : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                            ? <IoHeart size={16} className='text-red-500' />
+                                            : <IoHeartOutline size={16} className='text-[#292D32]' />
                                         }
                                         <span className={`font-["Inter"] text-[12px] font-medium select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                             {note.like_count || 0}
@@ -191,7 +191,7 @@ const Home_page = () => {
 
                                     {/* Comments */}
                                     <div className='flex items-center gap-1'>
-                                        <PiChatText size={14} className='text-[#292D32]' />
+                                        <PiChatText size={16} className='text-[#292D32]' />
                                         <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {note.comments_count || 0}
                                         </span>
@@ -199,7 +199,7 @@ const Home_page = () => {
 
                                     {/* Views */}
                                     <div className='flex items-center gap-1'>
-                                        <LuEye size={14} className='text-[#292D32]' />
+                                        <LuEye size={16} className='text-[#292D32]' />
                                         <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {formatViews(note.views)}
                                         </span>
@@ -212,8 +212,8 @@ const Home_page = () => {
                                         title="Bookmark"
                                     >
                                         {isBookmarked(noteId)
-                                            ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
-                                            : <LuBookmarkMinus size={14} className='text-[#292D32]' />
+                                            ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                            : <LuBookmarkMinus size={16} className='text-[#292D32]' />
                                         }
                                     </button>
 

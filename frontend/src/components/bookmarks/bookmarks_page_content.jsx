@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react'
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { PiChatText } from "react-icons/pi";
-import { LuEye } from "react-icons/lu";
-import { MdOutlineFileDownload } from "react-icons/md";
+import { LuEye, LuBookmarkMinus } from "react-icons/lu";
 import { BsBookmarkDashFill } from "react-icons/bs";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { api } from '../../util/api';
@@ -10,9 +9,19 @@ import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
 import { TagsChipView } from '../common/TagsChip';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ShareButton from '../button/ShareButton';
 
 const Bookmarks_page_content = () => {
-    const { bookmarkedNotes, toggleBookmark, loading, setBookmarkedNotes, includeTags, excludeTags, sortBy } = useBookmarks();
+    const {
+        bookmarkedNotes,
+        toggleBookmark,
+        isBookmarked,
+        loading,
+        setBookmarkedNotes,
+        includeTags,
+        excludeTags,
+        sortBy
+    } = useBookmarks();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -20,10 +29,11 @@ const Bookmarks_page_content = () => {
         if (views >= 1000) {
             return (views / 1000).toFixed(1) + 'k';
         }
-        return views.toString();
+        return (views || 0).toString();
     };
 
-    const handleCardClick = (id) => {
+    const handleCardClick = (note) => {
+        const id = note._id || note.id;
         navigate(`/content/${id}`, { state: { from: location.pathname } });
     };
 
@@ -58,47 +68,15 @@ const Bookmarks_page_content = () => {
         }
     };
 
-    const sortedNotes = useMemo(() => {
-        let sorted = [...bookmarkedNotes];
+    const handleBookmark = (note, e) => {
+        e.stopPropagation();
+        toggleBookmark(note);
+    };
 
-        // ── Tag filtering ─────────────────────────────────────────
-        if (includeTags.length > 0) {
-            sorted = sorted.filter(note =>
-                includeTags.every(tag =>
-                    (note.tags || []).some(t => t.toLowerCase() === tag.toLowerCase())
-                )
-            );
-        }
-        if (excludeTags.length > 0) {
-            sorted = sorted.filter(note =>
-                !excludeTags.some(tag =>
-                    (note.tags || []).some(t => t.toLowerCase() === tag.toLowerCase())
-                )
-            );
-        }
+    const sortedNotes = bookmarkedNotes;
 
-        // ── Sorting ───────────────────────────────────────────────
-        switch (sortBy) {
-            case 'views':
-                sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-                break;
-            case 'comments':
-                sorted.sort((a, b) => (b.comments_count || 0) - (a.comments_count || 0));
-                break;
-            case 'likes':
-                sorted.sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
-                break;
-            case 'date':
-                sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                break;
-            default:
-                break;
-        }
 
-        return sorted;
-    }, [bookmarkedNotes, sortBy, includeTags, excludeTags]);
-
-    if (loading) {
+    if (loading && bookmarkedNotes.length === 0) {
         return (
             <div className='w-full h-full bg-[#EEF2E1] flex items-center justify-center'>
                 <p className='font-[Inter] text-xl animate-pulse text-gray-600'>Loading your bookmarks...</p>
@@ -131,109 +109,146 @@ const Bookmarks_page_content = () => {
     }
 
     return (
-        <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8'>
-                {sortedNotes.map((note) => (
-                    <div 
-                        key={note._id || note.id}
-                        className='bg-white rounded-xl p-6 shadow-sm flex flex-col relative hover:shadow-md transition-shadow cursor-pointer'
-                        onClick={() => handleCardClick(note._id || note.id)}
-                    >
-                        <button
-                            onClick={(e) => { e.stopPropagation(); toggleBookmark(note); }}
-                            className='absolute top-4 right-4 cursor-pointer hover:scale-110 transition z-20'
+        <div className='w-full h-full bg-[#EEF2E1] overflow-auto relative pb-[76px] md:pb-0'>
+            <div className='flex flex-col gap-3 px-3 py-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:p-8'>
+                {sortedNotes.map((note) => {
+                    const noteId = note._id || note.id;
+                    const thumbFile = note.file_paths?.find(f =>
+                        ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
+                    );
+
+                    return (
+                        <div
+                            key={noteId}
+                            className='bg-white rounded-[12px] shadow-sm p-3 md:p-6 flex flex-col cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]'
+                            onClick={() => handleCardClick(note)}
                         >
-                            <BsBookmarkDashFill size={20} className='text-yellow-400' />
-                        </button>
-
-                        <h3 className='text-lg font-semibold text-gray-800 mb-3 pr-8 break-all'>{note.title}</h3>
-
-                        <div className='flex items-center gap-2 mb-3'>
-                            {note.author_profile_picture_url ? (
-                                <img
-                                    src={getMediaUrl(note.author_profile_picture_url)}
-                                    alt={note.author_username}
-                                    className="w-6 h-6 rounded-full object-cover"
-                                />
-                            ) : (
-                                <div className='w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold'>
-                                    {note.author_username?.[0]?.toUpperCase() || 'U'}
-                                </div>
-                            )}
-                            <span className='text-sm font-medium text-gray-700 flex items-center gap-2'>
-                                {note.author_username}
-                                <FollowChip
-                                    authorId={note.author_id}
-                                    initialIsFollowing={note.is_following}
-                                    onFollowChange={handleFollowChange}
-                                />
-                            </span>
-                        </div>
-
-                        <div className="flex gap-3 mb-4 flex-grow">
-                            <p className='text-sm text-gray-600 line-clamp-3 flex-1 break-all'>
-                                {note.text}
-                            </p>
-                            {note.file_paths?.some(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase())) && (
-                                <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                                    <img
-                                        src={getMediaUrl(`/uploads/${note.file_paths.find(file => ['png', 'jpg', 'jpeg', 'webp'].includes(file.split('.').pop().toLowerCase()))}`)}
-                                        alt="Thumbnail"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        {note.file_paths?.length > 0 && (
-                            <div className='mb-4'>
-                                <span className='text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full'>
-                                    📎 {note.file_paths.length} Attachment(s)
-                                </span>
-                            </div>
-                        )}
-
-                        <div className='flex flex-wrap gap-2 mb-4'>
-                            <TagsChipView tags={note.tags} />
-                        </div>
-
-                        <div className='border-t border-gray-200 mb-4'></div>
-
-                        <div className='flex items-center justify-between text-sm text-gray-600'>
-                            <div className='flex items-center gap-4'>
-                                <button
-                                    onClick={(e) => handleLike(note._id || note.id, e)}
-                                    className='flex items-center gap-1 hover:text-red-500 transition cursor-pointer'
-                                >
-                                    {note.is_liked ? (
-                                        <IoHeart size={16} className='text-red-500' />
+                            {/* ── Author row ──────────────────────────────── */}
+                            <div className='flex items-center justify-between gap-2'>
+                                <div className='flex items-center gap-2 min-w-0'>
+                                    {note.author_profile_picture_url ? (
+                                        <img
+                                            src={getMediaUrl(note.author_profile_picture_url)}
+                                            alt={note.author_username}
+                                            className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover flex-shrink-0"
+                                        />
                                     ) : (
-                                        <IoHeartOutline size={16} />
+                                        <div className='w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#577F4E] flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0'>
+                                            {note.author_username?.[0]?.toUpperCase() || 'U'}
+                                        </div>
                                     )}
-                                    <span className={note.is_liked ? 'text-red-500' : ''}>
-                                        {note.like_count || 0}
-                                    </span>
-                                </button>
-                                <div className='flex items-center gap-1'>
-                                    <PiChatText size={16} />
-                                    <span>{note.comments_count || 0}</span>
+                                    <div className='min-w-0'>
+                                        <div className='font-["Inter"] text-[13px] md:text-[14px] font-semibold text-[#124C09]/70 flex items-center gap-1.5 flex-wrap leading-tight'>
+                                            <span className='truncate'>{note.author_username || 'Unknown'}</span>
+                                            <FollowChip
+                                                authorId={note.author_id}
+                                                initialIsFollowing={note.is_following}
+                                                onFollowChange={handleFollowChange}
+                                            />
+                                        </div>
+                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
+                                    </div>
                                 </div>
-                                <div className='flex items-center gap-1'>
-                                    <LuEye size={16} />
-                                    <span>{formatViews(note.views || 0)}</span>
+
+                                <div className='flex items-center gap-2 flex-shrink-0'>
+                                    {note.type && (
+                                        <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${note.type === 'post'
+                                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                            : 'bg-purple-50 text-purple-700 border border-purple-200'
+                                            }`}>
+                                            {note.type === 'post' ? 'Note' : 'Discussion'}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                            <div className='flex items-center gap-2'>
-                                <button className='hover:text-gray-800 transition'>
-                                    <MdOutlineFileDownload size={16} />
-                                </button>
+
+                            {/* ── Content ─────────────────────────────────── */}
+                            <div className='mt-3 flex gap-3 flex-grow'>
+                                <div className='flex-1 min-w-0'>
+                                    <p className='font-["Inter"] text-[15px] md:text-[18px] font-semibold text-gray-800 break-words leading-snug line-clamp-2'>
+                                        {note.title}
+                                    </p>
+                                    {note.text && (
+                                        <p className='font-["Inter"] text-[12px] md:text-sm text-gray-500 mt-1.5 break-words line-clamp-2 md:line-clamp-3 whitespace-pre-wrap'>
+                                            {note.text}
+                                        </p>
+                                    )}
+                                </div>
+                                {thumbFile && (
+                                    <div className='w-[64px] h-[56px] md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100'>
+                                        <img
+                                            src={getMediaUrl(`/uploads/${thumbFile}`)}
+                                            alt="Thumbnail"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ── Tags ────────────────────────────────────── */}
+                            <TagsChipView tags={note.tags} />
+
+                            {/* ── Actions ─────────────────────────────────── */}
+                            <div className='flex justify-end mt-3 pt-2.5 border-t border-gray-100'>
+                                <div className='flex items-center gap-3 md:gap-4'>
+                                    {/* Like */}
+                                    <button
+                                        onClick={(e) => handleLike(noteId, e)}
+                                        className='flex items-center gap-1 hover:text-red-500 transition-colors'
+                                    >
+                                        {note.is_liked
+                                            ? <IoHeart size={16} className='text-red-500' />
+                                            : <IoHeartOutline size={16} className='text-[#292D32]' />
+                                        }
+                                        <span className={`font-["Inter"] text-[12px] select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
+                                            {note.like_count || 0}
+                                        </span>
+                                    </button>
+
+                                    {/* Comments */}
+                                    <div className='flex items-center gap-1'>
+                                        <PiChatText size={16} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                            {note.comments_count || 0}
+                                        </span>
+                                    </div>
+
+                                    {/* Views */}
+                                    <div className='flex items-center gap-1'>
+                                        <LuEye size={16} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                            {formatViews(note.views)}
+                                        </span>
+                                    </div>
+
+                                    {/* Bookmark */}
+                                    <button
+                                        onClick={(e) => handleBookmark(note, e)}
+                                        className='flex items-center justify-center hover:text-yellow-500 transition-colors'
+                                        title="Bookmark"
+                                    >
+                                        {isBookmarked(noteId)
+                                            ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                            : <LuBookmarkMinus size={16} className='text-[#292D32]' />
+                                        }
+                                    </button>
+
+                                    {/* Share */}
+                                    <div className="flex items-center justify-center">
+                                        <ShareButton
+                                            targetId={noteId}
+                                            title={note.title}
+                                            text={note.text?.substring(0, 100) || 'Check out this post'}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
-    )
+    );
 }
 
 export default Bookmarks_page_content

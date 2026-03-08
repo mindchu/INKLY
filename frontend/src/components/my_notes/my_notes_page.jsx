@@ -191,11 +191,11 @@ const My_notes_page = () => {
                       }}
                     />
                     <div className='flex items-center gap-1'>
-                      <MessageCircle size={15} />
+                      <MessageCircle size={16} />
                       <span className='text-xs sm:text-sm'>{note.comments_count || 0}</span>
                     </div>
                     <div className='flex items-center gap-1'>
-                      <Eye size={15} />
+                      <Eye size={16} />
                       <span className='text-xs sm:text-sm'>{note.views || 0}</span>
                     </div>
                   </div>
@@ -206,7 +206,7 @@ const My_notes_page = () => {
                       className='hover:text-gray-800 transition'
                       onClick={(e) => handleEdit(note, e)}
                     >
-                      <FaRegEdit size={15} />
+                      <FaRegEdit size={16} />
                     </button>
 
                     <DeleteButton
@@ -222,9 +222,9 @@ const My_notes_page = () => {
                       onClick={(e) => handleBookmark(note, e)}
                     >
                       {isBookmarked(note._id || note.id) ? (
-                        <BsBookmarkDashFill size={15} />
+                        <BsBookmarkDashFill size={16} />
                       ) : (
-                        <BsBookmarkDash size={15} />
+                        <BsBookmarkDash size={16} />
                       )}
                     </button>
 

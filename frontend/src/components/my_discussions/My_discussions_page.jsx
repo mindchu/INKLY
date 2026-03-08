@@ -191,11 +191,11 @@ const My_discussions_page = () => {
                                             }}
                                         />
                                         <div className='flex items-center gap-1'>
-                                            <MessageCircle size={15} />
+                                            <MessageCircle size={16} />
                                             <span className='text-xs sm:text-sm'>{disc.comments_count || 0}</span>
                                         </div>
                                         <div className='flex items-center gap-1'>
-                                            <Eye size={15} />
+                                            <Eye size={16} />
                                             <span className='text-xs sm:text-sm'>{disc.views || 0}</span>
                                         </div>
                                     </div>
@@ -206,7 +206,7 @@ const My_discussions_page = () => {
                                             className='hover:text-gray-800 transition'
                                             onClick={(e) => handleEdit(disc, e)}
                                         >
-                                            <FaRegEdit size={15} />
+                                            <FaRegEdit size={16} />
                                         </button>
 
                                         <DeleteButton
@@ -222,9 +222,9 @@ const My_discussions_page = () => {
                                             onClick={(e) => handleBookmark(disc, e)}
                                         >
                                             {isBookmarked(disc._id || disc.id) ? (
-                                                <BsBookmarkDashFill size={15} />
+                                                <BsBookmarkDashFill size={16} />
                                             ) : (
-                                                <BsBookmarkDash size={15} />
+                                                <BsBookmarkDash size={16} />
                                             )}
                                         </button>
 
