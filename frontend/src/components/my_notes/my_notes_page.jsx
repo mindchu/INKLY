@@ -136,6 +136,9 @@ const My_notes_page = () => {
                   <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0 truncate'>
                     <span className='truncate'>{note.author_username || 'Me'}</span>
                     <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                    <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                        {new Date(note.created_at).toLocaleDateString()}
+                    </p>
                   </span>
                 </div>
 

@@ -119,7 +119,9 @@ const Discussion_page = () => {
                                                         onFollowChange={handleFollowChange}
                                                     />
                                                 </p>
-                                                <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>Posted recently</p>
+                                                <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                    {new Date(post.created_at).toLocaleDateString()}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>

@@ -144,7 +144,9 @@ const CommentThreadPage = () => {
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm">{comment.author_username || 'Anonymous'}</span>
-                            <span className="text-xs text-gray-400">recent</span>
+                            <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                {new Date(comment.created_at).toLocaleDateString()}
+                            </p>
                         </div>
                         <p className="text-sm text-gray-700 mt-1 break-all">{comment.text}</p>
 
@@ -274,7 +276,9 @@ const CommentThreadPage = () => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3">
                                         <span className="font-bold text-gray-900">{anchorComment.author_username || 'Anonymous'}</span>
-                                        <span className="text-xs text-gray-400">original comment</span>
+                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                {new Date(anchorComment.created_at).toLocaleDateString()}
+                                        </p>
                                     </div>
                                     <p className="text-lg text-gray-800 mt-2 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 break-all">
                                         {anchorComment.text}

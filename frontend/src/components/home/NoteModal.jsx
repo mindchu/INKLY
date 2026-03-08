@@ -158,7 +158,6 @@ const NoteModal = ({ note, onClose }) => {
                                     {note.author_username || 'Unknown'}
                                     <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
                                 </p>
-                                <p className="text-sm text-gray-500">Posted recently</p>
                             </div>
                         </div>
                     </div>
@@ -212,7 +211,6 @@ const NoteModal = ({ note, onClose }) => {
                                         </span>
                                         <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
                                     </div>
-                                    <p className="text-[11px] text-gray-400 mt-0.5">Published recently</p>
                                 </div>
                             </div>
 

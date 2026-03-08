@@ -145,8 +145,10 @@ const Bookmarks_page_content = () => {
                                                 initialIsFollowing={note.is_following}
                                                 onFollowChange={handleFollowChange}
                                             />
+                                            <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                {new Date(note.created_at).toLocaleDateString()}
+                                            </p>
                                         </div>
-                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                     </div>
                                 </div>
 

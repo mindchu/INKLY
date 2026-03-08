@@ -136,6 +136,9 @@ const My_discussions_page = () => {
                                     <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0 truncate'>
                                         <span className='truncate'>{disc.author_username || 'Me'}</span>
                                         <FollowChip authorId={disc.author_id} initialIsFollowing={disc.is_following} />
+                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                            {new Date(disc.created_at).toLocaleDateString()}
+                                        </p>
                                     </span>
                                 </div>
 
