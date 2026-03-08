@@ -45,7 +45,7 @@ const Home_Top_bar = () => {
       <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
         <div className='flex flex-row items-center gap-3'>
           <PiBookOpenTextLight size={38} className='opacity-70' />
-          <p className='font-["Julius_Sans_One"] text-[28px] md:text-[32px] font-thin text-[#3E4A34] select-none'>HOME</p>
+          <p className='font-["Julius_Sans_One"] text-[18px] md:text-[32px] font-thin text-[#3E4A34] select-none'>HOME</p>
         </div>
       </div>
 

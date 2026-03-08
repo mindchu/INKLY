@@ -10,7 +10,7 @@ const Profile_top_bar = () => {
             <div className='flex flex-row gap-3 items-center mt-2 ml-5 justify-between w-full pr-8'>
                 <div className='flex flex-row items-center gap-3'>
                     <TiUserOutline size={32} className='opacity-70' />
-                    <p className='font-["Julius Sans One"] text-[32px] text-[#3E4A34] font-thin select-none'>EDIT PROFILE</p>
+                    <p className='font-["Julius Sans One"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>EDIT PROFILE</p>
                 </div>
                 <div className='flex gap-6 ml-auto mr-5 items-center'>
                     <button onClick={() => navigate('/profile')} className='w-[150px] h-[40px] rounded-md border border-[#838181] opacity-60 font-["Inter"] text-[16px] cursor-pointer hover:bg-gray-100 hover:opacity-100 hover:border-[#5a5a5a] transition-all duration-200'>Cancel</button>

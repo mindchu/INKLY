@@ -19,14 +19,14 @@ import { FaUserCircle } from 'react-icons/fa';
 
 
 // ── Mobile tab pages — same order as desktop sidebar ────────────────────────
-// Desktop: Home, Discussion, Note, Search, Following,
+// Desktop: Home, Note, Discussion, Search, Following,
 //          My Note, My Discussion, Create Note, Create Discussion, Bookmark,
 //          Profile, Interests, Sign Out, [Admin]
 const BASE_TAB_PAGES = [
     [
         { label: 'Home',       iconOff: AiOutlineHome,  iconOn: AiFillHome,      path: '/home' },
-        { label: 'Discussion', iconOff: BiChat,          iconOn: BiSolidChat,     path: '/discussion' },
         { label: 'Note',       iconOff: PiNotepadLight,  iconOn: PiNotepadBold,   path: '/note_forum' },
+        { label: 'Discussion', iconOff: BiChat,          iconOn: BiSolidChat,     path: '/discussion' },
         { label: 'Search',     iconOff: RiSearch2Line,   iconOn: RiSearch2Fill,   path: '/search' },
     ],
     [
@@ -91,8 +91,8 @@ const Side_bar = () => {
         {
             section: 'Explore', items: [
                 { label: 'Home',       icon: <AiOutlineHome size={20} />,   path: '/home' },
-                { label: 'Discussion', icon: <BiChat size={20} />,          path: '/discussion' },
                 { label: 'Note',       icon: <CgNotes size={20} />,         path: '/note_forum' },
+                { label: 'Discussion', icon: <BiChat size={20} />,          path: '/discussion' },
                 { label: 'Search',     icon: <RiSearch2Line size={20} />,   path: '/search' },
                 { label: 'Following',  icon: <HiOutlineUsers size={20} />,  path: '/following' },
             ]

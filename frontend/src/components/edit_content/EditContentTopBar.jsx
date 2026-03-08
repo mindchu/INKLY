@@ -8,7 +8,7 @@ const EditContentTopBar = () => {
             <div className='flex flex-row gap-3 items-center mt-2 ml-5 justify-between w-full pr-8'>
                 <div className='flex flex-row items-center gap-3'>
                     <MdEditDocument size={32} className='opacity-70 text-[#3A5335]' />
-                    <p className='font-["Inter"] text-[32px] text-[#3E4A34] font-thin select-none uppercase'>EDIT CONTENT</p>
+                    <p className='font-["Inter"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none uppercase'>EDIT CONTENT</p>
                 </div>
                 <div className='flex gap-6 ml-auto mr-5 items-center'>
                     <button

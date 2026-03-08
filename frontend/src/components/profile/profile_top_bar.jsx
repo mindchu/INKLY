@@ -24,7 +24,7 @@ const Profile_top_bar = () => {
                 <div className='flex flex-row items-center gap-2 md:gap-3'>
                     <TiUserOutline size={24} className='opacity-70 md:hidden' />
                     <TiUserOutline size={32} className='opacity-70 hidden md:block' />
-                    <p className='font-["Julius_Sans_One"] text-[22px] md:text-[32px] text-[#3E4A34] font-thin select-none'>
+                    <p className='font-["Julius_Sans_One"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>
                         {isEditPage ? 'EDIT PROFILE' : 'PROFILE'}
                     </p>
                 </div>

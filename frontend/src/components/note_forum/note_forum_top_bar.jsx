@@ -48,7 +48,7 @@ const Note_forum_top_bar = () => {
       <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
         <div className='flex flex-row items-center gap-3'>
           <BiMessageSquare size={32} className='opacity-70' />
-          <p className='font-["Julius_Sans_One"] text-[28px] md:text-[32px] text-[#3E4A34] font-thin select-none'>NOTE FORUM</p>
+          <p className='font-["Julius_Sans_One"] text-[18px] md:text-[32px] text-[#3E4A34] font-thin select-none'>NOTE FORUM</p>
         </div>
       </div>
 

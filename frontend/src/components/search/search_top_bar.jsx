@@ -51,7 +51,7 @@ const Search_top_bar = () => {
             <div className='flex flex-row mt-1.5 gap-3 items-center mx-4 sm:mx-5 justify-between'>
                 <div className='flex flex-row items-center gap-3'>
                     <RiSearch2Line size={28} className='opacity-70' />
-                    <p className='font-["Julius_Sans_One"] text-[24px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>SEARCH</p>
+                    <p className='font-["Julius_Sans_One"] text-[18px] sm:text-[32px] text-[#3E4A34] font-thin select-none'>SEARCH</p>
                 </div>
             </div>
 
