@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useLocation,useNavigate } from 'react-router-dom';
 import { GoPaperclip } from "react-icons/go";
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { PiChatText } from "react-icons/pi";
@@ -19,6 +19,7 @@ const Search_page = () => {
     const { results, loading, setResults, page, setPage, hasMore } = useSearch();
     const { toggleBookmark, isBookmarked } = useBookmarks();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const observer = useRef();
     const lastResultElementRef = useCallback(node => {
@@ -33,7 +34,7 @@ const Search_page = () => {
     }, [loading, hasMore]);
 
     const handleCardClick = (note) => {
-        navigate(`/content/${note._id || note.id}`);
+        navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
     };
 
     const formatViews = (views) => {

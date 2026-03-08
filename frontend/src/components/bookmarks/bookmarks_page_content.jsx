@@ -9,16 +9,22 @@ import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
 import { getMediaUrl } from '../../config';
 import { TagsChipView } from '../common/TagsChip';
-
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Bookmarks_page_content = () => {
     const { bookmarkedNotes, toggleBookmark, loading, setBookmarkedNotes, includeTags, excludeTags, sortBy } = useBookmarks();
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const formatViews = (views) => {
         if (views >= 1000) {
             return (views / 1000).toFixed(1) + 'k';
         }
         return views.toString();
+    };
+
+    const handleCardClick = (id) => {
+        navigate(`/content/${id}`, { state: { from: location.pathname } });
     };
 
     const handleLike = async (postId, e) => {
@@ -118,7 +124,11 @@ const Bookmarks_page_content = () => {
         <div className='w-full h-full bg-[#EEF2E1] overflow-auto'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8'>
                 {sortedNotes.map((note) => (
-                    <div key={note._id || note.id} className='bg-white rounded-xl p-6 shadow-sm flex flex-col relative hover:shadow-md transition-shadow cursor-pointer'>
+                    <div 
+                        key={note._id || note.id}
+                        className='bg-white rounded-xl p-6 shadow-sm flex flex-col relative hover:shadow-md transition-shadow cursor-pointer'
+                        onClick={() => handleCardClick(note._id || note.id)}
+                    >
                         <button
                             onClick={(e) => { e.stopPropagation(); toggleBookmark(note); }}
                             className='absolute top-4 right-4 cursor-pointer hover:scale-110 transition z-20'
