@@ -83,7 +83,7 @@ const Search_page = () => {
             {/* Responsive grid: 1 col mobile, 2 col tablet, 3 col desktop */}
             <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6'>
                 {results.map((note, index) => {
-                    const isTriggerResult = index === Math.max(0, results.length - 3);
+                    const isTriggerResult = index === Math.max(0, results.length - 5);
                     return (
                         <div
                             ref={isTriggerResult ? lastResultElementRef : null}

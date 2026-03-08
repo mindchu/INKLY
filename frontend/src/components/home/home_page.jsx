@@ -67,10 +67,10 @@ const Home_page = () => {
     };
 
     const handleFollowChange = (authorId, isNowFollowing) => {
-        setNotes(prevNotes => 
-            prevNotes.map(note => 
-                note.author_id === authorId 
-                    ? { ...note, is_following: isNowFollowing } 
+        setNotes(prevNotes =>
+            prevNotes.map(note =>
+                note.author_id === authorId
+                    ? { ...note, is_following: isNowFollowing }
                     : note
             )
         );
@@ -95,7 +95,7 @@ const Home_page = () => {
             <div className='flex flex-col gap-3 px-3 py-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:p-8'>
                 {notes.map((note, index) => {
                     const noteId = note._id || note.id;
-                    const isTriggerNote = index === Math.max(0, notes.length - 3);
+                    const isTriggerNote = index === Math.max(0, notes.length - 5);
                     const thumbFile = note.file_paths?.find(f =>
                         ['png', 'jpg', 'jpeg', 'webp'].includes(f.split('.').pop().toLowerCase())
                     );
@@ -136,11 +136,10 @@ const Home_page = () => {
 
                                 <div className='flex items-center gap-2 flex-shrink-0'>
                                     {note.type && (
-                                        <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${
-                                            note.type === 'post'
+                                        <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${note.type === 'post'
                                                 ? 'bg-blue-50 text-blue-700 border border-blue-200'
                                                 : 'bg-purple-50 text-purple-700 border border-purple-200'
-                                        }`}>
+                                            }`}>
                                             {note.type === 'post' ? 'Note' : 'Discussion'}
                                         </span>
                                     )}

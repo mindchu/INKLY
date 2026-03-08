@@ -128,12 +128,13 @@ async def search_content(
     sort_by: str = Query("recent", description="recent, views, likes, or comments"),
     scope: str = Query("all", description="search scope: all, bookmarks, following, or owned"),
     skip: int = Query(0, description="Number of items to skip"),
-    limit: int = Query(10, description="Max number of items to return")
+    limit: int = Query(10, description="Max number of items to return"),
+    type: str = Query(None, description="Filter by content type: post or discussion")
 ):
     user = request.session.get('user')
     user_id = user['google_id'] if user else None
-    results = content_util.get_search_results(user_id, q, tags, exclude_tags, sort_by, scope, skip, limit)
-    return {"data": results}
+    results, stats = content_util.get_search_results(user_id, q, tags, exclude_tags, sort_by, scope, skip, limit, content_type=type)
+    return {"data": results, "stats": stats}
 
 
 @router.post("/content/{content_id}/comment")

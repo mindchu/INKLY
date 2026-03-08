@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../util/api';
 
 const SortContext = createContext();
@@ -12,6 +13,7 @@ export const useSortContext = () => {
 };
 
 export const SortProvider = ({ children, contentType }) => {
+    const location = useLocation();
     const [sortBy, setSortBy] = useState('recommended');
     const [includeTags, setIncludeTags] = useState([]);
     const [excludeTags, setExcludeTags] = useState([]);
@@ -21,8 +23,30 @@ export const SortProvider = ({ children, contentType }) => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const limit = 10;
+    const limit = 20;
     const lastFetchedSearch = useRef(null);
+
+    // Handle force refresh from sidebar
+    useEffect(() => {
+        if (location.state?.refresh) {
+            const isAtDefault = sortBy === 'recommended' &&
+                includeTags.length === 0 &&
+                excludeTags.length === 0 &&
+                searchQuery === '';
+
+            if (isAtDefault) {
+                fetchRecommended(0, 'recommended', [], []);
+            } else {
+                setSearchQuery('');
+                setLocalSearch('');
+                setSortBy('recommended');
+                setIncludeTags([]);
+                setExcludeTags([]);
+                setPage(0);
+                lastFetchedSearch.current = null;
+            }
+        }
+    }, [location.state?.refresh]);
 
     const fetchRecommended = async (pageNum = 0, currentSortBy = sortBy, currentIncludeTags = includeTags, currentExcludeTags = excludeTags) => {
         setLoading(true);
@@ -31,9 +55,9 @@ export const SortProvider = ({ children, contentType }) => {
 
             const sortParam = currentSortBy === 'views' ? 'views'
                 : currentSortBy === 'likes' ? 'likes'
-                : currentSortBy === 'comments' ? 'comments'
-                : currentSortBy === 'recommended' ? 'recommended'
-                : 'recent';
+                    : currentSortBy === 'comments' ? 'comments'
+                        : currentSortBy === 'recommended' ? 'recommended'
+                            : 'recent';
             params.append('sort', sortParam);
             params.append('skip', pageNum * limit);
             params.append('limit', limit);
@@ -81,9 +105,9 @@ export const SortProvider = ({ children, contentType }) => {
 
             const sortParam = currentSortBy === 'views' ? 'views'
                 : currentSortBy === 'likes' ? 'likes'
-                : currentSortBy === 'comments' ? 'comments'
-                : currentSortBy === 'recommended' ? 'recommended'
-                : 'recent';
+                    : currentSortBy === 'comments' ? 'comments'
+                        : currentSortBy === 'recommended' ? 'recommended'
+                            : 'recent';
             params.append('sort_by', sortParam);
             params.append('scope', 'all');
             params.append('skip', pageNum * limit);
