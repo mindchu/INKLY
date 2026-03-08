@@ -4,7 +4,6 @@ import { MdOutlineDateRange, MdOutlineRemoveRedEye } from "react-icons/md";
 import { IoClose, IoHeartOutline } from "react-icons/io5";
 import { BiCommentDetail } from "react-icons/bi";
 import { RiSearch2Line } from "react-icons/ri";
-import { FiMenu } from "react-icons/fi";
 import { useBookmarks } from '../../context/BookmarksContext';
 import { useSidebar } from '../../context/SidebarContext';
 
@@ -50,9 +49,6 @@ const Bookmarks_top_bar = () => {
             {/* ── Header row ─────────────────────────────────────────── */}
             <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
                 <div className='flex flex-row items-center gap-3'>
-                    <button onClick={toggleSidebar} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
-                        <FiMenu size={24} className="text-[#3E4A34]" />
-                    </button>
                     <BsBookmark size={32} className='opacity-70' />
                     <p className='font-["Julius Sans One"] text-[24px] md:text-[32px] text-[#3E4A34] font-thin select-none'>BOOKMARKS</p>
                 </div>
