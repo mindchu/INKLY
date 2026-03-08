@@ -34,7 +34,7 @@ function Signin() {
                 </div>
                 <div className='hidden lg:block bg-[#EEF2E1] h-screen w-[50%] relative overflow-hidden'>
                     <div className='absolute inset-0 flex items-center justify-center opacity-10 grayscale'>
-                        <div className='text-[200px] font-black tracking-tighter'>INKLY</div>
+                        <div className='text-[200px] font-black tracking-tighter select-none'>INKLY</div>
                     </div>
                 </div>
             </div>
