@@ -37,6 +37,16 @@ const Search_page = () => {
         navigate(`/content/${note._id || note.id}`, { state: { from: location.pathname } });
     };
 
+    const handleFollowChange = (authorId, isNowFollowing) => {
+        setResults(prevNotes =>
+            prevNotes.map(note =>
+                note.author_id === authorId
+                    ? { ...note, is_following: isNowFollowing }
+                    : note
+            )
+        );
+    };
+
     const formatViews = (views) => {
         if (views >= 1000) {
             return (views / 1000).toFixed(1) + 'k';
@@ -113,7 +123,11 @@ const Search_page = () => {
                                     )}
                                     <p className='font-[Inter] text-[15px] sm:text-[17px] text-[#124C09] font-semibold flex items-center gap-2 min-w-0 truncate'>
                                         <span className='truncate'>{note.author_username || 'Unknown'}</span>
-                                        <FollowChip authorId={note.author_id} initialIsFollowing={note.is_following} />
+                                        <FollowChip
+                                            authorId={note.author_id}
+                                            initialIsFollowing={note.is_following}
+                                            onFollowChange={handleFollowChange}
+                                        />
                                     </p>
                                 </div>
 
