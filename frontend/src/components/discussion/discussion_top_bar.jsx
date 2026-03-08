@@ -7,10 +7,10 @@ import { BiCommentDetail } from "react-icons/bi";
 import { useSortContext } from '../../context/SortContext';
 
 const SORT_OPTIONS = [
-    { key: 'views',    icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
-    { key: 'comments', icon: <BiCommentDetail size={12} />,       label: 'Comments' },
-    { key: 'likes',    icon: <IoHeartOutline size={12} />,        label: 'Likes' },
-    { key: 'date',     icon: <MdOutlineDateRange size={12} />,    label: 'Date' },
+    { key: 'views', icon: <MdOutlineRemoveRedEye size={12} />, label: 'Views' },
+    { key: 'comments', icon: <BiCommentDetail size={12} />, label: 'Comments' },
+    { key: 'likes', icon: <IoHeartOutline size={12} />, label: 'Likes' },
+    { key: 'date', icon: <MdOutlineDateRange size={12} />, label: 'Date' },
 ];
 
 const Discussion_top_bar = () => {
@@ -45,7 +45,7 @@ const Discussion_top_bar = () => {
         <div className='w-full bg-white shadow-md py-3'>
 
             {/* ── Header row ─────────────────────────────────────────── */}
-            <div className='flex flex-row items-center ml-4 md:ml-5 mt-1.5 gap-3 justify-between w-full pr-4 md:pr-8'>
+            <div className='flex flex-row items-center px-4 md:px-5 mt-1.5 gap-3 justify-between'>
                 <div className='flex flex-row items-center gap-3'>
                     <BiMessageSquare size={32} className='opacity-70' />
                     <p className='font-["Julius_Sans_One"] text-[18px] md:text-[32px] text-[#3E4A34] font-thin select-none'>DISCUSSION FORUM</p>
@@ -59,7 +59,7 @@ const Discussion_top_bar = () => {
                 </button>
                 <input
                     type='text'
-                    placeholder='Search discussions by title, subject, or tags...'
+                    placeholder='Search forum by title, subject, or tags...'
                     className='select-none flex flex-1 min-w-0 bg-transparent font-["Inter"] text-[15px] md:text-[18px] outline-none border-none focus:outline-none focus:ring-0'
                     value={localSearch}
                     onChange={(e) => setLocalSearch(e.target.value)}
@@ -77,9 +77,8 @@ const Discussion_top_bar = () => {
                             <button
                                 key={key}
                                 onClick={() => setSortBy(key)}
-                                className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
-                                    sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`flex flex-row items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                             >
                                 {icon}
                                 <span className='font-["Inter"] text-[14px] font-medium'>{label}</span>
@@ -96,9 +95,8 @@ const Discussion_top_bar = () => {
                             <button
                                 key={key}
                                 onClick={() => setSortBy(key)}
-                                className={`flex flex-row items-center gap-1 px-3 py-1.5 rounded-full transition-all text-[12px] font-medium font-["Inter"] ${
-                                    sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={`flex flex-row items-center gap-1 px-3 py-1.5 rounded-full transition-all text-[12px] font-medium font-["Inter"] ${sortBy === key ? 'bg-[#3E4A34] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
                             >
                                 {icon}
                                 {label}

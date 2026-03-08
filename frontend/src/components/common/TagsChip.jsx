@@ -26,37 +26,37 @@ export const TagsChipView = ({ tags }) => {
     return (
         <>
             {tags && tags.length > 0 && (
-            <div className='flex flex-wrap gap-2 mb-4'>
-                {tags.map((tag, tagIndex) => (
-                    <span
-                        key={tagIndex}
-                        className='text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium break-all'
-                    >
-                        #{tag}
-                    </span>
-                ))}
-            </div>
+                <div className='flex flex-wrap gap-2 mb-4 overflow-hidden max-w-full'>
+                    {tags.map((tag, tagIndex) => (
+                        <span
+                            key={tagIndex}
+                            className='inline-block max-w-full text-xs text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium truncate break-all'
+                        >
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
             )}
         </>
     )
 }
 
-export const TagsChipAdd = ({ tags, handleAddTag, interests }) =>  {
+export const TagsChipAdd = ({ tags, handleAddTag, interests }) => {
     return (
         <>
-        {tags && Array.isArray(interests) &&
-            tags.filter(tag => !interests.includes(tag.name))
-            .slice(0, 10)
-            .map((tag, index) => (
-                <button
-                key={index}
-                onClick={() => handleAddTag(tag.name)}
-                style={{ borderColor: tag.color }}
-                className='px-3 py-1.5 bg-[#F5F7EF] text-[#7A8A73] rounded-full text-xs font-medium border hover:brightness-95 transition-all break-all'
-                >
-                + {tag.name}
-                </button>
-        ))}
+            {tags && Array.isArray(interests) &&
+                tags.filter(tag => !interests.includes(tag.name))
+                    .slice(0, 10)
+                    .map((tag, index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleAddTag(tag.name)}
+                            style={{ borderColor: tag.color }}
+                            className='px-3 py-1.5 bg-[#F5F7EF] text-[#7A8A73] rounded-full text-xs font-medium border hover:brightness-95 transition-all break-all'
+                        >
+                            + {tag.name}
+                        </button>
+                    ))}
         </>
     );
 };
