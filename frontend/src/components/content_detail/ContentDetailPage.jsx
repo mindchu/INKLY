@@ -200,23 +200,23 @@ const ContentDetailPage = () => {
         return commentList.map((comment) => (
             <div key={comment._id} className={`mt-4 ${level > 0 ? 'ml-4 sm:ml-6 border-l-2 border-gray-100 pl-3' : ''}`}>
                 <div className="flex items-start gap-2">
-                            {comment.author_profile_picture_url ? (
-                                <img
-                                    src={getMediaUrl(comment.author_profile_picture_url)}
-                                    alt={comment.author_username}
-                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shrink-0"
-                                />
-                            ) : (
-                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold shrink-0">
-                                    {comment.author_username?.[0]?.toUpperCase() || 'U'}
-                                </div>
-                            )}
+                    {comment.author_profile_picture_url ? (
+                        <img
+                            src={getMediaUrl(comment.author_profile_picture_url)}
+                            alt={comment.author_username}
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shrink-0"
+                        />
+                    ) : (
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center text-[10px] text-green-700 font-bold shrink-0">
+                            {comment.author_username?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                    )}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-xs sm:text-sm">{comment.author_username || 'Anonymous'}</span>
                             <span className="text-xs text-gray-400">recent</span>
                         </div>
-                        <p className="text-xs sm:text-sm text-gray-700 mt-1 wrap-break-word">{comment.text}</p>
+                        <p className="text-xs sm:text-sm text-gray-700 mt-1 break-words">{comment.text}</p>
                         <div className="flex items-center gap-3 mt-2 flex-wrap">
                             <button
                                 onClick={() => setReplyingTo(replyingTo === comment._id ? null : comment._id)}
@@ -330,30 +330,30 @@ const ContentDetailPage = () => {
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden min-w-0">
 
                     {/* ── Header ── */}
-                    <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100">
+                    <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 overflow-hidden">
 
                         {/* Tags */}
                         <TagsChipView tags={content.tags} />
 
                         {/* Title */}
-                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mt-2 mb-4 wrap-break-word leading-tight">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mt-2 mb-4 break-all leading-tight max-w-full">
                             {content.title}
                         </h1>
 
                         {/* Author row */}
                         <div className="flex items-start sm:items-center gap-3">
                             {/* Avatar */}
-                                    {content.author_profile_picture_url ? (
-                                        <img
-                                            src={getMediaUrl(content.author_profile_picture_url)}
-                                            alt={content.author_username}
-                                            className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover shrink-0"
-                                        />
-                                    ) : (
-                                        <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-sm md:text-lg font-semibold shrink-0">
-                                            {content.author_username?.[0]?.toUpperCase() || 'U'}
-                                        </div>
-                                    )}
+                            {content.author_profile_picture_url ? (
+                                <img
+                                    src={getMediaUrl(content.author_profile_picture_url)}
+                                    alt={content.author_username}
+                                    className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover shrink-0"
+                                />
+                            ) : (
+                                <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-white text-sm md:text-lg font-semibold shrink-0">
+                                    {content.author_username?.[0]?.toUpperCase() || 'U'}
+                                </div>
+                            )}
 
                             {/* Name + meta — grows to fill space */}
                             <div className="flex-1 min-w-0">
@@ -408,7 +408,7 @@ const ContentDetailPage = () => {
 
                     {/* ── Body ── */}
                     <div className="p-4 sm:p-6 md:p-8 min-w-0 overflow-hidden">
-                        <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg mb-8 whitespace-pre-wrap wrap-break-word">
+                        <div className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg mb-8 whitespace-pre-wrap break-all">
                             {content.text}
                         </div>
 
