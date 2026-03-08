@@ -1,7 +1,5 @@
 import React, { useMemo, useEffect, useState, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom';
-import { GiPlainCircle } from "react-icons/gi";
-import { GoPaperclip } from "react-icons/go";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IoHeartOutline, IoHeart } from "react-icons/io5";
 import { GoComment } from "react-icons/go";
 import { LuEye, LuBookmarkMinus } from "react-icons/lu";
@@ -16,6 +14,7 @@ import { getMediaUrl } from '../../config';
 
 const Discussion_page = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { toggleBookmark, isBookmarked } = useBookmarks();
     const { sortBy, content, loading, setContent, page, setPage, hasMore } = useSortContext();
 
@@ -94,7 +93,7 @@ const Discussion_page = () => {
                                     ref={isTriggerPost ? lastPostElementRef : null}
                                     key={postId}
                                     className='w-full bg-white rounded-[12px] p-3 md:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow'
-                                    onClick={() => navigate(`/content/${postId}`)}
+                                    onClick={() => navigate(`/content/${postId}`, { state: { from: location.pathname } })}
                                 >
                                     {/* ── Author row ──────────────────────────────── */}
                                     <div className='flex items-center justify-between gap-2'>

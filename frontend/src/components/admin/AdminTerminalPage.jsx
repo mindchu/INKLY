@@ -7,7 +7,7 @@ const AdminTerminalPage = () => {
     const { profileData } = useProfileContext();
     const navigate = useNavigate();
 
-    const [sourceTags, setSourceTags] = useState([]); // Array of tags
+    const [sourceTags, setSourceTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
     const [targetTag, setTargetTag] = useState('');
     const [loading, setLoading] = useState(false);
