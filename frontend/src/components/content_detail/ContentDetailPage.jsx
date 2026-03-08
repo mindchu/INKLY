@@ -11,6 +11,7 @@ import FollowChip from '../common/FollowChip';
 import { useProfileContext } from '../../context/ProfileContext';
 import { getMediaUrl } from '../../config';
 import DeleteButton from '../../components/button/DeleteButton';
+import ShareButton from '../../components/button/ShareButton';
 import { TagsChipView } from '../common/TagsChip';
 
 const addReplyToTree = (comments, parentId, newReply) => {
@@ -402,6 +403,14 @@ const ContentDetailPage = () => {
                                     <LuEye size={18} className="sm:w-5 sm:h-5" />
                                     <span className="text-xs sm:text-sm font-medium">{content.views || 0}</span>
                                 </div>
+
+                                {/* Share */}
+                                <ShareButton
+                                    targetId={contentId}
+                                    title={content.title}
+                                    text={content.text?.substring(0, 100) || 'Check out this post'}
+                                    iconSize={18}
+                                />
                             </div>
                         </div>
                     </div>
