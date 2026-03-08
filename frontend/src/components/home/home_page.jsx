@@ -184,41 +184,41 @@ const Home_page = () => {
                                             ? <IoHeart size={14} className='text-red-500' />
                                             : <IoHeartOutline size={14} className='text-[#292D32]' />
                                         }
-                                        <span className={`font-["Inter"] text-[12px] select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
+                                        <span className={`font-["Inter"] text-[12px] font-medium select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                             {note.like_count || 0}
                                         </span>
                                     </button>
 
                                     {/* Comments */}
                                     <div className='flex items-center gap-1'>
-                                        <PiChatText size={16} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                        <PiChatText size={14} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {note.comments_count || 0}
                                         </span>
                                     </div>
 
                                     {/* Views */}
                                     <div className='flex items-center gap-1'>
-                                        <LuEye size={16} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                        <LuEye size={14} className='text-[#292D32]' />
+                                        <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {formatViews(note.views)}
                                         </span>
                                     </div>
 
                                     {/* Bookmark */}
                                     <button
-                                        onClick={(e) => handleBookmark(note, e)}
+                                        onClick={(e) => { e.stopPropagation(); handleBookmark(note, e); }}
                                         className='flex items-center justify-center hover:text-yellow-500 transition-colors'
                                         title="Bookmark"
                                     >
                                         {isBookmarked(noteId)
-                                            ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
-                                            : <LuBookmarkMinus size={16} className='text-[#292D32]' />
+                                            ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
+                                            : <LuBookmarkMinus size={14} className='text-[#292D32]' />
                                         }
                                     </button>
 
                                     {/* Share */}
-                                    <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-center text-[#292D32]" onClick={(e) => e.stopPropagation()}>
                                         <ShareButton
                                             targetId={noteId}
                                             title={note.title}

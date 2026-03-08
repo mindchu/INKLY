@@ -129,6 +129,16 @@ const Search_page = () => {
                                             onFollowChange={handleFollowChange}
                                         />
                                     </p>
+                                    <div className='flex items-center gap-2 flex-shrink-0'>
+                                        {note.type && (
+                                            <span className={`text-[10px] px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${note.type === 'post'
+                                                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                                    : 'bg-purple-50 text-purple-700 border border-purple-200'
+                                                }`}>
+                                                {note.type === 'post' ? 'Note' : 'Discussion'}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Body text */}
@@ -187,12 +197,6 @@ const Search_page = () => {
 
                                     {/* Right: actions */}
                                     <div className='flex flex-row items-center gap-3 sm:gap-[16px]'>
-                                        <button
-                                            onClick={(e) => e.stopPropagation()}
-                                            className='cursor-pointer hover:text-green-600 transition-colors'
-                                        >
-                                            <MdOutlineFileDownload size={16} className='text-[#292D32]' />
-                                        </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); toggleBookmark(note); }}
                                             className={`cursor-pointer transition-colors ${isBookmarked(note._id || note.id) ? 'text-yellow-400' : 'text-[#292D32] hover:text-yellow-500'}`}
