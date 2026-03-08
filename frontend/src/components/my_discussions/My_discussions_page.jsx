@@ -136,6 +136,9 @@ const My_discussions_page = () => {
                                     <span className='text-sm font-medium text-gray-700 flex items-center gap-2 min-w-0 truncate'>
                                         <span className='truncate'>{disc.author_username || 'Me'}</span>
                                         <FollowChip authorId={disc.author_id} initialIsFollowing={disc.is_following} />
+                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                            {new Date(disc.created_at).toLocaleDateString()}
+                                        </p>
                                     </span>
                                 </div>
 
@@ -191,11 +194,11 @@ const My_discussions_page = () => {
                                             }}
                                         />
                                         <div className='flex items-center gap-1'>
-                                            <MessageCircle size={15} />
+                                            <MessageCircle size={16} />
                                             <span className='text-xs sm:text-sm'>{disc.comments_count || 0}</span>
                                         </div>
                                         <div className='flex items-center gap-1'>
-                                            <Eye size={15} />
+                                            <Eye size={16} />
                                             <span className='text-xs sm:text-sm'>{disc.views || 0}</span>
                                         </div>
                                     </div>
@@ -206,7 +209,7 @@ const My_discussions_page = () => {
                                             className='hover:text-gray-800 transition'
                                             onClick={(e) => handleEdit(disc, e)}
                                         >
-                                            <FaRegEdit size={15} />
+                                            <FaRegEdit size={16} />
                                         </button>
 
                                         <DeleteButton
@@ -222,9 +225,9 @@ const My_discussions_page = () => {
                                             onClick={(e) => handleBookmark(disc, e)}
                                         >
                                             {isBookmarked(disc._id || disc.id) ? (
-                                                <BsBookmarkDashFill size={15} />
+                                                <BsBookmarkDashFill size={16} />
                                             ) : (
-                                                <BsBookmarkDash size={15} />
+                                                <BsBookmarkDash size={16} />
                                             )}
                                         </button>
 

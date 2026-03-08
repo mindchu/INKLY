@@ -215,7 +215,9 @@ const ContentDetailPage = () => {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-xs sm:text-sm">{comment.author_username || 'Anonymous'}</span>
-                            <span className="text-xs text-gray-400">recent</span>
+                            <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                {new Date(comment.created_at).toLocaleDateString()}
+                            </p>
                         </div>
                         <p className="text-xs sm:text-sm text-gray-700 mt-1 break-words">{comment.text}</p>
                         <div className="flex items-center gap-3 mt-2 flex-wrap">
@@ -361,8 +363,10 @@ const ContentDetailPage = () => {
                                 <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap text-sm md:text-base">
                                     {content.author_username || 'Unknown'}
                                     <FollowChip authorId={content.author_id} initialIsFollowing={content.is_following} />
+                                    <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                        {new Date(content.created_at).toLocaleDateString()}
+                                    </p>
                                 </p>
-                                <p className="text-xs md:text-sm text-gray-500">Published recently</p>
                             </div>
 
                             {/* Actions — always on the right, wraps on tiny screens */}

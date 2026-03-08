@@ -119,7 +119,9 @@ const Discussion_page = () => {
                                                         onFollowChange={handleFollowChange}
                                                     />
                                                 </p>
-                                                <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>Posted recently</p>
+                                                <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                    {new Date(post.created_at).toLocaleDateString()}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -159,8 +161,8 @@ const Discussion_page = () => {
                                                 className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                             >
                                                 {post.is_liked
-                                                    ? <IoHeart size={14} className='text-red-500' />
-                                                    : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                                    ? <IoHeart size={16} className='text-red-500' />
+                                                    : <IoHeartOutline size={16} className='text-[#292D32]' />
                                                 }
                                                 <span className={`font-["Inter"] text-[12px] select-none ${post.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                                     {post.like_count || 0}
@@ -169,13 +171,13 @@ const Discussion_page = () => {
 
                                             {/* Comments */}
                                             <button className='flex items-center gap-1 hover:text-blue-500 transition-colors'>
-                                                <GoComment size={14} className='text-[#292D32]' />
+                                                <GoComment size={16} className='text-[#292D32]' />
                                                 <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{post.comments_count || 0}</span>
                                             </button>
 
                                             {/* Views */}
                                             <div className='flex items-center gap-1'>
-                                                <LuEye size={14} className='text-[#292D32]' />
+                                                <LuEye size={16} className='text-[#292D32]' />
                                                 <span className='font-["Inter"] text-[12px] text-gray-600 select-none'>{post.views || 0}</span>
                                             </div>
 
@@ -185,8 +187,8 @@ const Discussion_page = () => {
                                                 className='flex items-center hover:text-yellow-500 transition-colors'
                                             >
                                                 {isBookmarked(postId)
-                                                    ? <BsBookmarkDashFill size={14} className='text-yellow-400' />
-                                                    : <LuBookmarkMinus size={14} className='text-[#292D32]' />
+                                                    ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                                    : <LuBookmarkMinus size={16} className='text-[#292D32]' />
                                                 }
                                             </button>
 

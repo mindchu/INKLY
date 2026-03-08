@@ -129,8 +129,10 @@ const Home_page = () => {
                                                 initialIsFollowing={note.is_following}
                                                 onFollowChange={handleFollowChange}
                                             />
+                                            <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                {new Date(note.created_at).toLocaleDateString()}
+                                            </p>
                                         </p>
-                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                     </div>
                                 </div>
 
@@ -181,10 +183,10 @@ const Home_page = () => {
                                         className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                     >
                                         {note.is_liked
-                                            ? <IoHeart size={14} className='text-red-500' />
-                                            : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                            ? <IoHeart size={16} className='text-red-500' />
+                                            : <IoHeartOutline size={16} className='text-[#292D32]' />
                                         }
-                                        <span className={`font-["Inter"] text-[12px] select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
+                                        <span className={`font-["Inter"] text-[12px] font-medium select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                             {note.like_count || 0}
                                         </span>
                                     </button>
@@ -192,7 +194,7 @@ const Home_page = () => {
                                     {/* Comments */}
                                     <div className='flex items-center gap-1'>
                                         <PiChatText size={16} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                        <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {note.comments_count || 0}
                                         </span>
                                     </div>
@@ -200,14 +202,14 @@ const Home_page = () => {
                                     {/* Views */}
                                     <div className='flex items-center gap-1'>
                                         <LuEye size={16} className='text-[#292D32]' />
-                                        <span className='font-["Inter"] text-[12px] select-none'>
+                                        <span className='font-["Inter"] text-[12px] font-medium text-gray-600 select-none'>
                                             {formatViews(note.views)}
                                         </span>
                                     </div>
 
                                     {/* Bookmark */}
                                     <button
-                                        onClick={(e) => handleBookmark(note, e)}
+                                        onClick={(e) => { e.stopPropagation(); handleBookmark(note, e); }}
                                         className='flex items-center justify-center hover:text-yellow-500 transition-colors'
                                         title="Bookmark"
                                     >
@@ -218,7 +220,7 @@ const Home_page = () => {
                                     </button>
 
                                     {/* Share */}
-                                    <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-center text-[#292D32]" onClick={(e) => e.stopPropagation()}>
                                         <ShareButton
                                             targetId={noteId}
                                             title={note.title}

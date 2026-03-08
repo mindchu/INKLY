@@ -6,7 +6,7 @@ const ShareButton = ({
     targetId, 
     title = "Check out this content", 
     text = "I found this interesting and wanted to share it with you",
-    iconSize = 16 
+    iconSize = 14
 }) => {
     const [isSharing, setIsSharing] = useState(false);
 

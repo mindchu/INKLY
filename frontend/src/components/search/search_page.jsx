@@ -125,8 +125,10 @@ const Search_page = () => {
                                                 initialIsFollowing={note.is_following}
                                                 onFollowChange={handleFollowChange}
                                             />
+                                            <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5 truncate'>
+                                                {new Date(note.created_at).toLocaleDateString()}
+                                            </p>
                                         </div>
-                                        <p className='font-["Inter"] text-[10px] text-[#124C09]/50 mt-0.5'>Posted recently</p>
                                     </div>
                                 </div>
 
@@ -177,8 +179,8 @@ const Search_page = () => {
                                         className='flex items-center gap-1 hover:text-red-500 transition-colors'
                                     >
                                         {note.is_liked
-                                            ? <IoHeart size={14} className='text-red-500' />
-                                            : <IoHeartOutline size={14} className='text-[#292D32]' />
+                                            ? <IoHeart size={16} className='text-red-500' />
+                                            : <IoHeartOutline size={16} className='text-[#292D32]' />
                                         }
                                         <span className={`font-["Inter"] text-[12px] select-none ${note.is_liked ? 'text-red-500' : 'text-gray-600'}`}>
                                             {note.like_count || 0}
