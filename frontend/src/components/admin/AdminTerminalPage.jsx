@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../util/api';
 import { useProfileContext } from '../../context/ProfileContext';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +44,27 @@ const AdminTerminalPage = () => {
     const [deleteTagError, setDeleteTagError] = useState('');
     const [deleteSuggestions, setDeleteSuggestions] = useState([]);
     const [showDeleteSuggestions, setShowDeleteSuggestions] = useState(false);
+
+    const deleteTagContainerRef = useRef(null);
+    const sourceTagContainerRef = useRef(null);
+    const targetTagContainerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (deleteTagContainerRef.current && !deleteTagContainerRef.current.contains(event.target)) {
+                setShowDeleteSuggestions(false);
+            }
+            if (sourceTagContainerRef.current && !sourceTagContainerRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+            if (targetTagContainerRef.current && !targetTagContainerRef.current.contains(event.target)) {
+                setShowTargetSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const fetchTagsData = React.useCallback(async () => {
         try {
@@ -342,7 +363,7 @@ const closeConfirmModal = () => {
                             <form onSubmit={handleDeleteTag} className="flex flex-col gap-6 mt-auto">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-[#3A5335]">Identify Tag</label>
-                                    <div className="relative">
+                                    <div className="relative" ref={deleteTagContainerRef}>
                                         <input
                                             type="text"
                                             placeholder="Search tag to remove..."
@@ -397,7 +418,7 @@ const closeConfirmModal = () => {
                             <form onSubmit={handleMergeTags} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <label className="block text-sm font-semibold text-[#3A5335]">Source Tags (to be removed)</label>
-                                    <div className="relative">
+                                    <div className="relative" ref={sourceTagContainerRef}>
                                         <div className="min-h-[120px] w-full p-4 bg-[#F9FBF7] border border-[#D4D9C6] rounded-xl flex flex-wrap gap-2 content-start focus-within:ring-2 focus-within:ring-[#6B9D63] focus-within:border-transparent transition-all">
                                             {sourceTags.map((tag, index) => (
                                                 <span key={index} className="bg-white text-[#577F4E] px-3 py-1.5 rounded-lg text-sm font-medium inline-flex break-all items-center gap-2 border border-[#E3E8D9] shadow-sm animate-pop-in">
@@ -459,7 +480,7 @@ const closeConfirmModal = () => {
                                 <div className="flex flex-col justify-between space-y-4">
                                     <div className="space-y-4">
                                         <label className="block text-sm font-semibold text-[#3A5335]">Target Tag (the result)</label>
-                                        <div className="relative">
+                                        <div className="relative" ref={targetTagContainerRef}>
                                             <input
                                                 type="text"
                                                 placeholder="Enter destination tag name..."
