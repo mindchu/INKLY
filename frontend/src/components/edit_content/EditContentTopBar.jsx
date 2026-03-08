@@ -9,7 +9,7 @@ const EditContentTopBar = () => {
                 {/* Left — icon + title */}
                 <div className='flex flex-row items-center gap-2 sm:gap-3 min-w-0'>
                     <MdEditDocument size={24} className='opacity-70 text-[#3A5335] flex-shrink-0 sm:w-8 sm:h-8' />
-                    <p className='font-["Julius_Sans_One"] text-sm sm:text-xl md:text-3xl text-[#3E4A34] font-thin select-none uppercase tracking-wide truncate'>
+                    <p className='font-["Julius_Sans_One"] text-[18px] md:text-[32px] text-[#3E4A34] font-thin select-none uppercase tracking-wide truncate'>
                         Edit Content
                     </p>
                 </div>
