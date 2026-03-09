@@ -194,14 +194,16 @@ const EditContentPage = () => {
 
     if (loading) {
         return (
-            <div className='w-full h-screen bg-[#EEF2E1] flex items-center justify-center font-["Inter"]'>
+            <div className='min-w-0 min-h-screen bg-[#EEF2E1] flex items-center justify-center font-["Inter"]'>
                 <div className='text-lg font-medium text-gray-600 animate-pulse'>Loading content...</div>
             </div>
         );
     }
 
     return (
-        <div className='w-full min-h-screen bg-[#EEF2E1] overflow-x-hidden overflow-y-auto font-["Inter"]'>
+        // ✅ FIX: replaced `w-full` with `min-w-0` so this flex child respects
+        // the available width after the sidebar takes its space on iPad.
+        <div className='min-w-0 min-h-screen bg-[#EEF2E1] overflow-x-hidden overflow-y-auto font-["Inter"]'>
             <div className='max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 md:py-8 pb-24 md:pb-8 min-w-0'>
                 <div className='bg-white rounded-xl sm:rounded-2xl shadow-sm border border-[#E3E8D9] p-4 sm:p-6 md:p-8 overflow-hidden min-w-0'>
 
