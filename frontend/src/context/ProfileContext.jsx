@@ -43,7 +43,9 @@ export const ProfileProvider = ({ children }) => {
       const updated = await api.put('/users/me/profile', newData);
       setProfileData(prev => ({
         ...prev,
-        ...updated
+        username: updated.username ?? prev.username,
+        bio: updated.bio ?? prev.bio,
+        interested_tags: updated.interests ?? prev.interested_tags,
       }));
       return { success: true };
     } catch (error) {

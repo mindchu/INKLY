@@ -6,7 +6,7 @@ import { TagsChipAdd, TagsChipCreate } from '../common/TagsChip';
 import { Tag } from 'lucide-react';
 
 const Interests_page = () => {
-    const { profileData, loading: profileLoading, updateProfile } = useProfileContext();
+    const { profileData, loading: profileLoading, updateProfile, setProfileData } = useProfileContext();
     const [allTags, setAllTags] = useState([]);
     const [userInterests, setUserInterests] = useState([]);
     const [tagInput, setTagInput] = useState('');
@@ -62,6 +62,7 @@ const Interests_page = () => {
                 bio: profileData.bio,
                 interests: tags
             });
+            setProfileData(prev => ({ ...prev, interested_tags: tags }));
         } catch (error) {
             console.error('Error saving interests:', error);
             alert('Failed to save interests');
