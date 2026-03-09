@@ -8,6 +8,9 @@ import { LuEye } from 'react-icons/lu';
 import { IoHeartOutline, IoHeart, IoArrowForward } from "react-icons/io5";
 import { api } from '../../util/api';
 import FollowChip from '../common/FollowChip';
+import { LuBookmarkMinus } from "react-icons/lu";
+import { BsBookmarkDashFill } from "react-icons/bs";
+import { useBookmarks } from '../../context/BookmarksContext';
 import { useProfileContext } from '../../context/ProfileContext';
 import { getMediaUrl } from '../../config';
 import DeleteButton from '../../components/button/DeleteButton';
@@ -66,6 +69,7 @@ const getFileIcon = (filename) => {
 const ContentDetailPage = () => {
     const { profileData } = useProfileContext();
     const { contentId } = useParams();
+    const { isBookmarked, toggleBookmark } = useBookmarks();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -407,6 +411,17 @@ const ContentDetailPage = () => {
                                     <LuEye size={18} className="sm:w-5 sm:h-5" />
                                     <span className="text-xs sm:text-sm font-medium">{content.views || 0}</span>
                                 </div>
+
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); toggleBookmark(content); }}
+                                    className='flex items-center justify-center hover:text-yellow-500 transition-colors'
+                                    title="Bookmark"
+                                >
+                                    {isBookmarked(contentId)
+                                        ? <BsBookmarkDashFill size={16} className='text-yellow-400' />
+                                        : <LuBookmarkMinus size={16} className='text-[#292D32]' />
+                                    }
+                                </button>
 
                                 {/* Share */}
                                 <ShareButton
