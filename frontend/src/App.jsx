@@ -54,7 +54,7 @@ const App = () => {
                     <SortProvider>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <Home_Top_bar />
                           </div>
@@ -153,7 +153,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <Following_top_bar />
                           </div>
@@ -211,7 +211,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <CreateNote_top_bar />
                           </div>
@@ -229,7 +229,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <CreateDiscussion_top_bar />
                           </div>
@@ -247,7 +247,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <Bookmarks_wrapper />
                         </div>
                       </div>
@@ -260,7 +260,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <Interests_page />
                         </div>
                       </div>
@@ -273,7 +273,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <Profile_top_bar />
                           </div>
@@ -291,7 +291,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <Profile_top_bar />
                           </div>
@@ -309,7 +309,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <ContentDetailPage />
                         </div>
                       </div>
@@ -322,7 +322,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <CommentThreadPage />
                         </div>
                       </div>
@@ -335,7 +335,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <EditContentTopBar />
                           </div>
@@ -353,7 +353,7 @@ const App = () => {
                     <ProtectedRoute>
                       <div className="flex h-screen overflow-hidden">
                         <Sidebar />
-                        <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-col flex-1 min-h-0 min-w-0">
                           <div className="shrink-0">
                             <AdminTerminalTopBar />
                           </div>
